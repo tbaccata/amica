@@ -331,16 +331,18 @@ server <- function(input, output, session) {
     if (reacValues$amicaInput == FALSE) {
       ###FILTDATA BEGIN
       imp_idx <- 
-        which(assayNames(reacValues$proteinData) == "Intensity")
+        which(assayNames(reacValues$proteinData) == "LFQIntensity")
       
       ### filter on values
-      impDf <- assay(reacValues$proteinData, "Intensity")
+      impDf <- assay(reacValues$proteinData, "LFQIntensity")
       
       rnames <- filterOnMinValuesRnames(
         y = reacValues$proteinData,
         minMSMS = input$minMSMS,
         minRazor = input$minRazor
       )
+      
+      
       tmp <- tryCatch({
         filterOnValidValues(
           impDf[rnames,],
@@ -361,6 +363,7 @@ server <- function(input, output, session) {
         showNotification(paste("Filtering values..."), type = "message")
       }
       )
+      
       rowsDf <- rowData(reacValues$proteinData)
       rowsDf$quantified <- ""
       rowsDf[tmp, 'quantified'] <- "+" 
@@ -388,6 +391,8 @@ server <- function(input, output, session) {
         }
         )
       }
+      
+      
       
       normDf <- tryCatch({
         imputeIntensities(
@@ -426,25 +431,16 @@ server <- function(input, output, session) {
       
       pep.count.table <- NULL
       if (input$limmaTrend) {
-        countIdx <- grep(razorUniqueCountPrefix, colnames(reacValues$filtData ) )
+        countIdx <- grep("razorUniqueCount.", colnames(reacValues$filtData ) )
         pep.count.table = data.frame(count = apply(reacValues$filtData[,countIdx],1,FUN=min),
                                      row.names = rownames(reacValues$filtData ) )
         pep.count.table$count = pep.count.table$count+1
       }
 
-      out <- groupComparisons(
-        as.matrix(
-          assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),]
-        ),
-        reacValues$contrastMatrix,
-        reacValues$expDesign,
-        pep.count.table
-      )
-      
       tool <- ifelse(input$limmaTrend, "DEqMS", "limma")
       
       tryCatch({
-        out <-groupComparisons(
+        out <- groupComparisons(
               as.matrix(
                 assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),]
               ),
@@ -455,7 +451,7 @@ server <- function(input, output, session) {
         
       },
       error=function(cond) {
-        showNotification(paste("error in", tool, cond), type = "error")
+        showNotification(paste("error in", tool, cond), type = "error", duration = 100)
         # message(cond)
         
       },
@@ -467,9 +463,6 @@ server <- function(input, output, session) {
         )
       },silent=TRUE
       )
-      
-      
-      
       
       out$Gene.names <- reacValues$filtData[,geneName, drop=T]
       
@@ -765,7 +758,7 @@ server <- function(input, output, session) {
     if (input$assayNames=="ImputedIntensity") {
       object <- assay(reacValues$proteinData, "ImputedIntensity")
       
-      object[isQuantRnames(reacValues$proteinData),]
+      #object[isQuantRnames(reacValues$proteinData),]
       
       object <- toLongFormat(
         object[isQuantRnames(reacValues$proteinData),],
@@ -820,7 +813,8 @@ server <- function(input, output, session) {
           myGroupColors(),
           input$pca_base,
           input$pca_legend,
-          input$pca_pointsize
+          input$pca_pointsize,
+          input$pca_show_label
         )
     })
     
@@ -1105,6 +1099,15 @@ server <- function(input, output, session) {
     plotData$Gene <- 
       rowData(reacValues$proteinData)[[geneName]]
     
+    fit1 <- lm(x~y, data=plotData)
+    intercept <- fit1$coefficients[[1]]
+    slope <- fit1$coefficients[[2]]
+    
+    title = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 3),
+                  "Intercept =",signif(fit1$coef[[1]],3 ),
+                  " Slope =",signif(fit1$coef[[2]], 3),
+                  " P =",signif(summary(fit1)$coef[2,4], 5))
+    
     withProgress(message = "Plotting scatter plot", {
       pu <-
         ggplot(plotData,
@@ -1115,11 +1118,16 @@ server <- function(input, output, session) {
                  #y = !!sym(yLabel),
                  label = Gene,
                  color = Contaminant
-               )) + geom_smooth(method = "lm", se=FALSE, color="#fa9fb5", formula = y ~ x) +
+               )) + geom_abline(intercept = 0,#intercept, 
+                                slope = 1, #slope, 
+                                size=1,
+                                alpha = 0.5,
+                                color=myScatterColors()[5]) +
+        #geom_smooth(method = "lm", se=FALSE, color="#fa9fb5", formula = y ~ x) +
         theme_minimal(base_size = plot_fontsize) + labs(x=xLabel, y=yLabel)  + 
         theme(legend.title = element_text(size=plot_legendsize),
               legend.text=element_text(size=plot_legendsize)) +
-        geom_point() + scale_color_manual(values=myScatterColors() ) #scale_color_brewer(palette = "Paired")
+        geom_point() + scale_color_manual(values=myScatterColors() ) + ggtitle(title) #scale_color_brewer(palette = "Paired")
       
       
     })
@@ -1277,14 +1285,15 @@ server <- function(input, output, session) {
   numIdPlotly <- eventReactive(input$submitNumProts, {
     validate(
       need(
-        "Intensity" %in% assayNames(reacValues$proteinData),
-        "No data to plot (no columns starting with 'Intensity_' available)."
+        "Intensity" %in% assayNames(reacValues$proteinData) |
+        "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
       )
     )
     
     
     df <-
-      as.data.frame(apply(assay(reacValues$proteinData, "Intensity"), 2, function(x)
+      as.data.frame(apply(assay(reacValues$proteinData, "LFQIntensity"), 2, function(x)
         sum(!is.na(x))))
     names(df) <- "Number"
     df$Sample <- row.names(df)
@@ -1340,14 +1349,15 @@ server <- function(input, output, session) {
   pctMvsPlotly <- eventReactive(input$submitNumMVs, {
     validate(
       need(
-        "Intensity" %in% assayNames(reacValues$proteinData),
-        "No data to plot (no columns starting with 'Intensity_' available)."
+        "Intensity" %in% assayNames(reacValues$proteinData) |
+          "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
       )
     )
     
     
     df <-
-      as.data.frame(apply(assay(reacValues$proteinData, "Intensity"), 2, function(x) {
+      as.data.frame(apply(assay(reacValues$proteinData, "LFQIntensity"), 2, function(x) {
         100 * sum(is.na(x)) / length(x)
       }))
     names(df) <- "Number"
@@ -1791,12 +1801,13 @@ server <- function(input, output, session) {
                  label = Gene.names,
                  key = key,
                  color = significant
-               )) + geom_point(size = pointsize) + geom_abline(intercept = intercept, 
-                                                               slope = slope, 
-                                                               size=1.5, 
-                                                               color="#fa9fb5") +
+               )) + geom_point(size = pointsize) + geom_abline(intercept = 0,#intercept, 
+                                                               slope = 1, #slope, 
+                                                               size=1,
+                                                               alpha = 0.5,
+                                                               color=myScatterColors()[5]) +
         theme_minimal(base_size = fontsize) + scale_color_manual(values=myScatterColors() ) +
-        labs(x = labelNamesX, y = labelNamesY, title =  title) 
+        labs(x = labelNamesX, y = labelNamesY) #, title =  title) 
       #pu <- pu + ggtitle(expression(txt)) + geom_text(x = 25, y = 300, label = txt, parse = TRUE)
       
       # pu <- pu + geom_smooth(method = "lm", se=FALSE, color="#fa9fb5", formula = y ~ x)
@@ -2794,7 +2805,12 @@ server <- function(input, output, session) {
                label = Gene.names,
                key = key,
                color = significant
-             )) + geom_point() + theme_minimal(base_size = input$fcamica_base) + 
+             )) + geom_point() + geom_abline(intercept = 0,#intercept, 
+                                             slope = 1, #slope, 
+                                             size=1,
+                                             alpha = 0.6,
+                                             color=myScatterColors()[5]) +
+      theme_minimal(base_size = input$fcamica_base) + 
       scale_color_manual(values=myScatterColors() ) +
       labs(x = labelNamesX, y = labelNamesY)
     
@@ -3010,14 +3026,19 @@ server <- function(input, output, session) {
   output$exampleHelpBox <- renderUI({
     if (input$exampleHelp %% 2){
       HTML(
-        "<p><b>Protein complexes between PGRMC1 and actin-associated proteins are disrupted by AG-205</b></p>
-                       <p>PGRMC1 is a protein from the MAPR family with a range of cellular functions. 
+        
+        "
+        <p>Teakel, S. L., Ludescher, M., Thejer, B. M., Poschmann, G., Forwood, J. K., Neubauer, H., & Cahill, M. A. 
+        (2020). Protein complexes including PGRMC1 and actin-associated proteins are disrupted by AG-205. 
+        Biochemical and biophysical research communications, 524(1), 64-69.
+        </p>
+        <p>PGRMC1 is a protein from the MAPR family with a range of cellular functions. 
                        PGRMC1 has been described to play a role in regulating membrane trafficking and 
                        in cancer progression and response to therapies. To further understand the functions 
                        of PGRMC1 and the mechanism of the small molecule inhibitor of PGRMC1, AG-205, 
                        proteins differentially bound to PGRMC1 were identified following AG-205 
                        treatment of MIA PaCa-2 cells.</p>
-                       
+                       Data have been re-analyzed from PRIDE identifier PXD0016455.
                        <a href='https://pubmed.ncbi.nlm.nih.gov/31980178'target='_blank'>Further information</a>.</p>
                        "
       )

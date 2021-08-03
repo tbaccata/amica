@@ -170,28 +170,44 @@ isQuantRnames = function(y) {
 }
 
 filterOnMinValuesRnames = function(y, minMSMS, minRazor) {
-  rnames <- c()
-  if (spectraCount %in% names(y@rowData) &
+  rnames <- row.names(y@rowData)
+
+  if (contaminantCol %in% names(y@rowData) &&
+       spectraCount %in% names(y@rowData) &&
       razorUniqueCount %in% names(y@rowData)) {
     rnames <-
       row.names(y@rowData[y@rowData[[contaminantCol]] !=
-                             "+" &
+                             "+" &&
                             y@rowData[[razorUniqueCount]] >=
-                             minRazor &
+                             minRazor &&
                             y@rowData[[spectraCount]] >=
                              minMSMS,])
-  } else if (spectraCount %in% names(y@rowData)) {
+  } else if ( spectraCount %in% names(y@rowData) &
+             contaminantCol %in% names(y@rowData)) {
     rnames <-
       row.names(y@rowData[y@rowData[[contaminantCol]] !=
                              "+" &
                             y@rowData[[spectraCount]] >=
                              minMSMS,])
-  } else if (razorUniqueCount %in% names(y@rowData)) {
+  } else if (razorUniqueCount %in% names(y@rowData) &&
+             contaminantCol %in% names(y@rowData)) {
     rnames <-
       row.names(y@rowData[y@rowData[[contaminantCol]] !=
                              "+" &
                             y@rowData[[razorUniqueCount]] >=
                              minRazor,])
+  } else if (contaminantCol %in% names(y@rowData) ) {
+    rnames <-
+      row.names(y@rowData[y@rowData[[contaminantCol]] !=
+                            "+",])
+  } else if (razorUniqueCount %in% names(y@rowData) ) {
+    rnames <-
+      row.names(y@rowData[y@rowData[[razorUniqueCount]] >=
+                  minRazor,])
+  } else if (spectraCount %in% names(y@rowData)) {
+    rnames <-
+      row.names(y@rowData[y@rowData[[spectraCount]] >=
+                            minMSMS,])
   }
   return(rnames)
 }

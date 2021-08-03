@@ -51,7 +51,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      )
                    ),
                    helpText(
-                     "If 'amica' is selected previous output gets loaded in. When 'MaxQuant or FragPipe', or 'custom' are selected differential abundance get's computed with limma or DEqMS, for this you have to upload an additional 'contrast matrix' to your experimental 'design'."
+                     "If 'amica' is selected previous output gets loaded in. When 'MaxQuant or FragPipe', 
+                     or 'custom' are selected differential abundance get's computed with limma or DEqMS, 
+                     for this you have to upload an additional 'contrast matrix' to your experimental 'design'."
                    ),
                    conditionalPanel(
                      condition = "input.source == 'example'",
@@ -87,16 +89,17 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      condition = "input.source == 'custom'",
                      fileInput("customFile", "Upload custom tab delimeted file."),
                      helpText(
-                       "File needs to be tab-delimited and it needs to contain a proteinId, Gene.name, expression values. Can have additional columns to filter on values."
+                       "File needs to be tab-delimited and it needs to contain a proteinId, Gene.name, intensities and peptide counts."
                      )
                    ),
                    conditionalPanel(
                      # The condition should be that the user selects
                      # "file" from the radio buttons
                      condition = "input.source == 'custom'",
-                     fileInput("specFile", "Upload a specification file in tab delimeted format."),
+                     fileInput("specFile", "Upload a specification file in tab delimited format."),
                      helpText(
-                       "File needs to have two columns: the column 'Variable' which defines the variable and 'Pattern' which is the column name or a pattern."
+                       "File needs to have two columns: the column 'Variable' which defines the variable and 
+                       'Pattern' which is the column name or a pattern."
                      )
                    ),
                    
@@ -177,7 +180,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                            choices = c("None", "Quantile", "VSN", "Median.centering"),
                            selected = "None"
                          ),
-                         #helpText(" uses the LFQ intensities as is."),
+                         helpText("The renormalization utilzes LFQ intensities."),
                          checkboxInput(
                            "limmaTrend",
                            "use DEqMS? If not selected differential abundant proteins are detected by limma.",
@@ -402,7 +405,13 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 min = 1,
                 max = 8,
                 step = 1
-              )
+              ),
+              checkboxInput(
+                "pca_show_label",
+                "Show labels of samples?",
+                value = FALSE
+              ),
+              
             )),
             fluidRow(
               column(width = 2),

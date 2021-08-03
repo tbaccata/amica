@@ -464,7 +464,8 @@ plotPCA <-
            colorPalette = "Accent",
            basesize = 14,
            legend_size = 10,
-           point_size = 3) {
+           point_size = 3,
+           input_label = F) {
     idxs <-
     grep(paste0(colnames(dataHeatmap), collapse = "|"), mappings$samples)
   groups <- mappings$groups[idxs]
@@ -485,7 +486,7 @@ plotPCA <-
     ggplotly(autoplot(
       pca,
       data = tmp,
-      label = F,
+      label = input_label,
       colour = "group",
       #shape = "group",
       size = point_size
@@ -833,7 +834,7 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
   lfqs <- log2(lfqs)
   
   assayList[[assayIdx]] <- lfqs
-  names(assayList)[assayIdx] <- "Intensity"
+  names(assayList)[assayIdx] <- "LFQIntensity"
   assayIdx <- assayIdx + 1
   assayList[[assayIdx]] <- lfqs
   names(assayList)[assayIdx] <- "ImputedIntensity"
@@ -902,15 +903,16 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   dropIdx <- c(unique_idx, razor_idx, tot_idx)
   dropIdx <- c(dropIdx, grep("Spectral.Count", names(protData)) )
   
-  se <- ProteomicsData(assays = assayList,
-                       rowData = protData,
-                       colData = design)
+  #se <- ProteomicsData(assays = assayList,
+  #                     rowData = protData,
+  #                     colData = design)
   
   se <- ProteomicsData(
     assays = list(
-      Intensity = razor,
-      ImputedIntensity = razor,
-      iBAQ = tots
+      TotalIntensity = tots,
+      UniqueIntensity = uniqs,
+      LFQIntensity = razor,
+      ImputedIntensity = razor
     ),
     rowData = protData[,-dropIdx],
     colData = design
@@ -939,15 +941,15 @@ readInCustomSumm <- function(mqFile, specs, design) {
   names(protData)[which(names(protData)==proteinId)] <- "Majority.protein.IDs"
   names(protData)[which(names(protData)==geneName)] <- "Gene.names"
   
-  if (spectraCount %in% names(protData)) {
+  if (isTruthy(spectraCount) && spectraCount %in% names(protData)) {
     names(protData)[which(names(protData)==spectraCount)] <- "spectraCount"
   }
-  if (razorUniqueCount %in% names(protData)) {
+  if (isTruthy(razorUniqueCount) && razorUniqueCount %in% names(protData)) {
     names(protData)[which(names(protData)==razorUniqueCount)] <- "razorUniqueCount"
   }
   
   
-  if (pot.contaminant %in% names(protData)) {
+  if (isTruthy(pot.contaminant) && pot.contaminant  %in% names(protData)) {
     names(protData)[which(names(protData)==pot.contaminant)] <- "Potential.contaminant"
   } else {
       protData$Potential.contaminant <- NULL
@@ -972,7 +974,7 @@ readInCustomSumm <- function(mqFile, specs, design) {
   razor[razor==0] <- NA
   razor <- log2(razor)
   
-  intsList <- list(Intensity=razor, ImputedIntensity=razor)
+  intsList <- list(LFQIntensity=razor, ImputedIntensity=razor)
   dropIdx <- int_idx
   
   if (length(abundancePrefix) > 0) {
