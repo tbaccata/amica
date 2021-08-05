@@ -197,6 +197,7 @@ getVolcanoPlotData <-
   function(data,
            comparison,
            fcCutoff,
+           sigCutoffValue,
            selectionChoice = "absolute",
            padjY = FALSE) {
     geneIdx <- which(colnames(data)==geneName)
@@ -266,6 +267,23 @@ getVolcanoPlotData <-
     }
 
   }
+  
+  # duplicated :(
+  if (sigCutoffValue == "none") {
+    comp$significant <- "no"
+    
+    if (selectionChoice=="absolute") {
+      comp$significant[abs(comp$logFC) >= fcCutoff] <-
+        "yes"
+    } else if (selectionChoice=="enriched") {
+      comp$significant[comp$logFC >= fcCutoff] <-
+        "yes"
+    } else if (selectionChoice=="reduced") {
+      comp$significant[comp$logFC <= -fcCutoff] <-
+        "yes"
+    }
+  }
+  
   return(comp)
 }
 
@@ -349,9 +367,11 @@ generateEnrichedMatrix <- function(data, enrichmentChoice, sigCutoffValue = padj
   if (sigCutoffValue == "p-value") {
     #pvalVar <- "P.Value"
     pvalVar <- pvalPrefix
-  } else {
+  } else if (sigCutoffValue == "adj.p-value") {
     #pvalVar <- "adj.P.Val"
     pvalVar <- padjPrefix
+  } else {
+    pvalVar <- 'none'
   }
   
   # fcIdx <- grep("logFC", colnames(data) )
@@ -359,6 +379,9 @@ generateEnrichedMatrix <- function(data, enrichmentChoice, sigCutoffValue = padj
   pvalIdx <- grep(pvalVar, colnames(data) )
   
   pilot <- ifelse(length(pvalIdx) < 1, TRUE, FALSE)
+  
+  if (pvalVar == 'none') pilot <- TRUE
+  
   comps <- colnames(data)[fcIdx]
   # comps <- gsub("logFC_","", comps)
   comps <- gsub(logfcPrefix,"", comps)
@@ -375,7 +398,7 @@ generateEnrichedMatrix <- function(data, enrichmentChoice, sigCutoffValue = padj
       if (enrichmentChoice == "enriched") {
         data[data[fc] >= thresh & !is.na(data[fc]) ,]$tmp <- 1
       } else if (enrichmentChoice == "absolute") {
-        data[abs(data[fc] & !is.na(data[fc])) >= thresh,]$tmp <- 1
+        data[abs(data[fc]) >= thresh & !is.na(data[fc]),]$tmp <- 1
       } else if (enrichmentChoice == "reduced") {
         data[data[fc] <= -thresh & !is.na(data[fc]),]$tmp <- 1
       }
@@ -651,8 +674,8 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   df.genes <- df.genes[order(df.genes[[geneName]], decreasing=TRUE),]
   df.genes <- df.genes[!duplicated(df.genes[[geneName]]),]
   
-  idxs <- match(df.genes[[geneName]], V(ppi)$label)
-  
+  #idxs <- match(df.genes[[geneName]], V(ppi)$label)
+  idxs <- match(df.genes[[geneName]], V(ppi)$name)
 
   idxs <- idxs[!is.na(idxs)]
   
@@ -661,14 +684,16 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   }
   
   g <- induced_subgraph(ppi, idxs)
-  df <- toVisNetworkData(g, idToLabel = F)
+  df <- toVisNetworkData(g, idToLabel = T)
   df$nodes <-
     merge(df$nodes, df.genes,
           by.x = "label", by.y = geneName)
   colnames(df$nodes) <- c("label", "id", "log2FC")
+  colnames(df$edges) <- c("from", "to", "value")
   
   df$nodes <-
     merge(df$nodes, cellmap, by="label", all.x = T)
+  
   return(df)
 }
 
@@ -1053,7 +1078,8 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
       id = 1:nrow(tmp),
       label = tmp$Gene.names,
       group = rep('Prey', nrow(tmp)),
-      shape = rep('circle', nrow(tmp)),
+      #shape = rep('circle', nrow(tmp)),
+      shape = rep(NA, nrow(tmp)),
       color = rep(palette[2], nrow(tmp))
     )
   df$id <- df$id + max(nodes$id)
@@ -1073,6 +1099,7 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
       )
     edges.df <- rbind(edges.df, bait.df)
   }
+  edges.df$value <- 0.33
   return(list(nodes.df, edges.df))
 }
 

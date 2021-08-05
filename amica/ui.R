@@ -9,7 +9,7 @@ footer = function(x) {
          <p>Please cite amica in your publications, 
          we will provide a PMID pointing to this site shortly.\n
          </p>
-         <p>Many thanks to the MS facility and the MFPL IT team.
+         <p>Many thanks to the MS facility and the Max Perutz Labs IT team.
          If you have questions, feedback, suggestions, etc. please mail
          them to sebastian.didusch@univie.ac.at.
          </p>")
@@ -23,7 +23,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
     tags$script(inactivity),
     useShinyjs(),
     navbarPage(
-      "amica beta I (v21.05.18)",
+      "amica v21.08.04",
       id = "navbar",
       inverse = TRUE,
       theme = bs_theme(
@@ -233,7 +233,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                  ,
                  mainPanel(
                    #h1("amica"),
-                   img(src = 'ga_amica.svg', width = '400px', align = "center"),
+                   img(src = 'ga_amica.svg',  align = "center"),
                    br(),
                    br(),
                    br(),
@@ -884,7 +884,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
               radioButtons(
                 "sigCutoffValue",
                 "Significance cutoff (which value to use)",
-                choices = c("p-value", "adj.p-value"),
+                choices = c("adj.p-value", "p-value", "none"),
                 selected = "adj.p-value"
               ),
               helpText(
@@ -908,7 +908,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
         ),
         h3("Summary"),
         p(
-          "Compare intersections of your data, visualize your differentially abundant proteins, or select the gene name of a single protein to inspect its intensities in your different conditions. Subsequent visualizations (heatmap, fold change plot) and ORA will be computed on the proteins in the output table."
+          "Compare intersections of your data, visualize your differentially abundant proteins, 
+          or select the gene name of a single protein to inspect its intensities in your different 
+          conditions."
         ),
         tabsetPanel(
           type = "pills",
@@ -1083,13 +1085,22 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
         br(),
         br(),
         br(),
+        shinyjs::hidden(
+          div(
+            id = 'hide_before_comparisons',
+        p(
+          "The output table can be further filtered.
+          You can for example use regular expressions (ProteinA|ProteinB|ProteinC)
+          to select only proteins of interest or apply additional column filters.
+          Subsequent visualizations (heatmap, fold change plot, PPI network) 
+          and ORA will be computed on the proteins in the output table."
+        ),
+        
         div(style = 'overflow-x: scroll; max-width: 100%',
             DTOutput("groupComparisonsDT")),
         br(),
         
-        shinyjs::hidden(
-          div(
-            id = 'hide_before_comparisons',
+        
             verbatimTextOutput("filterDTSummary"),
             tabsetPanel(
               type = "tabs",
@@ -1113,6 +1124,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                                     value = TRUE),
                       checkboxInput("clusterCols",
                                     "Cluster columns (samples) of heatmap?",
+                                    value = TRUE),
+                      checkboxInput("heatmap_labels",
+                                    "Show gene names of proteins?",
                                     value = TRUE),
                       radioButtons(
                         "scaleHeatmap",
@@ -1275,6 +1289,17 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 h3("PPI Network"),
                 inline(actionButton("networkHelp", icon = icon("info") , label = NULL)),
                 inline(uiOutput("NetworkHelpBox")),
+                inline(
+                  numericInput(
+                    "edgeWeightThresh",
+                    "Min edge weight",
+                    value = 0,
+                    min = 0,
+                    max = 1,
+                    step = 0.1,
+                    width = '50%'
+                  )
+                ),
                 inline(uiOutput("download_button_spec_network")),
                 visNetworkOutput("network", width = "100%", height = "600px")
               )

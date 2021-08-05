@@ -1529,6 +1529,7 @@ server <- function(input, output, session) {
         dom = 'Bfrtip',
         pageLength = 10,
         autoWidth = TRUE,
+        search = list(regex = TRUE),
         #scrollX = TRUE,
         #scroller = TRUE,
         buttons = c('csv')
@@ -1559,6 +1560,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$submitMultiComp,{
     req(enrichedMatrixSet())
+    
+    req(input$upset1Sample)
 
     if (reacValues$show_multi == FALSE) {
       reacValues$show_multi = TRUE
@@ -1676,6 +1679,7 @@ server <- function(input, output, session) {
     fontsize = isolate(input$heatmap_base)
     plot_width = isolate(input$heatmap_width)
     plot_height = isolate(input$heatmap_height)
+    show_labels <- isolate(input$heatmap_labels)
     
     validate(need(
       nrow(reacValues$dataHeatmap) >= 1,
@@ -1693,6 +1697,7 @@ server <- function(input, output, session) {
         Colv = reacValues$clusterCols,
         scale = reacValues$scaleHeatmap,
         fontsize_row = fontsize,
+        showticklabels = show_labels,
         column_text_angle = 90,
         colors = heatColors()
       ) %>%
@@ -1878,6 +1883,7 @@ server <- function(input, output, session) {
       reacValues$dataLimma,
       sample,
       fcThresh,
+      sigCutoffValue,
       choice,
       padjYBoolean
     )
@@ -2371,7 +2377,8 @@ server <- function(input, output, session) {
   
   
   ppi <- reactive({
-    read_graph("data/Human_Interactome_high.gml", format="gml")
+    #read_graph("data/Human_Interactome_high.gml", format="gml")
+    simplify(read_graph('data/intact_weighted.edgelist', format="ncol", directed=F))
   })
   
   cellmap <- reactive({
@@ -2382,7 +2389,8 @@ server <- function(input, output, session) {
   })
   
   #### PPI NETWORK
-  multiNetwork <- function() {
+  multiNetwork <- function(thresh=0) {
+    if (is.na(thresh) || is.null(thresh)) thresh <- 0
     validate(need(nrow(reacValues$dataComp) > 1,"Not enough data to display."))
     
     ridx <- input$groupComparisonsDT_rows_all
@@ -2397,12 +2405,16 @@ server <- function(input, output, session) {
     nodes <- nw.data[[1]]
     edges <- nw.data[[2]]
     
-    idxs <- match(nodes$label, V(ppi() )$label)
+    #idxs <- match(nodes$label, V(ppi() )$label)
+    idxs <- match(nodes$label, V(ppi() )$name)
     idxs <- idxs[!is.na(idxs)]
     
     if (length(idxs)>1) {
       G <- induced_subgraph(ppi(), idxs)
       G.df <- igraph::as_long_data_frame(G)
+      
+      names(G.df) <- c("from", "to", "value", "from_label", "to_label")
+      
       from_id <- match(G.df$from_label, nodes$label)
       to_id <- match(G.df$to_label, nodes$label)
       
@@ -2411,9 +2423,10 @@ server <- function(input, output, session) {
           from = from_id,
           to = to_id,
           color = rep(myScatterColors()[2], length(to_id)),
-          interaction = rep('PPI', length(to_id))
+          interaction = rep('PPI', length(to_id)),
+          value = G.df$value
         )
-      edges <- rbind(edges, ppi.edges)
+      edges <- rbind(edges, ppi.edges[ppi.edges$value >= thresh,])
     }
     
     nodes <-
@@ -2426,11 +2439,11 @@ server <- function(input, output, session) {
                edges,
                layout = "layout_nicely",
                type = "full") %>%
-      visPhysics(stabilization = F) %>% visIgraphLayout() %>%
-      visEdges(smooth=F, width=0.6) %>%
+      visIgraphLayout() %>% visPhysics(stabilization = F) %>%
       visOptions(selectedBy = "CellMap localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
+      visEdges(smooth=F) %>%
       visLegend(
         main = "Legend",
         useGroups = F,
@@ -2474,13 +2487,16 @@ server <- function(input, output, session) {
   })
   # 
   
-  singleNetwork <- function() {
+  singleNetwork <- function(thresh) {
+    if (is.na(thresh) || is.null(thresh)) thresh <- 0
+    
     req(reacValues$dataComp)
     
     ridx <- input$groupComparisonsDT_rows_all
     rnames <- rownames(reacValues$dataComp[ridx,])
     
     networkData <- toNetworkData(reacValues$dataComp[rnames,], ppi(), cellmap())
+    networkData$edges <- networkData$edges[networkData$edges$value >= thresh, ]
     
     msg <- ""
     if (length(rnames) > 1) {
@@ -2514,7 +2530,7 @@ server <- function(input, output, session) {
       visOptions(selectedBy = "CellMap localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
-      visEdges(smooth=F, color=list(color = "grey", highlight = "red"), width=0.6) %>%
+      visEdges(smooth=F, color=list(color = "grey", highlight = "red")) %>%
 
       visLegend(
         useGroups = F,
@@ -2537,9 +2553,9 @@ server <- function(input, output, session) {
   output$network <- renderVisNetwork({
     out <- 0
     if (length(grep(logfcPrefix, names(reacValues$dataComp)) ) > 1) {
-      out <- multiNetwork()
+      out <- multiNetwork(input$edgeWeightThresh)
     } else {
-      out <- singleNetwork()
+      out <- singleNetwork(input$edgeWeightThresh)
     }
     out
   })
@@ -2729,6 +2745,7 @@ server <- function(input, output, session) {
         dom = 'Bfrtip',
         pageLength = 10,
         autoWidth = TRUE,
+        search = list(regex = TRUE),
         #scrollX = TRUE,
         #scroller = TRUE,
         buttons = c('csv')
