@@ -1689,6 +1689,17 @@ server <- function(input, output, session) {
         " proteins selected. Apply less stringent thresholds."
       )
     ))
+    
+    
+    annot <- colData(reacValues$proteinData)
+    row.names(annot) <- annot$samples
+    
+    annot <- annot[names(reacValues$dataHeatmap),]
+    
+    cols <- myGroupColors()[1:ncol(reacValues$dataHeatmap)]
+    
+    #annot$groups <- annot$factor(annot$groups)
+    annot$samples <- NULL
 
     withProgress(message = "Plotting heatmap ", {
       heatmaply(
@@ -1696,9 +1707,14 @@ server <- function(input, output, session) {
         Rowv = reacValues$clusterRows,
         Colv = reacValues$clusterCols,
         scale = reacValues$scaleHeatmap,
+        plot_method = "plotly",
         fontsize_row = fontsize,
-        showticklabels = show_labels,
+        fontsize_col = fontsize,
+        showticklabels = c(TRUE, show_labels),
+        col_side_colors = annot,
+        row_dend_left = TRUE,
         column_text_angle = 90,
+        key.title = 'Z-score',
         colors = heatColors()
       ) %>%
         config(displaylogo = F,
