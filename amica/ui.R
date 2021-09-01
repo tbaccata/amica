@@ -1336,14 +1336,39 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
             shinyjs::hidden(
               div(
                 id = 'hide_ora_before_submit',
-                fluidRow(
-                  column(width = 1),
-                  column(width = 10,
-                         plotlyOutput("gostplot", height = 600),),
-                  column(width = 1)
-                ),
                 
-                #uiOutput("gostplot"), #, height = 600, width = "90%"),
+                tabsetPanel(
+                  type = "tabs",
+                  tabPanel(
+                    h3("Manhattan plot"),
+                    fluidRow(
+                      column(width = 1),
+                      column(width = 10,
+                             plotlyOutput("gostplot", height = 600)),
+                      column(width = 1)
+                    )
+                  ),
+                  tabPanel(
+                    h3("Bar plot"),
+                    radioButtons(
+                      "orasource",
+                      "Source",
+                      choices = c(
+                        "GO:MF",
+                        "GO:CC",
+                        "GO:BP",
+                        "KEGG",
+                        "REAC",
+                        "CORUM",
+                        "WP"
+                      ),
+                      selected = "GO:MF"
+                    ),
+                    colourInput("oraBar_color", "Select bar color", "#66c2a5"),
+                    actionButton("submitORABar", strong("Submit")),
+                    plotlyOutput("oraBarplot", height = 800)
+                  )
+                ),
                 br(),
                 uiOutput("download_button_ora"),
                 #downloadLink("download1","Download table"),
@@ -1351,7 +1376,6 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                     DTOutput("gprofilerDT"))
               )
             )
-            
           )
         ),
         footer()
