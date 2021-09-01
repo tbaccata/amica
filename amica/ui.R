@@ -23,7 +23,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
     tags$script(inactivity),
     useShinyjs(),
     navbarPage(
-      "amica v21.08.04",
+      "amica v21.09.01",
       id = "navbar",
       inverse = TRUE,
       theme = bs_theme(
@@ -233,7 +233,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                  ,
                  mainPanel(
                    #h1("amica"),
-                   img(src = 'ga_amica.svg',  align = "center"),
+                   HTML('<center><img src="ga_amica.png" width="50%"></center>'),
+                   #img(src = 'ga_amica.svg',  align = "center"),
                    br(),
                    br(),
                    br(),
@@ -271,7 +272,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                          tabsetPanel(
                            type = "tabs",
                            tabPanel(h4("Available color palettes"),
-                                    plotOutput("brewercols"),),
+                                    plotOutput("brewercols", height = "800px")),
                            tabPanel(h4("Qualitative (groups)"),
                                         uiOutput("brewerOptionsQual"),
                                         radioButtons(
@@ -280,7 +281,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                                           choices = c("yes", "no"),
                                           selected = "no"
                                         ),
-                                        plotlyOutput("mtcarsBar"),
+                                        plotlyOutput("mtcarsBar", height = 800),
                                         helpText(
                                           "The Motor Trend Car Road Tests was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
                                         )
@@ -311,7 +312,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                                       choices = c("yes", "no"),
                                       selected = "no"
                                     ),
-                                    plotlyOutput("irisScatter"),
+                                    plotlyOutput("irisScatter", height = 800),
                                     helpText("This famous (Fisher's or Anderson's) iris data set gives
                                              the measurements in centimeters of the variables sepal 
                                              length and width and petal length and width, respectively, 
@@ -327,7 +328,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                                choices = c("yes", "no"),
                                selected = "yes"
                              ),
-                             plotlyOutput("mtcarsHeatmap"),
+                             plotlyOutput("mtcarsHeatmap", height = 800),
                              helpText(
                                "The Motor Trend Car Road Tests was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
                              )
