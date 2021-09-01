@@ -617,6 +617,9 @@ server <- function(input, output, session) {
     heatmaply(
       t(mtcars),
       scale = "row",
+      key.title = 'Z-score',
+      row_dend_left = T,
+      showticklabels = T,
       colors = heatColors()
     ) %>%
       config(displaylogo = F,
@@ -1291,9 +1294,16 @@ server <- function(input, output, session) {
       )
     )
     
+    aname <-
+      ifelse(
+        "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        'LFQIntensity',
+        'Intensity'
+      )
+    
     
     df <-
-      as.data.frame(apply(assay(reacValues$proteinData, "LFQIntensity"), 2, function(x)
+      as.data.frame(apply(assay(reacValues$proteinData, aname), 2, function(x)
         sum(!is.na(x))))
     names(df) <- "Number"
     df$Sample <- row.names(df)
@@ -1349,15 +1359,21 @@ server <- function(input, output, session) {
   pctMvsPlotly <- eventReactive(input$submitNumMVs, {
     validate(
       need(
-        "Intensity" %in% assayNames(reacValues$proteinData) |
+        "Intensity" %in% assayNames(reacValues$proteinData) ||
           "LFQIntensity" %in% assayNames(reacValues$proteinData),
         "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
       )
     )
     
+    aname <-
+      ifelse(
+        "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        'LFQIntensity',
+        'Intensity'
+      )
     
     df <-
-      as.data.frame(apply(assay(reacValues$proteinData, "LFQIntensity"), 2, function(x) {
+      as.data.frame(apply(assay(reacValues$proteinData, aname), 2, function(x) {
         100 * sum(is.na(x)) / length(x)
       }))
     names(df) <- "Number"
@@ -2232,6 +2248,7 @@ server <- function(input, output, session) {
     
     cols <- c(
       "source",
+      "term_id",
       "term_name",
       "p_value",
       "term_size",
@@ -2258,6 +2275,49 @@ server <- function(input, output, session) {
     gostplot(reacValues$GostPlot, capped = T, interactive = T)
   })
   
+  output$oraBarplot <- renderPlotly({
+    input$submitORABar
+    req(reacValues$dataGprofiler)
+    orasource <- isolate(input$orasource)
+    oracolor <- isolate(input$oraBar_color)
+
+    plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
+
+    validate(need(nrow(plotDf)>0, "No significant over-represented terms detected."))
+
+    plotDf$p_value <- -log10(plotDf$p_value)
+    plotDf <- plotDf[!duplicated(plotDf$term_name),]
+    plotDf <- plotDf[order(plotDf$p_value),]
+    plotDf$term_name <- factor(plotDf$term_name, levels = plotDf$term_name)
+
+    ptitle <- expression(paste(-log[10]," (P)", sep = ''))
+    p <- ggplot(plotDf, aes(x = term_name, y = p_value)) +
+      geom_bar(stat = "identity", fill=oracolor, width = 0.9)  + xlab("") +
+      ylab("-log10(p-value)") +
+      theme_minimal( base_size = 14) + coord_flip() + theme(axis.text.x = element_text(colour =
+                                                                                         "black"),
+                                                            axis.text.y = element_text(colour = "black"))
+
+    ggplotly(p) %>% config(
+      displaylogo = F,
+      modeBarButtonsToRemove = list(
+        'sendDataToCloud',
+        'autoScale2d',
+        'zoomIn2d',
+        'zoomOut2d',
+        'toggleSpikelines',
+        'hoverClosestCartesian',
+        'hoverCompareCartesian'
+      ),
+      toImageButtonOptions = list(
+        format = "svg",
+        width = 676,
+        height = 676,
+        filename = "ora_barplot"
+      )
+    )
+
+  })
   
   output$download1 <- downloadHandler(
     filename = function() {
@@ -3057,7 +3117,7 @@ server <- function(input, output, session) {
   })
   
   output$exampleHelpBox <- renderUI({
-    if (input$exampleHelp %% 2){
+    if (!(input$exampleHelp %% 2)){
       HTML(
         
         "
