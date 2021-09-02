@@ -619,7 +619,7 @@ server <- function(input, output, session) {
       scale = "row",
       key.title = 'Z-score',
       row_dend_left = T,
-      showticklabels = T,
+      showticklabels = c(T, T),
       colors = heatColors()
     ) %>%
       config(displaylogo = F,
@@ -741,7 +741,6 @@ server <- function(input, output, session) {
       "\t2) Quantitative results\n",
       "\t3) Protein-protein interaction networks (only applicable for H.sapiens at the moment)\n",
       "\t4) or upload another amica file to compare experiments!"
-      
     )
   })
   
@@ -1696,6 +1695,7 @@ server <- function(input, output, session) {
     plot_width = isolate(input$heatmap_width)
     plot_height = isolate(input$heatmap_height)
     show_labels <- isolate(input$heatmap_labels)
+    show_annot <- isolate(input$heatmap_annot)
     
     validate(need(
       nrow(reacValues$dataHeatmap) >= 1,
@@ -1712,27 +1712,72 @@ server <- function(input, output, session) {
     
     annot <- annot[names(reacValues$dataHeatmap),]
     
+    groupIdx <- 1
+    mapping <- c()
+    mnames <- c()
+    relevantGroups <- annot$groups
+    for (i in seq_along(relevantGroups)) {
+      if (relevantGroups[i] %in% names(mapping)) {
+        next
+      } else {
+        color <- myGroupColors()[groupIdx]
+        group = relevantGroups[i]
+        mapping <- c(mapping, color)
+        mnames <- c(mnames, group)
+        names(mapping) <- mnames
+        groupIdx <- groupIdx + 1
+      }
+    }
+    #names(mapping) <- mnames
+    print(annot)
+    print(mapping)
+    
     cols <- myGroupColors()[1:ncol(reacValues$dataHeatmap)]
     
     #annot$groups <- annot$factor(annot$groups)
     annot$samples <- NULL
-
+    
+    cbarTitle <-
+      ifelse(reacValues$scaleHeatmap != "none", "Z-score", "log2 Intensity")
+    
     withProgress(message = "Plotting heatmap ", {
-      heatmaply(
-        reacValues$dataHeatmap,
-        Rowv = reacValues$clusterRows,
-        Colv = reacValues$clusterCols,
-        scale = reacValues$scaleHeatmap,
-        plot_method = "plotly",
-        fontsize_row = fontsize,
-        fontsize_col = fontsize,
-        showticklabels = c(TRUE, show_labels),
-        col_side_colors = annot,
-        row_dend_left = TRUE,
-        column_text_angle = 90,
-        key.title = 'Z-score',
-        colors = heatColors()
-      ) %>%
+      p <- 0
+      
+      if (show_annot) {
+        p <- heatmaply(
+          reacValues$dataHeatmap,
+          Rowv = reacValues$clusterRows,
+          Colv = reacValues$clusterCols,
+          scale = reacValues$scaleHeatmap,
+          plot_method = "plotly",
+          fontsize_row = fontsize,
+          fontsize_col = fontsize,
+          showticklabels = c(TRUE, show_labels),
+          col_side_palette = mapping,
+          col_side_colors = annot,
+          row_dend_left = TRUE,
+          column_text_angle = 90,
+          key.title = cbarTitle,
+          colors = heatColors()
+        )
+      } else {
+        p <- heatmaply(
+          reacValues$dataHeatmap,
+          Rowv = reacValues$clusterRows,
+          Colv = reacValues$clusterCols,
+          scale = reacValues$scaleHeatmap,
+          plot_method = "plotly",
+          fontsize_row = fontsize,
+          fontsize_col = fontsize,
+          showticklabels = c(TRUE, show_labels),
+          row_dend_left = TRUE,
+          column_text_angle = 90,
+          key.title = cbarTitle,
+          colors = heatColors()
+        )
+      }
+      
+      p %>%
         config(displaylogo = F,
                modeBarButtonsToRemove = list(
                  'sendDataToCloud',
