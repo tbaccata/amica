@@ -1129,6 +1129,11 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                       checkboxInput("heatmap_labels",
                                     "Show gene names of proteins?",
                                     value = TRUE),
+                      checkboxInput("heatmap_annot",
+                                    "Annotate samples in dendrogram?",
+                                    value = TRUE),
+                      
+                      
                       radioButtons(
                         "scaleHeatmap",
                         "Scale rows (proteins) or columns (samples) on z-scores? If none is selected intensity values are plotted.",
