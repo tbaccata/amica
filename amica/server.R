@@ -315,7 +315,8 @@ server <- function(input, output, session) {
     req(reacValues$uniqueGroups)
     selectizeInput(
       "filterValuesInput",
-      "Select groups to be considered for filtering on valid values. If none is selected all groups are considered.",
+      "Select groups to be considered for filtering on valid values. 
+      If none is selected all groups are considered.",
       c("", reacValues$uniqueGroups),
       multiple = T,
       selected = NULL
@@ -342,7 +343,6 @@ server <- function(input, output, session) {
         minMSMS = input$minMSMS,
         minRazor = input$minRazor
       )
-      
       
       tmp <- tryCatch({
         filterOnValidValues(
@@ -387,13 +387,10 @@ server <- function(input, output, session) {
         }
         ,
         finally = {
-          showNotification(paste("Imputing intensities..."), type = "message")
-          #message("Normalizing intensities...", )
+          showNotification(paste("Normalizing intensities..."), type = "message")
         }
         )
       }
-      
-      
       
       normDf <- tryCatch({
         imputeIntensities(
@@ -1729,13 +1726,8 @@ server <- function(input, output, session) {
         groupIdx <- groupIdx + 1
       }
     }
-    #names(mapping) <- mnames
-    print(annot)
-    print(mapping)
     
     cols <- myGroupColors()[1:ncol(reacValues$dataHeatmap)]
-    
-    #annot$groups <- annot$factor(annot$groups)
     annot$samples <- NULL
     
     cbarTitle <-
@@ -2318,7 +2310,8 @@ server <- function(input, output, session) {
     validate(
       need(nrow(reacValues$GostPlot$result) >= 1, "No significant over-represented term detected.")
     )
-    gostplot(reacValues$GostPlot, capped = T, interactive = T)
+    gostplot(reacValues$GostPlot, capped = F, interactive = T)
+    # %>% layout(yaxis = list(title = '-log10(p-adj)'))
   })
   
   output$oraBarplot <- renderPlotly({
@@ -3128,6 +3121,33 @@ server <- function(input, output, session) {
                by selecting a different comparison and pressing the 'Submit Analysis' button.")
     } else {
       return()
+    }
+  })
+  
+  output$assaysHelpBox <- renderUI({
+    if (input$assaysHelp %% 2) {
+      
+      HTML("
+      <p><b>LFQIntensity</b> or <b>Intensity</b> are intensities 
+      that still contain missing values and potential contaminants. 
+      These intensities are used to calculate the fraction of missing data 
+       or the number of identified protein groups in a sample. If the data was quantified 
+      with MaxQuant or FragPipe these intensities are already normalized.</p>
+      
+      <p><b>ImputedIntensity</b> are normalized and imputed intensities 
+      that are also used to calculate differential abundance. If the re-normalization 
+      option was selected in the input tab the <b>LFQIntensities</b> were normalized 
+      after removing potential contaminants, reverse hits, proteins only identified by site 
+      and protein groups that had too few valid values per group.</p>
+           
+           <p><b>iBAQ</b> (intensity-based absolute quantification) values are obtained 
+           by dividing protein intensities by the number of theoretically observable tryptic peptides.
+            This measure correlates well with protein abundance and is for example used to calculate 
+            the percentage of contamination in a sample (if available).
+           </p>
+           
+           <p><b>RawIntensity</b> are non-normalized, summed peptide intensities per protein group.</p>
+           ")
     }
   })
   

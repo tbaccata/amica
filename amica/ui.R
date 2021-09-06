@@ -355,7 +355,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
         value = 'qctab',
         h1("Quality Control"),
         h2("Compare different intensities"),
-        uiOutput("assayNames"),
+        br(),
+        inline(uiOutput("assayNames")),
+        inline(actionButton('assaysHelp', label = '', icon = icon("info"))),
+        uiOutput("assaysHelpBox"),
         helpText("ImputedIntensity are the intensities used for quantification"),
         verbatimTextOutput("quantSummary"),
         tabsetPanel(
@@ -1346,12 +1349,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                   type = "tabs",
                   tabPanel(
                     h3("Manhattan plot"),
-                    fluidRow(
-                      column(width = 1),
-                      column(width = 10,
-                             plotlyOutput("gostplot", height = 600)),
-                      column(width = 1)
-                    )
+                    #fluidRow(
+                             plotlyOutput("gostplot", height = 800),
+                    #)
                   ),
                   tabPanel(
                     h3("Bar plot"),
