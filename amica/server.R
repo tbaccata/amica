@@ -104,8 +104,9 @@ server <- function(input, output, session) {
   shinyjs::onclick("profileParams",
                    shinyjs::toggle(id = "toggle_profile_params"))
   
-  shinyjs::onclick("fcParams",
-                   shinyjs::toggle(id = "toggle_fc_params"))
+  
+  shinyjs::onclick("oraBarParams",
+                   shinyjs::toggle(id = "toggle_oraBar_params"))
   
   shinyjs::onclick("fcamicaParams",
                    shinyjs::toggle(id = "toggle_fcamica_params"))
@@ -2325,23 +2326,26 @@ server <- function(input, output, session) {
     req(reacValues$dataGprofiler)
     orasource <- isolate(input$orasource)
     oracolor <- isolate(input$oraBar_color)
+    oraMaxTerm <- isolate(input$oraBar_maxTerms)
+    plotWidth <- isolate(input$oraBar_width)
+    plotHeight <- isolate(input$oraBar_height)
 
+    oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
+    
     plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
 
     validate(need(nrow(plotDf)>0, "No significant over-represented terms detected."))
 
-    plotDf$p_value <- -log10(plotDf$p_value)
+    plotDf$minusLog10p_value <- -log10(plotDf$p_value)
     plotDf <- plotDf[!duplicated(plotDf$term_name),]
-    plotDf <- plotDf[order(plotDf$p_value),]
+    plotDf <- plotDf[order(plotDf$minusLog10p_value),]
+    plotDf <- head(plotDf, min(nrow(plotDf), oraMaxTerm))
     plotDf$term_name <- factor(plotDf$term_name, levels = plotDf$term_name)
 
-    ptitle <- expression(paste(-log[10]," (P)", sep = ''))
-    p <- ggplot(plotDf, aes(x = term_name, y = p_value)) +
+    p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
       geom_bar(stat = "identity", fill=oracolor, width = 0.9)  + xlab("") +
       ylab("-log10(p-value)") +
-      theme_minimal( base_size = 14) + coord_flip() + theme(axis.text.x = element_text(colour =
-                                                                                         "black"),
-                                                            axis.text.y = element_text(colour = "black"))
+      theme_minimal( base_size = 14) + coord_flip()
 
     ggplotly(p) %>% config(
       displaylogo = F,
@@ -2356,8 +2360,8 @@ server <- function(input, output, session) {
       ),
       toImageButtonOptions = list(
         format = "svg",
-        width = 676,
-        height = 676,
+        width = plotWidth,
+        height = plotHeight,
         filename = "ora_barplot"
       )
     )
