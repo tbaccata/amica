@@ -1369,7 +1369,39 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                       ),
                       selected = "GO:MF"
                     ),
-                    colourInput("oraBar_color", "Select bar color", "#66c2a5"),
+                    inline(actionButton("oraBarParams", "", icon = icon("wrench"))),
+                    shinyjs::hidden(
+                      div(
+                        id = 'toggle_oraBar_params',
+                    
+                    numericInput(
+                      "oraBar_width",
+                      "Width in pixel.",
+                      value = 768,
+                      min = 338,
+                      max = 1352,
+                      step = 10
+                    ),
+                    numericInput(
+                      "oraBar_height",
+                      "Height in pixel.",
+                      value = 676,
+                      min = 338,
+                      max = 1352,
+                      step = 10
+                    ),
+                    
+                    sliderInput(
+                      "oraBar_maxTerms",
+                      "Max. number of terms to plot",
+                      min = 0,
+                      max = 50,
+                      step = 1,
+                      value = 0
+                    ), helpText("If '0' is selected all terms are plotted."),
+                    colourInput("oraBar_color", "Select bar color", "#66c2a5")
+                    )
+                    ),
                     actionButton("submitORABar", strong("Submit")),
                     plotlyOutput("oraBarplot", height = 800)
                   )
