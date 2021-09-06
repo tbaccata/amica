@@ -20,6 +20,7 @@ require(Rmisc)
 require(data.table)
 require(dplyr)
 require(RColorBrewer)
+require(colourpicker)
 #require(pryr)
 ###
 source("R/utils.R")
