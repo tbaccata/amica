@@ -74,6 +74,9 @@ server <- function(input, output, session) {
   shinyjs::onclick("densityParams",
                    shinyjs::toggle(id = "toggle_density_params"))
   
+  shinyjs::onclick("corParams",
+                   shinyjs::toggle(id = "toggle_cor_params"))
+  
   shinyjs::onclick("cvParams",
                    shinyjs::toggle(id = "toggle_cv_params"))
   
@@ -529,7 +532,7 @@ server <- function(input, output, session) {
     mycols
   })
   
-  myGroupColors <- reactive({
+  mySelectionColors <- reactive({
     color <- ifelse(is.null(input$brewerOptionsQual), "Set2", input$brewerOptionsQual)
     reverse <- ifelse(input$revQual=="yes", TRUE, FALSE)
     #nc <- length(unique(reacValues$proteinData$groups))
@@ -544,10 +547,52 @@ server <- function(input, output, session) {
       nc <- ifelse(nc<3, 3, nc)
       mycols <- brewer.pal(nc, color)
     }
+    
+    names(mycols) <- unique(colData(reacValues$proteinData)$groups)
+    
     if (reverse) mycols <- rev(mycols)
     mycols
   })
   
+  output$myColorPanel <- renderUI({
+    req(reacValues$proteinData)
+    
+    groups <- unique(colData(reacValues$proteinData)$groups)
+    
+    lapply(seq_along(groups), function(i) {
+      colourInput(paste("col", i, sep="_"), paste0(groups[i]), mySelectionColors()[i])
+    })
+    })
+  
+  output$volcanoMAColors <- renderUI({
+    pal <- brewer.pal(3, "Set2")
+    
+    lapply(seq_along(1:2), function(i) {
+      colourInput(paste("volcanocol", i, sep="_"), paste0("Color ", i, ":"), pal[i])
+    })
+  })
+  
+  output$fcPlotColors <- renderUI({
+    pal <- brewer.pal(4, "Set2")
+    
+    lapply(seq_along(pal), function(i) {
+      colourInput(paste("fcplotcol", i, sep="_"), paste0("Color ", i, ":"), pal[i])
+    })
+  })
+  
+  myGroupColors <- reactive({
+    groups <- unique(colData(reacValues$proteinData)$groups)
+    
+    colors <- lapply(seq_along(groups), function(i) {
+      input[[paste("col", i, sep="_")]]
+    })
+    
+    if (is.null(input$col_1)) colors <- mySelectionColors()
+    
+    names(colors) <- groups
+    colors
+  })
+
   myScatterColors <- reactive({
     color <- ifelse(is.null(input$brewerOptionsScatter), "Set2", input$brewerOptionsScatter)
     reverse <- ifelse(input$revScatter=="yes", TRUE, FALSE)
@@ -786,7 +831,7 @@ server <- function(input, output, session) {
     assayNames <- isolate(input$assayNames)
     groupInputs <- isolate(input$pcaSamplesInput)
     
-    validate(need(!is.null(assayNames) | length(assayNames) > 0, "Please select an intensity prefix."))
+    validate(need(assayNames != "", "Please provide an intensity."))
     validate(need(length(groupInputs) > 1 | is.null(groupInputs), "Please select at least two groups. If none is selected all are considered."))
     
     if (is.null(groupInputs)) groupInputs <- unique(colData(reacValues$proteinData)$groups)
@@ -955,6 +1000,8 @@ server <- function(input, output, session) {
 
   output$densityPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
+    validate(need(input$assayName != "", "Please provide an intensity."))
+    
     withProgress(message = "Plotting density plot", {
       densityPlotly()
     })
@@ -1111,11 +1158,9 @@ server <- function(input, output, session) {
     withProgress(message = "Plotting scatter plot", {
       pu <-
         ggplot(plotData,
-               # variable != literal in the R "programming" ""language""
                aes(
-                 x=x, y=y,
-                 #x = !!sym(xLabel),
-                 #y = !!sym(yLabel),
+                 x=x, 
+                 y=y,
                  label = Gene,
                  color = Contaminant
                )) + geom_abline(intercept = 0,#intercept, 
@@ -1160,6 +1205,75 @@ server <- function(input, output, session) {
           filename = "scatter_plot"
         )
       )
+  })
+  
+  output$corrPlotly <- renderPlotly({
+    input$submitCor
+    
+    req(reacValues$uploadSuccess)
+
+    width <- isolate(input$cor_width)
+    height <- isolate(input$cor_height)
+    
+    assayName <- isolate(input$assayNames)
+    validate(need(assayName != "", "Please provide an intensity."))
+
+    df <- assay(reacValues$proteinData, assayName)
+
+    annot <- colData(reacValues$proteinData)
+    row.names(annot) <- annot$samples 
+    annot <- annot[names(df),]
+    annot$samples <- NULL
+    
+    groupIdx <- 1
+    mapping <- c()
+    mnames <- c()
+    relevantGroups <- annot$groups
+    for (i in seq_along(relevantGroups)) {
+      if (relevantGroups[i] %in% names(mapping)) {
+        next
+      } else {
+        color <- myGroupColors()[groupIdx]
+        group = relevantGroups[i]
+        mapping <- c(mapping, color)
+        mnames <- c(mnames, group)
+        names(mapping) <- mnames
+        groupIdx <- groupIdx + 1
+      }
+    }
+
+    corDf <- cor(df, method = "pearson", use = "complete.obs")
+
+    withProgress(message = "Plotting correlation plot ", {
+      p <-
+        heatmaply_cor(
+          round(corDf, 2),
+          xlab = "", 
+          ylab = "",
+          limits = c(min(corDf), 1),
+          #row_side_palette = mapping,
+          row_side_palette = myGroupColors(),
+          row_side_colors = annot,
+          plot_method = "plotly",
+          key.title = "Pearson Correlation"
+        )
+    })
+
+    p %>%  config(displaylogo = F,
+                  modeBarButtonsToRemove = list(
+                    'sendDataToCloud',
+                    'autoScale2d',
+                    'zoomIn2d',
+                    'zoomOut2d',
+                    'toggleSpikelines',
+                    'hoverClosestCartesian',
+                    'hoverCompareCartesian'
+                  ),
+                  toImageButtonOptions = list(format = "svg",
+                                              width = width,
+                                              height = height,
+                                              filename = "corrplot")
+    )
   })
   
   
@@ -1463,6 +1577,7 @@ server <- function(input, output, session) {
   output$boxplotCV <- renderPlotly({
     req(reacValues$uploadSuccess)
     validate(need(any(duplicated(colData(reacValues$proteinData)$groups)), "Cannot output CV plot for a pilot without replicates")) 
+    validate(need(input$assayName != "", "Please provide an intensity."))
     withProgress(message = "Plotting Coefficient of Variations ", {
       cvsPlotly()
     })
@@ -1746,7 +1861,8 @@ server <- function(input, output, session) {
           fontsize_row = fontsize,
           fontsize_col = fontsize,
           showticklabels = c(TRUE, show_labels),
-          col_side_palette = mapping,
+          #col_side_palette = mapping,
+          col_side_palette = myGroupColors(),
           col_side_colors = annot,
           row_dend_left = TRUE,
           column_text_angle = 90,
@@ -1821,6 +1937,15 @@ server <- function(input, output, session) {
     plot_height <- isolate(input$fc_height)
     pointsize <- isolate(input$fc_pointsize)
     
+    c1 <- isolate(input$fcplotcol_1)
+    c2 <- isolate(input$fcplotcol_2)
+    c3 <- isolate(input$fcplotcol_3)
+    c4 <- isolate(input$fcplotcol_4)
+    
+    colors <- c(c1, c2, c3, c4, "red")
+    
+    if(is.null(c1)) colors <- brewer.pal(4, "Set2")
+    
     validate(need(length(selection)>1, "Please select two comparisons."))
     validate(need(length(ridx)>0, "No proteins to plot (output table must be empty)."))
     validate(need(nrow(reacValues$dataComp)>0, "No data to plot."))
@@ -1880,8 +2005,9 @@ server <- function(input, output, session) {
                                                                slope = 1, #slope, 
                                                                size=1,
                                                                alpha = 0.5,
-                                                               color=myScatterColors()[5]) +
-        theme_minimal(base_size = fontsize) + scale_color_manual(values=myScatterColors() ) +
+                                                               "skyblue"
+                                                               ) +
+        theme_minimal(base_size = fontsize) + scale_color_manual(values=colors ) +
         labs(x = labelNamesX, y = labelNamesY) #, title =  title) 
       #pu <- pu + ggtitle(expression(txt)) + geom_text(x = 25, y = 300, label = txt, parse = TRUE)
       
@@ -1982,7 +2108,16 @@ server <- function(input, output, session) {
     pointsize <- isolate(input$volcano_pointsize)
     padjYBoolean <- ifelse(padjY == "p-values", FALSE, TRUE)
     
+    c1 <- isolate(input$volcanocol_1)
+    c2 <- isolate(input$volcanocol_2)
     
+    pal <- brewer.pal(3, "Set2")
+    if (is.null(c1) | is.null(c2)) {
+      c1 <- pal[1]
+      c2 <- pal[2]
+    }
+    pcols <- c(c1,c2,"red")
+
     setChoice <- "union"#isolate(input$setChoice)
     
     validate(need(!is.null(sample) & sample!="" & length(sample)>0, "Please select a group comparison."))
@@ -1991,15 +2126,7 @@ server <- function(input, output, session) {
     if (!is.null(get_data())) {
       pltData[pltData$key %in% get_data()$key, "show_id"] <- TRUE
     }
-    
-    # reacValues$dataComp <-
-    #   getComparisonsData2(reacValues$dataLimma,
-    #                       matrixSet,
-    #                       setChoice,
-    #                       sample)
-    
-    
-    
+
     if (reacValues$show_analysis == FALSE) {
       reacValues$show_analysis = TRUE
       toggle(id = 'hide_before_comparisons', anim = T)
@@ -2016,7 +2143,8 @@ server <- function(input, output, session) {
     xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
     
     withProgress(message = 'Plotting Volcano plot ', {
-      p <- plotVolcanoPlot(pltData, myScatterColors(), padjYBoolean, pointsize )
+      p <-
+        plotVolcanoPlot(pltData,  pcols, padjYBoolean, pointsize)
       p <-
         p + theme_minimal(base_size = fontsize) + theme(
           legend.text = element_text(size = legend_fontsize),
@@ -2088,7 +2216,15 @@ server <- function(input, output, session) {
     pointsize <- isolate(input$volcano_pointsize)
     
     pltData <- isolate(volcanoPlotData() )
-    #req(volcanoPlotData())
+    c1 <- isolate(input$volcanocol_1)
+    c2 <- isolate(input$volcanocol_2)
+
+    pal <- brewer.pal(3, "Set2")
+    if (is.null(c1) | is.null(c2)) {
+      c1 <- pal[1]
+      c2 <- pal[2]
+    }
+    pcols <- c(c1,c2,"red")
     
     validate(need(!is.null(sample) & sample!="" & length(sample)>0, "Please select a group comparison."))
     
@@ -2105,7 +2241,7 @@ server <- function(input, output, session) {
     }
     
     withProgress(message = "Plotting MA plot ", {
-      p <- plotMAPlot(pltData, myScatterColors(), pointsize)
+      p <- plotMAPlot(pltData, pcols, pointsize)
       
       p <-
         p + theme_minimal(base_size = fontsize) + theme(
@@ -2162,7 +2298,6 @@ server <- function(input, output, session) {
   output$profilePlot <- renderPlotly({
     req(reacValues$dataLimma)
     req(input$selectProfilePlotGene)
-    
     rowIdx <- which(rowData(reacValues$proteinData)[[geneName]]==input$selectProfilePlotGene)
     
     
@@ -3251,6 +3386,15 @@ server <- function(input, output, session) {
     if (input$densityHelp %% 2){
       helpText("The density plot shows a smoothed version of a histogram.
       It is especially useful to compare density plots of the intensities before and after imputation.
+               ")
+    }
+  })
+  
+  output$corHelpBox <- renderUI({
+    if (input$corHelp %% 2){
+      helpText("
+      The Pearson correlation plot visualizes how well samples (e.g replicates)
+      correlate.
                ")
     }
   })
