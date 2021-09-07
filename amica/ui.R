@@ -281,10 +281,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                                           choices = c("yes", "no"),
                                           selected = "no"
                                         ),
-                                        plotlyOutput("mtcarsBar", height = 800),
-                                        helpText(
-                                          "The Motor Trend Car Road Tests was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
-                                        )
+                                    uiOutput('myColorPanel')
                                     ),
                            tabPanel(h4("Qualitative (scatter)"),
                                     selectInput(
@@ -420,7 +417,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
             fluidRow(
               column(width = 2),
               column(width = 8,
-                     plotlyOutput("pca", height = 600)),
+                     plotlyOutput("pca", height = 800)),
               column(width = 2)
             )
             
@@ -474,7 +471,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                        ),
                        ###
                        
-                       plotlyOutput("boxPlot", height = 600)
+                       plotlyOutput("boxPlot", height = 800)
                      ),
                      column(
                        width = 6,
@@ -521,55 +518,93 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                          )
                        ),
                        ###
-                       plotlyOutput("densityPlot", height = 600)
+                       plotlyOutput("densityPlot", height = 800)
                      )
                    )),
+
           tabPanel(
-            h3("Coefficient of variation"),
-            inline(actionButton("submitCVs", "Plot CVs", icon = icon("cog"))),
-            inline(actionButton("cvHelp", icon = icon("info") , label = NULL)),
-            inline(uiOutput("cvHelpBox")),
-            ###
-            inline(actionButton("cvParams", "", icon = icon("wrench"))),
-            shinyjs::hidden(
-              div(
-                id = 'toggle_cv_params',
-                numericInput(
-                  "cv_width",
-                  "Width in pixel.",
-                  value = 768,
-                  min = 338,
-                  max = 1352,
-                  step = 10
-                ),
-                numericInput(
-                  "cv_height",
-                  "Height in pixel.",
-                  value = 676,
-                  min = 338,
-                  max = 1352,
-                  step = 10
-                ),
-                numericInput(
-                  "cv_base",
-                  "Base font size in pt.",
-                  value = 14,
-                  min = 4,
-                  max = 32,
-                  step = 1
-                ),
-                numericInput(
-                  "cv_legend",
-                  "Legend font size in pt.",
-                  value = 10,
-                  min = 4,
-                  max = 16,
-                  step = 1
-                )
+            h3("Correlation and CVs"),
+            fluidRow(
+              column(width = 6,
+                     h4("Correlation"),
+                     
+                     inline(actionButton("submitCor", "Plot Correlation", icon = icon("cog"))),
+                     inline(actionButton("corHelp", icon = icon("info") , label = NULL)),
+                     inline(uiOutput("corHelpBox")),
+                     ###
+                     inline(actionButton("corParams", "", icon = icon("wrench"))),
+                     shinyjs::hidden(
+                       div(
+                         id = 'toggle_cor_params',
+                         numericInput(
+                           "cor_width",
+                           "Width in pixel.",
+                           value = 800,
+                           min = 338,
+                           max = 1352,
+                           step = 10
+                         ),
+                         numericInput(
+                           "cor_height",
+                           "Height in pixel.",
+                           value = 800,
+                           min = 338,
+                           max = 1352,
+                           step = 10
+                         )
+                       )
+                     ),
+                     
+                     plotlyOutput("corrPlotly", height = 800)
+              ),
+              column(width = 6,
+                     h4("Coefficient of variation"),
+                     inline(actionButton("submitCVs", "Plot CVs", icon = icon("cog"))),
+                     inline(actionButton("cvHelp", icon = icon("info") , label = NULL)),
+                     inline(uiOutput("cvHelpBox")),
+                     ###
+                     inline(actionButton("cvParams", "", icon = icon("wrench"))),
+                     shinyjs::hidden(
+                       div(
+                         id = 'toggle_cv_params',
+                         numericInput(
+                           "cv_width",
+                           "Width in pixel.",
+                           value = 768,
+                           min = 338,
+                           max = 1352,
+                           step = 10
+                         ),
+                         numericInput(
+                           "cv_height",
+                           "Height in pixel.",
+                           value = 676,
+                           min = 338,
+                           max = 1352,
+                           step = 10
+                         ),
+                         numericInput(
+                           "cv_base",
+                           "Base font size in pt.",
+                           value = 14,
+                           min = 4,
+                           max = 32,
+                           step = 1
+                         ),
+                         numericInput(
+                           "cv_legend",
+                           "Legend font size in pt.",
+                           value = 10,
+                           min = 4,
+                           max = 16,
+                           step = 1
+                         )
+                       )
+                     ),
+                     ###
+                     plotlyOutput("boxplotCV", height = 800)
               )
-            ),
-            ###
-            plotlyOutput("boxplotCV", height = 600)
+            )
           )
           
         ),
@@ -849,9 +884,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
             ###
           ),
           column(
-            width = 8,
-            plotlyOutput("scatterPlot", height = 600)
-          )
+            width = 7,
+            plotlyOutput("scatterPlot", height = 800)
+          ), column(width = 1)
         ),
         footer()
       ),
@@ -980,7 +1015,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                       choices = c('p-values',
                                   'adj. p-values'),
                       selected = 'p-values'
-                    )
+                    ),
+                    uiOutput('volcanoMAColors')
                   )
                 )
               ),
@@ -1173,7 +1209,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 ),
                 shinyjs::hidden(div(
                   id = 'hide_heatmap_before_submit',
-                  plotlyOutput("compareHeatmap", height = 800), #height = "auto"),
+                  plotlyOutput("compareHeatmap", height = 800, width = "auto"), #height = "auto"),
                 ))
               ),
               
@@ -1223,7 +1259,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                       min = 1,
                       max = 4,
                       step = 1
-                    )
+                    ),
+                    uiOutput('fcPlotColors')
                   )
                 ),
                 ###
