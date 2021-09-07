@@ -233,6 +233,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                  ,
                  mainPanel(
                    #h1("amica"),
+                   actionButton("showModal", "Show modal dialog"),
                    HTML('<center><img src="ga_amica.png" width="50%"></center>'),
                    #img(src = 'ga_amica.svg',  align = "center"),
                    br(),

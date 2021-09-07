@@ -9,7 +9,6 @@ server <- function(input, output, session) {
     reactiveValues(
       proteinData = NULL,
       expDesign=NULL,
-      contrastMatrix=NULL,
       uploadSuccess=NULL,
       analysisSuccess=NULL,
       filtData = NULL,
@@ -1247,10 +1246,10 @@ server <- function(input, output, session) {
     withProgress(message = "Plotting correlation plot ", {
       p <-
         heatmaply_cor(
-          round(corDf, 2),
+          round(corDf, 3),
           xlab = "", 
           ylab = "",
-          limits = c(min(corDf), 1),
+          limits = c(min(corDf)-0.003, 1),
           #row_side_palette = mapping,
           row_side_palette = myGroupColors(),
           row_side_colors = annot,
@@ -3469,5 +3468,23 @@ server <- function(input, output, session) {
   #   condition = 'output.isPilot',
   #   verbatimTextOutput("color_pr")
   #   )
+  
+  observeEvent(input$showModal, {
+    
+    df <- read.table("data/PXD0016455/design.txt")
+    
+    showModal(modalDialog(
+      title = "Somewhat important message",
+      size = "l",
+      "This is a somewhat important message.",
+      renderUI({
+        HTML('<br><center><img src="ga_amica.png" width="50%"></center><br>')
+      }),
+      "Still an important msg.",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
   
 }
