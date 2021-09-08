@@ -23,7 +23,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
     tags$script(inactivity),
     useShinyjs(),
     navbarPage(
-      "amica v21.09.01",
+      "amica v21.09.08",
       id = "navbar",
       inverse = TRUE,
       theme = bs_theme(

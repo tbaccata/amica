@@ -46,7 +46,7 @@ filterVal="+"
 
 # logout user after n seconds/minutes...etc.
 # https://stackoverflow.com/questions/33839543/shiny-server-session-time-out-doesnt-work/53207050
-timeoutSeconds <- 5
+timeoutSeconds <- 60
 
 inactivity <- sprintf("function idleTimer() {
 var t = setTimeout(logout, %s);
