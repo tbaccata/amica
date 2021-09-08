@@ -130,6 +130,7 @@ server <- function(input, output, session) {
   observeEvent(input$resetAnalysis,{
     reacValues$proteinData <- NULL
     reacValues$amicaInput <- FALSE
+    reacValues$dbTool <- NULL
     reacValues$dataHeatmap <- NULL
     reacValues$GostPlot <- NULL
     reacValues$expDesign <- NULL
@@ -268,11 +269,13 @@ server <- function(input, output, session) {
         reacValues$proteinData <-
           readInMQproteinGroupsSumm(input$maxquantFile$datapath,
                                     reacValues$expDesign)
+        reacValues$dbTool <- "maxquant"
         showNotification(paste("Reading in MaxQuant ..."), type = "message")
       } else if (all(fragNames %in% header)) {
         reacValues$proteinData <-
           readInFragPipeProteinGroupsSumm(input$maxquantFile$datapath,
                                           reacValues$expDesign)
+        reacValues$dbTool <- "fragpipe"
         showNotification(paste("Reading in FragPipe ..."), type = "message")
       } else {
         showNotification(
@@ -325,6 +328,26 @@ server <- function(input, output, session) {
     )
   })
   
+  output$intensitySelection <- renderUI({
+    req(reacValues$proteinData)
+    intensities <- c()
+    selected <-  "LFQIntensity"
+    
+    if (reacValues$dbTool == "maxquant") {
+      intensities <- c("LFQIntensity", "RawIntensity", "iBAQ")
+    } else {
+      intensities <- c("LFQIntensity", "UniqueIntensity", "TotalIntensity")
+    }
+    
+    selectizeInput(
+      "quantIntensity",
+      "Which intensities should be quantified?.",
+      intensities,
+      multiple = T,
+      selected = selected
+    )
+  })
+  
   ### ANALYSIS
   observeEvent(input$runAnalysis, {
     if (is.null(reacValues$proteinData)) {
@@ -334,11 +357,14 @@ server <- function(input, output, session) {
     
     if (reacValues$amicaInput == FALSE) {
       ###FILTDATA BEGIN
-      imp_idx <- 
-        which(assayNames(reacValues$proteinData) == "LFQIntensity")
+      
+      quantIntensity <- ifelse(length(input$quantIntensity)>2, "LFQIntensity", input$quantIntensity)
+
+      #imp_idx <- 
+      #  which(assayNames(reacValues$proteinData) == "LFQIntensity")
       
       ### filter on values
-      impDf <- assay(reacValues$proteinData, "LFQIntensity")
+      impDf <- assay(reacValues$proteinData, quantIntensity)
       
       rnames <- filterOnMinValuesRnames(
         y = reacValues$proteinData,
@@ -999,8 +1025,7 @@ server <- function(input, output, session) {
 
   output$densityPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
-    validate(need(input$assayName != "", "Please provide an intensity."))
-    
+
     withProgress(message = "Plotting density plot", {
       densityPlotly()
     })
@@ -1576,7 +1601,7 @@ server <- function(input, output, session) {
   output$boxplotCV <- renderPlotly({
     req(reacValues$uploadSuccess)
     validate(need(any(duplicated(colData(reacValues$proteinData)$groups)), "Cannot output CV plot for a pilot without replicates")) 
-    validate(need(input$assayName != "", "Please provide an intensity."))
+    #validate(need(input$assayName != "", "Please provide an intensity."))
     withProgress(message = "Plotting Coefficient of Variations ", {
       cvsPlotly()
     })
@@ -3450,6 +3475,15 @@ server <- function(input, output, session) {
          </p>')
   })
   
+  
+  output$exampleFiles <- downloadHandler(
+    filename="examples.zip",  # desired file name on client 
+    content=function(con) {
+      file.copy("data/examples.zip", con)
+    }
+  )
+  
+  
   # observeEvent(input$showMemory,{
   #   output$printMemory <- renderText({
   #     paste0(
@@ -3469,18 +3503,158 @@ server <- function(input, output, session) {
   #   verbatimTextOutput("color_pr")
   #   )
   
-  observeEvent(input$showModal, {
+  output$exampleDesign <- renderDT({
+    tmpData <-
+      read.table(
+        "data/PXD0016455/design.txt",
+        header = T,
+        stringsAsFactors = F
+      )
     
-    df <- read.table("data/PXD0016455/design.txt")
+
+    datatable(
+      tmpData,
+      filter = "none",
+      rownames = F,
+      extensions = c('Buttons'),
+      options = list(
+        searching = FALSE,
+        dom = 'Bfrtip',
+        pageLength = 10,
+        autoWidth = TRUE,
+        buttons = list(
+          # 'csv',
+          list(
+            extend = 'csv',
+            fieldSeparator = '\t',
+            fieldBoundary = ''
+          )
+        )
+      )
+    )
+  }, server = F)
+  
+  output$exampleContrasts <- renderDT({
+    tmpData <-
+      read.table(
+        "data/PXD0016455/contrasts.txt",
+        header = T,
+        stringsAsFactors = F
+      )
     
+    datatable(
+      tmpData,
+      filter = "none",
+      rownames = F,
+      extensions = c('Buttons'),
+      options = list(
+        searching = FALSE,
+        dom = 'Bfrtip',
+        pageLength = 10,
+        autoWidth = TRUE,
+        buttons = list(
+          #'csv',
+          list(
+            extend = 'csv',
+            fieldSeparator = '\t',
+            fieldBoundary = ''
+          )
+        )
+      )
+    )
+  }, server = F)
+  
+  
+  output$exampleSpecifications <- renderDT({
+    tmpData <-
+      read.table(
+        "data/PXD0016455/specification.txt",
+        header = T,
+        stringsAsFactors = F
+      )
+    
+    datatable(
+      tmpData,
+      filter = "none",
+      rownames = F,
+      extensions = c('Buttons'),
+      options = list(
+        searching = FALSE,
+        dom = 'Bfrtip',
+        pageLength = 10,
+        autoWidth = TRUE,
+        buttons = list(
+          #'csv',
+          list(
+            extend = 'csv',
+            fieldSeparator = '\t',
+            fieldBoundary = ''
+          )
+        )
+      )
+    )
+  }, server = F)
+  
+  
+  observeEvent(input$showFileInput, {
     showModal(modalDialog(
-      title = "Somewhat important message",
-      size = "l",
-      "This is a somewhat important message.",
-      renderUI({
-        HTML('<br><center><img src="ga_amica.png" width="50%"></center><br>')
-      }),
-      "Still an important msg.",
+      title = "Accepted File input",
+      
+      HTML("<p>
+           Accepted input formats are the output from a database search tool (e.g MaxQuant,
+FragPipe, or some custom format). When you run amica you can download a tab-delimited output file
+           that is also getting recognized as an input format.</p>
+           <p>If you are want to inspect the formatting in detail you can download example input formats 
+           from an interaction proteomics study from Teakel SL et al.
+           </p>"),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$showDesign, {
+    showModal(modalDialog(
+      title = "Example experimental design",
+      
+      HTML("<p>
+           The design file has two columns: <b>samples</b> and <b>groups</b>. The sample names in the samples column need to match 
+           the column names of the input file in the order of the input file.</p>"),
+      
+      DTOutput("exampleDesign"),
+
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$showContrasts, {
+    showModal(modalDialog(
+      title = "Example contrast matrix",
+      
+      HTML("<p>
+           The contrast matrix tells amica which group comparisons to perform. The column names of
+this file can be freely chosen, but column names must be provided. For each row in this file the
+comparison group1-group2 is performed. If one wants to change the sign of the fold changes the
+position of the groups needs to be switched in the file (e.g group2-group1 instead of group1-group2</p>"),
+      
+      
+      DTOutput("exampleContrasts"),
+
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$showSpecifications, {
+    showModal(modalDialog(
+      title = "Example contrast matrix",
+      DTOutput("exampleSpecifications"),
+      
+      HTML("<p>
+           The specification file needs to be uploaded if a custom tab-delimited file is analyzed.
+           The file has two columns, Variable and Pattern, these are used to change the prefixes (or post-
+fixes) to identify the relevant columns in your data.</p>"),
+      
       easyClose = TRUE,
       footer = NULL
     ))
