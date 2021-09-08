@@ -95,7 +95,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      # "file" from the radio buttons
                      condition = "input.source == 'custom'",
                      h4("1) Custom input"),
-                     fileInput("customFile", "Upload custom tab delimeted file."),
+                     fileInput("customFile", "Upload custom tab delimited file."),
                      helpText(
                        "File needs to be tab-delimited and it needs to contain a proteinId, Gene.name, intensities and peptide counts."
                      )
@@ -269,11 +269,16 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                    br(),
                    br(),
                    p(
-                     "That's latin and roughly translates to 'user-friendly software for MS-based proteomics data analysis'.
-                                    amica's capabilities can deal with analyzing and visualizing common subjects in proteomics such as QC,
-                                    quantitative proteomics and protein-protein interaction networks, but one of amica's
-                                    main advantage is its comparability; you can compare different biological conditions
-                                    from a single experiment or even multiple similar or distinct conditions from different experiments."
+                     " Quantitative  proteomics has become an  increasingly prominent tool  in the study of life sciences.  
+                     A substantial hurdle for  many biologists is,  however, the intricacies involved in the associated 
+                     high troughput data  analysis.
+ In order to  facilitate this task for users  with any background  knowledge in proteomics, 
+ we have developed amica, a freely available open-source web-based software that accepts proteomic input 
+ files from different sources and provides automatically generated quality control, 
+ differential espression, biological network and over-representation analysis on the basis of minimal user input.
+Researchers can use amica interactively to compare specific and shared proteins in multiple group comparisons,
+create  customized output graphics,  and ultimately export the  results and the  corresponding analysis 
+settings in a tab-separated  format that can be shared  with collaborators."
                    ),
                    p(
                      "Upload the required input files (explained on the sidebar) and the full functionality will be revealed."
@@ -396,6 +401,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
             actionButton("submitPCA", "Plot PCA", icon = icon("cog")),
             actionButton("pcaParams", "", icon = icon("wrench")),
             shinyjs::hidden(div(
+              style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+              
               id = 'toggle_pca_params',
               numericInput(
                 "pca_width",
@@ -464,6 +473,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                        inline(actionButton("boxplotParams", "", icon = icon("wrench"))),
                        shinyjs::hidden(
                          div(
+                           style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                           
                            id = 'toggle_boxplot_params',
                            numericInput(
                              "boxplot_width",
@@ -513,6 +526,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                        inline(actionButton("densityParams", "", icon = icon("wrench"))),
                        shinyjs::hidden(
                          div(
+                           style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                           
                            id = 'toggle_density_params',
                            numericInput(
                              "density_width",
@@ -565,6 +582,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      inline(actionButton("corParams", "", icon = icon("wrench"))),
                      shinyjs::hidden(
                        div(
+                         style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                         
                          id = 'toggle_cor_params',
                          numericInput(
                            "cor_width",
@@ -596,6 +617,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      inline(actionButton("cvParams", "", icon = icon("wrench"))),
                      shinyjs::hidden(
                        div(
+                         style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                         
                          id = 'toggle_cv_params',
                          numericInput(
                            "cv_width",
@@ -654,6 +679,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                        inline(actionButton("contaminantsParams", "", icon = icon("wrench"))),
                        shinyjs::hidden(
                          div(
+                           style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                           
                            id = 'toggle_contaminants_params',
                            numericInput(
                              "contaminants_width",
@@ -702,7 +731,12 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                        inline(uiOutput("abundantHelpBox")),
                        ###
                        inline(actionButton("abundantParams", "", icon = icon("wrench"))),
-                       shinyjs::hidden(div(
+                       shinyjs::hidden(
+                         div(
+                           style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                           
                          id = 'toggle_abundant_params',
                          numericInput(
                            "abundant_width",
@@ -759,6 +793,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 inline(actionButton("barplotIdParams", "", icon = icon("wrench"))),
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_barplotId_params',
                     numericInput(
                       "barplotId_width",
@@ -807,6 +845,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 inline(actionButton("barplotMvParams", "", icon = icon("wrench"))),
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_barplotMv_params',
                     numericInput(
                       "barplotMv_width",
@@ -876,6 +918,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
             actionButton("scatterParams", "", icon = icon("wrench")),
             shinyjs::hidden(
               div(
+                style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                
                 id = 'toggle_scatter_params',
                 numericInput(
                   "scatter_width",
@@ -925,14 +971,26 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
         title = 'Differential abundance',
         value = 'quanttab',
         h2("Analyze differentially abundant proteins"),
+        br(),br(),br(),
+        actionButton("showTutorial", "Tutorial", icon = icon("info") ),
+        br(),br(),br(),
         p(
-          "Get an overview, compare multiple conditions, find proteins specific to certain conditions and find functionally related biological terms."
+          "Get an overview, compare multiple conditions, find proteins specific 
+          to certain conditions and find functionally related biological terms."
         ),
         wellPanel(
           h3("Global parameters"),
+          
           p(
-            "Select the fold change threshold and whether to use multiple-testing correction or rely on your gut feeling for all subsequent analysis in this tab."
+            "In this section you can select parameters to subset your data to show only protein groups of your interest. 
+            The selected parameters are applied to all selected group comparisons and can be further filtered in the output table.
+            Following filters can be set:"
           ),
+          HTML("<p><b>Fold change threshold</b><br>
+               <b>Significance cutoff</b><br>
+               <b>Enriched, reduced or absolute fold change.</b><br>
+               </p>"),
+          
           fluidRow(
             column(
               width = 4,
@@ -945,7 +1003,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 width = '30%'
               ),
               helpText(
-                "While the choice is arbitrary, lower thresholds might result in more false positives. Usual choices are between 1 and 2. You can lower the threshold and try to make sense of the resulting list of proteins (e.g if enriched terms make sense in the over-representation analysis below)."
+                "While the choice is arbitrary, lower thresholds might result in more false positives. 
+                Usual choices are between 1 and 2. You can lower the threshold and try to make sense 
+                of the resulting list of proteins (e.g if enriched terms make sense in the over-representation analysis below)."
               )
             ),
             column(
@@ -957,7 +1017,11 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 selected = "adj.p-value"
               ),
               helpText(
-                "Adjusted p-value is (highly) recommended. Raw p-value cutoffs yield many false positives and give a general trend, not any statistical significance."
+                "Adjusted p-value is (highly) recommended. Raw p-value cutoffs yield 
+                many false positives and give a general trend, not any statistical significance. 
+                Default threshold is 0.05, but this can still be lowered in the output table.
+                In case you want to visualize proteins only based on fold changes, 
+                you can also set no p-value significance cutoff."
               )
             ),
             column(
@@ -969,7 +1033,14 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 selected = "absolute"
               ),
               helpText(
-                "If 'enriched' is selected only proteins above the FC threshold are selected. 'absolute' selects proteins above and below that negative threshold (e.g if FC-threshold equals 2 'absolute' selects proteins in the ranges [-inf - (-2)] and [2 - inf]. 'reduced' return all significant proteins below the negative FC cutoff."
+                "If 'enriched' is selected only proteins above the FC threshold are selected.
+                This is useful for interaction proteomics experiments, when you have group comparisons like Bait - Control 
+                and only want to see enriched interaction partners vs a control.
+                
+                'absolute' selects proteins above and below that negative threshold 
+                (e.g if FC-threshold equals 2 'absolute' selects proteins in the ranges [-inf - (-2)] and [2 - inf]. 
+                
+                'reduced' return all significant proteins below the negative fold change threshold."
               )
             )
           ),
@@ -998,6 +1069,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 ###
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_volcano_params',
                     numericInput(
                       "volcano_width",
@@ -1089,6 +1164,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 ###
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_upset_params',
                     numericInput(
                       "upset_width",
@@ -1158,20 +1237,32 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
         shinyjs::hidden(
           div(
             id = 'hide_before_comparisons',
-        p(
-          "The output table can be further filtered.
-          You can for example use regular expressions (ProteinA|ProteinB|ProteinC)
+            
+          fluidRow(
+            column(width = 3),
+            column(width = 6,
+                   HTML(
+                     "<p><b>The output table can be further filtered</b>.
+          You can for example use regular expressions (e.g type in a query like 
+          ProteinA|ProteinB|ProteinC in the Gene.names column)
           to select only proteins of interest or apply additional column filters.
-          Subsequent visualizations (heatmap, fold change plot, PPI network) 
-          and ORA will be computed on the proteins in the output table."
-        ),
-        
+          When multiple group comparisons are selected you can subset the proteins that 
+          are only specific to one group comparison (e.g by writing 'yes' in one significant column 
+          and 'no' in the other column.)
+          </p>
+          <p>Subsequent visualizations (heatmap, fold change plot, PPI network) 
+          and ORA will be computed on the proteins in the output table. </p>"
+                   )
+                   ),
+            column(width = 3)
+          ),
+
         div(style = 'overflow-x: scroll; max-width: 100%',
             DTOutput("groupComparisonsDT")),
-        br(),
-        
-        
-            verbatimTextOutput("filterDTSummary"),
+        br(),br(),br(),
+        h4(textOutput("filterDTSummary")),
+        br(),br(),br(),
+            # verbatimTextOutput("filterDTSummary"),
             tabsetPanel(
               type = "tabs",
               tabPanel(
@@ -1188,6 +1279,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                   actionButton("heatmapParams", "", icon = icon("wrench")),
                   shinyjs::hidden(
                     div(
+                      style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                      
                       id = "toggle_heatmap_params",
                       checkboxInput("clusterRows",
                                     "Cluster rows (proteins) of heatmap?",
@@ -1257,6 +1352,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 inline(actionButton("fcParams", "", icon = icon("wrench"))),
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_fc_params',
                     numericInput(
                       "fc_width",
@@ -1321,6 +1420,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 inline(actionButton("profileParams", "", icon = icon("wrench"))),
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_profile_params',
                     numericInput(
                       "profile_width",
@@ -1439,6 +1542,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                     inline(actionButton("oraBarParams", "", icon = icon("wrench"))),
                     shinyjs::hidden(
                       div(
+                        style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                        
                         id = 'toggle_oraBar_params',
                     
                     numericInput(
@@ -1606,6 +1713,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
             inline(actionButton("upsetParams2", "", icon = icon("wrench"))),
             shinyjs::hidden(
               div(
+                style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                
                 id = 'toggle_upset_amicas_params',
                 numericInput(
                   "upset_amicas_width",
@@ -1701,6 +1812,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 actionButton("fcamicaParams", "", icon = icon("wrench")),
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_fcamica_params',
                     numericInput(
                       "fcamica_width",
@@ -1745,6 +1860,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                 actionButton("scatteramicaParams", "", icon = icon("wrench")),
                 shinyjs::hidden(
                   div(
+                    style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                    
                     id = 'toggle_scatteramica_params',
                     numericInput(
                       "scatteramica_width",

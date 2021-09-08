@@ -598,7 +598,7 @@ server <- function(input, output, session) {
   })
   
   output$fcPlotColors <- renderUI({
-    pal <- brewer.pal(4, "Set2")
+    pal <- myScatterColors()
     
     lapply(seq_along(pal), function(i) {
       colourInput(paste("fcplotcol", i, sep="_"), paste0("Color ", i, ":"), pal[i])
@@ -1679,13 +1679,11 @@ server <- function(input, output, session) {
       extensions = c('Buttons'), 
       options = list(
         dom = 'Bfrtip',
+        # searching = FALSE,
         pageLength = 10,
         autoWidth = TRUE,
         search = list(regex = TRUE),
-        #scrollX = TRUE,
-        #scroller = TRUE,
         buttons = c('csv')
-        #fixedColumns = list(leftColumns = 1)
       )
     ) %>% formatRound(paste0(logfcPrefix,selection), 4) %>% formatSignif(grep("P.Val", names(tmp)), digits = 4)
   }, server = F)
@@ -1965,10 +1963,11 @@ server <- function(input, output, session) {
     c2 <- isolate(input$fcplotcol_2)
     c3 <- isolate(input$fcplotcol_3)
     c4 <- isolate(input$fcplotcol_4)
+    c5 <- isolate(input$fcplotcol_4)
     
-    colors <- c(c1, c2, c3, c4, "red")
+    colors <- c(c1, c2, c3, c4, c5)
     
-    if(is.null(c1)) colors <- brewer.pal(4, "Set2")
+    if(is.null(c1)) colors <- myScatterColors()
     
     validate(need(length(selection)>1, "Please select two comparisons."))
     validate(need(length(ridx)>0, "No proteins to plot (output table must be empty)."))
@@ -2029,7 +2028,7 @@ server <- function(input, output, session) {
                                                                slope = 1, #slope, 
                                                                size=1,
                                                                alpha = 0.5,
-                                                               "skyblue"
+                                                               color = colors[5]
                                                                ) +
         theme_minimal(base_size = fontsize) + scale_color_manual(values=colors ) +
         labs(x = labelNamesX, y = labelNamesY) #, title =  title) 
@@ -3368,10 +3367,10 @@ server <- function(input, output, session) {
   
   output$NetworkHelpBox <- renderUI({
     if (input$networkHelp %% 2){
-      HTML("<p>PPI (protein-protein interaction) Network from HIPPIE shows PPIs at high confidence.
-      Details on how scores are calculated can be found <a href='http://cbdm-01.zdv.uni-mainz.de/~mschaefer/hippie/information.php' target='_blank'>here</a>.
+      HTML("<p>PPI (protein-protein interaction) Network from IntAct. All interactions are derived from literature curation or direct user submissions.  
+      Edge weights can be further filtered, more information \ can be found <a href='https://www.ebi.ac.uk/intact/' target='_blank'>here</a>.
       When multiple group comparisons are selected two types of edges are created: edges from the group comparison to the proteins 
-      and PPI edges from HIPPIE between the proteins. Networks can be downloaded in GML format enabling the visualization in a network tool.</p>
+      and PPI edges from IntAct between the proteins. Networks can be downloaded in GML format enabling the visualization in a network tool.</p>
       <p>Fold changes are color coded onto the nodes, sub-cellular locations can are retrieved from <a href='https://cell-map.org/' target='_blank'>Human Cell Map</a>.</p>
                ")
     } else {
@@ -3605,7 +3604,7 @@ server <- function(input, output, session) {
 FragPipe, or some custom format). When you run amica you can download a tab-delimited output file
            that is also getting recognized as an input format.</p>
            <p>If you are want to inspect the formatting in detail you can download example input formats 
-           from an interaction proteomics study from Teakel SL et al.
+           from an interaction proteomics study from Teakel et al.
            </p>"),
       easyClose = TRUE,
       footer = NULL
@@ -3660,5 +3659,54 @@ fixes) to identify the relevant columns in your data.</p>"),
     ))
   })
   
+  
+  observeEvent(input$showTutorial, {
+    showModal(modalDialog(
+      title = "Example use cases",
+
+      HTML('
+      <h3>Use case 1: Single group comparison</h3>
+      <p>
+      These small examples have been produced with the provided example data set. 
+      As the example data contains AP-MS data we set the selection parameter to 
+      "enriched" to retrieve differentially abundant proteins against the control.
+      <center><img src="da_tutorial/global_param.png" width="100%"></center>
+      Then we select a single group comparison (PRGMC1 bait vs MIA PaCa-2 cell 
+      background) and press "Submit Analysis".
+      <center><img src="da_tutorial/single_comp.png" width="100%"></center>
+      
+      When you hover over the volcano - or MA - plot you can see features to 
+      manipulate the plot. When we utilize the select box or lasso tool we can 
+      annotate the highest enriched proteins, as seen in the figure above.
+      </p>
+      
+      <p>
+      Further information on most plots can be acquired when you press the "info"
+      icon. Plot parameters can be changed when pressing the "wrench" icon and 
+      can be saved upon hovering over the plot and clicking on the "camera" icon.
+      </p>
+      
+      <h3>Use case 2: Multiple group comparisons</h3>
+      <p>
+      
+      When we select the "Analyze multiple comparisons" tab pill we can compare 
+      how the prey proteins change with and without the small molecule inhibitor 
+      AG-205, just select the two comparisons of the bait versus the controls: 
+      
+      <center><img src="da_tutorial/multi_comp.png" width="100%"></center>
+      </p>
+      
+      <p>
+      Scrolling down we can figure out the quantitive changes of prey proteins 
+      with and without AG-205 treatment in a fold change plot:
+      <center><img src="da_tutorial/fcplot.png" width="100%"></center>
+      </p>
+           
+           '),
+      size = "l",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
   
 }
