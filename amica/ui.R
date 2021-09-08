@@ -39,6 +39,9 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
       tabPanel('Input',
                sidebarLayout(
                  sidebarPanel(
+                   inline(h4("File input")),
+                   inline(actionButton("showFileInput", "", icon = icon("info") )),
+                   
                    radioButtons(
                      inputId = "source",
                      label = "Select the file input.",
@@ -55,6 +58,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      or 'custom' are selected differential abundance get's computed with limma or DEqMS, 
                      for this you have to upload an additional 'contrast matrix' to your experimental 'design'."
                    ),
+                   br(),
                    conditionalPanel(
                      condition = "input.source == 'example'",
                      
@@ -69,7 +73,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      # The condition should be that the user selects
                      # "file" from the radio buttons
                      condition = "input.source == 'amica'",
-                     fileInput("amicaFile", "Upload amica_proteinGroups.txt."),
+                     h4("1) amica file"),
+                     fileInput("amicaFile", "Upload amica_proteinGroups.txt.", width = "60%"),
                      helpText(
                        "Have you run amica before? Input the amica output from a previous session."
                      )
@@ -78,39 +83,36 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      # The condition should be that the user selects
                      # "file" from the radio buttons
                      condition = "input.source == 'maxquant'",
+                     h4("1) MaxQuant or FragPipe input"),
                      fileInput(
                        "maxquantFile",
-                       "Upload 'proteinGroups.txt' file from MaxQuant or 'combined_protein.tsv' from FragPipe."
+                       "Upload 'proteinGroups.txt' file from MaxQuant or 'combined_protein.tsv' from FragPipe.",
+                       width = "60%"
                      )
                    ),
                    conditionalPanel(
                      # The condition should be that the user selects
                      # "file" from the radio buttons
                      condition = "input.source == 'custom'",
+                     h4("1) Custom input"),
                      fileInput("customFile", "Upload custom tab delimeted file."),
                      helpText(
                        "File needs to be tab-delimited and it needs to contain a proteinId, Gene.name, intensities and peptide counts."
                      )
                    ),
-                   conditionalPanel(
-                     # The condition should be that the user selects
-                     # "file" from the radio buttons
-                     condition = "input.source == 'custom'",
-                     fileInput("specFile", "Upload a specification file in tab delimited format."),
-                     helpText(
-                       "File needs to have two columns: the column 'Variable' which defines the variable and 
-                       'Pattern' which is the column name or a pattern."
-                     )
-                   ),
                    
                    conditionalPanel(
                      condition = "input.source != 'example'",
+                     inline(h4("2) Experimental design")),
+                     inline(actionButton("showDesign", "", icon = icon("info") )),
+                     
                      fileInput(
                        "groupSpecification",
                        "Experimental design",
                        c('text/csv',
                          'text/comma-separated-values,text/plain'),
-                       multiple = F
+                       multiple = F,
+                       width = "60%"
                      ),
                      helpText(
                        "A tab-separated file containing the sample name ordered in appearance in the uploaded file and its corresponding group."
@@ -119,17 +121,40 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                    
                    conditionalPanel(
                      condition = "input.source == 'custom' || input.source == 'maxquant'",
+                     inline(h4("3) Contrast matrix")),
+                     inline(actionButton("showContrasts", "", icon = icon("info") )),
                      fileInput(
                        "contrastMatrix",
                        "Contrast matrix (group comparisons)",
                        c('text/csv',
                          'text/comma-separated-values,text/plain'),
-                       multiple = F
+                       multiple = F,
+                       width = "60%"
                      ),
                      helpText(
                        "A tab-separated file with the sample-of-interest in the first column and the sample it is getting compared to in the second column."
                      ),
                    ),
+                   conditionalPanel(
+                     # The condition should be that the user selects
+                     # "file" from the radio buttons
+                     condition = "input.source == 'custom'",
+                     inline(h4("4) Specification file")),
+                     inline(actionButton("showSpecifications", "", icon = icon("info") )),
+                     fileInput("specFile", "Upload a specification file in tab delimited format.",
+                               width = "60%"),
+                     helpText(
+                       "File needs to have two columns: the column 'Variable' which defines the variable and 
+                       'Pattern' which is the column name or a pattern."
+                     )
+                   ),
+                   
+                   br(),br(),br(),
+                   downloadButton(
+                     "exampleFiles",
+                     "Example input"
+                   ),
+                   br(),br(), br(),
                    
                    ######## PARAMETERS BEGIN
                    actionButton("submitAnalysis", "Upload"),
@@ -159,6 +184,11 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                          numericInput("minMSMS", "min. MSMS count", min = 1, value = 3),
                          
                          h4("Filter on valid values per group"),
+                         
+                         conditionalPanel(
+                           condition = "input.source == 'maxquant'",
+                           uiOutput("intensitySelection")
+                         ),
                          uiOutput("filterValuesInput"),
                          radioButtons(
                            "validValuesGroup",
@@ -233,7 +263,6 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                  ,
                  mainPanel(
                    #h1("amica"),
-                   actionButton("showModal", "Show modal dialog"),
                    HTML('<center><img src="ga_amica.png" width="50%"></center>'),
                    #img(src = 'ga_amica.svg',  align = "center"),
                    br(),
@@ -1475,7 +1504,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                               ),
                               conditionalPanel(
                                 condition = "input.amicaCompareSource == 'amica'",
-                                fileInput("amicaFile2", "Upload amica_proteinGroups.txt."),
+                                fileInput("amicaFile2", "Upload amica_proteinGroups.txt.",
+                                          width = "60%"),
                                 helpText(
                                   "Have you run amica before and want to compare it to the currently loaded in dataset?"
                                 )
