@@ -357,21 +357,20 @@ server <- function(input, output, session) {
     
     if (reacValues$amicaInput == FALSE) {
       ###FILTDATA BEGIN
-      
-      quantIntensity <- ifelse(length(input$quantIntensity)>2, "LFQIntensity", input$quantIntensity)
-
-      #imp_idx <- 
-      #  which(assayNames(reacValues$proteinData) == "LFQIntensity")
+      quantIntensity <- ifelse(is.null(input$quantIntensity) |
+                                 length(input$quantIntensity)>2, "LFQIntensity", input$quantIntensity)
       
       ### filter on values
       impDf <- assay(reacValues$proteinData, quantIntensity)
       
+
       rnames <- filterOnMinValuesRnames(
         y = reacValues$proteinData,
         minMSMS = input$minMSMS,
         minRazor = input$minRazor
       )
       
+
       tmp <- tryCatch({
         filterOnValidValues(
           impDf[rnames,],
@@ -393,6 +392,8 @@ server <- function(input, output, session) {
       }
       )
       
+      print(length(tmp))
+      
       rowsDf <- rowData(reacValues$proteinData)
       rowsDf$quantified <- ""
       rowsDf[tmp, 'quantified'] <- "+" 
@@ -400,6 +401,8 @@ server <- function(input, output, session) {
       reacValues$proteinData <- setRowData(reacValues$proteinData, rowsDf)
       
       normDf <- impDf[tmp, ]
+      
+      
       
       # renormalization
       if (input$renormalizationMethod != "None") {
@@ -688,6 +691,7 @@ server <- function(input, output, session) {
       key.title = 'Z-score',
       row_dend_left = T,
       showticklabels = c(T, T),
+      plot_method = "plotly",
       colors = heatColors()
     ) %>%
       config(displaylogo = F,
