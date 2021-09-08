@@ -861,8 +861,8 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
   assayList[[assayIdx]] <- lfqs
   names(assayList)[assayIdx] <- "LFQIntensity"
   assayIdx <- assayIdx + 1
-  assayList[[assayIdx]] <- lfqs
-  names(assayList)[assayIdx] <- "ImputedIntensity"
+  #assayList[[assayIdx]] <- lfqs
+  #names(assayList)[assayIdx] <- "ImputedIntensity"
   
   dropIdx <-
     grep(
@@ -936,8 +936,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     assays = list(
       TotalIntensity = tots,
       UniqueIntensity = uniqs,
-      LFQIntensity = razor,
-      ImputedIntensity = razor
+      LFQIntensity = razor
+      #ImputedIntensity = razor
     ),
     rowData = protData[,-dropIdx],
     colData = design
