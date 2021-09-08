@@ -1,0 +1,9 @@
+Variable	Pattern
+proteinId	Majority.protein.IDs
+geneName	Gene.names
+spectraCount	spectraCount
+razorUniqueCount	razorUniqueCount
+razorUniqueCountPrefix	razorUniqueCount_
+abundancePrefix	iBAQ
+intensityPrefix	LFQIntensity_
+contaminantCol	Potential.contaminant
