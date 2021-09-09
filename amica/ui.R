@@ -62,7 +62,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                    conditionalPanel(
                      condition = "input.source == 'example'",
                      
-                     actionButton('exampleHelp', label = 'Example', icon = icon("info")),
+                     actionButton('exampleHelp', label = '', icon = icon("info")),
                      uiOutput("exampleHelpBox"),
                      br(),br()
                    ),
@@ -73,7 +73,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      # The condition should be that the user selects
                      # "file" from the radio buttons
                      condition = "input.source == 'amica'",
-                     h4("1) amica file"),
+                     inline(h4("1) amica file")),
+                     inline(actionButton("showAmicaInput", "", icon = icon("info") )),
                      fileInput("amicaFile", "Upload amica_proteinGroups.txt.", width = "60%"),
                      helpText(
                        "Have you run amica before? Input the amica output from a previous session."
@@ -319,6 +320,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                                     uiOutput('myColorPanel')
                                     ),
                            tabPanel(h4("Qualitative (scatter)"),
+                                    HTML("
+                                         <p>
+                                         These colors will be used for scatter -,
+                                         volcano -, MA - and fold change plots, 
+                                         as well as for PPI networks.
+                                         </p>"),
                                     selectInput(
                                       "brewerOptionsScatter",
                                       "Scatter plot colors",
