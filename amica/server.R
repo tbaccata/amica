@@ -3506,6 +3506,78 @@ server <- function(input, output, session) {
   #   verbatimTextOutput("color_pr")
   #   )
   
+  output$exampleAmicaFile <- renderDT({
+    varName <-
+      c(
+        "Protein ID",
+        "Gene name",
+        "LFQ intensity prefix",
+        "Imputed Intensity prefix",
+        "razor unique count",
+        "razor unique prefix",
+        "p-value Prefix",
+        "adj. p-value prefix",
+        "fold change prefix",
+        "Avg. expression prefix",
+        "comparison infix",
+        "quantified column",
+        "Potential contaminant column"
+      )
+    colName <- c("Majority.protein.IDs",
+                 "Gene.names",
+                 "LFQIntensity_",
+                 "ImputedIntensity_",
+                 "razorUniqueCount",
+                 "razorUniqueCount",
+                 "P.Value_",
+                 "adj.P.Val_",
+                 "logFC_",
+                 "AveExpr_",
+                 "__vs__",
+                 "quantified",
+                 "Potential.contaminant"
+                 )
+    comment <- c("",
+                 "",
+                 "MaxQuants (MQs) 'LFQ intensity' columns",
+                 "Imputed and re-normalized intensities",
+                 "MQs 'razor+unique count' column",
+                 "MQs 'razor+unique count' column per sample",
+                 "e.g P.Value_group1__vs__group2",
+                 "e.g adj.P.Val_group1__vs__group2",
+                 "e.g logFC_group1__vs__group2",
+                 "e.g AveExp_group1__vs__group2",
+                 "see below",
+                 "see below",
+                 "MQs Potential.contaminants column"
+                 )
+    df <- data.frame(varName, colName, comment)
+    names(df) <- c("Variable name",
+                   "Column name or prefix",
+                   "Comment")
+    
+    datatable(
+      df,
+      filter = "none",
+      rownames = F,
+      extensions = c('Buttons'),
+      options = list(
+        searching = FALSE,
+        dom = 'Bfrtip',
+        pageLength = 15,
+        autoWidth = TRUE,
+        buttons = list(
+          # 'csv',
+          list(
+            extend = 'csv',
+            fieldSeparator = '\t',
+            fieldBoundary = ''
+          )
+        )
+      )
+    )
+  }, server = F)
+  
   output$exampleDesign <- renderDT({
     tmpData <-
       read.table(
@@ -3568,6 +3640,47 @@ server <- function(input, output, session) {
   }, server = F)
   
   
+  output$specificationsExplanation <- renderDT({
+    Variable <- c("proteinId",
+                  "geneName",
+                  "intensityPrefix",
+                  "abundancePrefix",
+                  "razorUniqueCount",
+                  "razorUniquePrefix",
+                  "spectraCount",
+                  "contaminantCol")
+    Pattern <- rep("...", length(Variable))
+    Mandatory <- c("yes",
+                   "yes",
+                   "yes",
+                   "no",
+                   "no",
+                   "no",
+                   "no",
+                   "no")
+    df <- data.frame(Variable, Pattern, Mandatory)
+    datatable(
+      df,
+      filter = "none",
+      rownames = F,
+      extensions = c('Buttons'),
+      options = list(
+        searching = FALSE,
+        dom = 'Bfrtip',
+        pageLength = 10,
+        autoWidth = TRUE,
+        buttons = list(
+          #'csv',
+          list(
+            extend = 'csv',
+            fieldSeparator = '\t',
+            fieldBoundary = ''
+          )
+        )
+      )
+    )
+  }, server = F)
+  
   output$exampleSpecifications <- renderDT({
     tmpData <-
       read.table(
@@ -3615,6 +3728,56 @@ FragPipe, or some custom format). When you run amica you can download a tab-deli
     ))
   })
   
+  
+  observeEvent(input$showAmicaInput, {
+    showModal(modalDialog(
+      title = "amica file input",
+      
+      HTML("<p>
+           amica’s tab-separated protein groups file has following columns:
+           </p><br>"), 
+      DTOutput("exampleAmicaFile"),
+      
+      HTML('
+      <p>
+        <ul style="list-style-type:square">
+        <li>IntensityPrefix, ImputedIntensityPrefix and abundancePrefix columns 
+        are log2 transformed, all 0s need to be converted to NANs. 
+        No INF values allowed. amica searches for all Intensity prefixes in 
+        the column names, if you want to provide more than the dafalt intensities.
+        However, all intensity prefixes must have the same number of samples in 
+        order to get processed.</li>
+        <li>ImputedIntensityPrefix should only contain filtered, 
+        imputed and normalized values.</li>
+        <li>quantCol: All proteins passing spectraCount and 
+        razorUniqueCount thresholds that have been quantified are set to "+" in 
+        this column. Otherwise no value ("") is written in the
+column</li>
+        <li>
+        comparisonInfix: The infix is important to retrieve the group ids 
+        from a group comparison (e.g for downstream visualizations like heatmaps). 
+        The groups before and after the "__vs__" infix should match with groups 
+        defined in the uploaded experimental design.
+        </li>
+        <li>
+        razorUniqueCount is a column, razorUniquePrefix is the prefix to the 
+        count per sample, but they may very well have the same value 
+        (just like in MaxQuant’s proteinGroups.txt)
+        </li>
+        </ul>
+      </p><br>
+           <p>
+           Proteins inferred from reverse hits and peptides ”only identified by 
+           site modifications” are not to be written into amica’s output. 
+           Additional columns can be added in the future but are at the
+moment not considered when uploaded.
+           </p>'),
+      size = "l",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
   observeEvent(input$showDesign, {
     showModal(modalDialog(
       title = "Example experimental design",
@@ -3651,6 +3814,14 @@ position of the groups needs to be switched in the file (e.g group2-group1 inste
   observeEvent(input$showSpecifications, {
     showModal(modalDialog(
       title = "Example contrast matrix",
+      
+      HTML("<p>
+           Following variables can be parsed:
+           </p>"),
+      
+      DTOutput("specificationsExplanation"),
+      HTML("<br>Ig razorUnique count is missing some functionality will be lost (DEqMS)
+           <br>An example format to reanalyze amica output is provided here<br>"),
       DTOutput("exampleSpecifications"),
       
       HTML("<p>
