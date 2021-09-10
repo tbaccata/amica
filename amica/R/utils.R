@@ -886,29 +886,41 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
   
   row.names(protData) <- protData$Protein.ID
+
+  spCount <- "Summarized.Razor.Spectral.Count"
+  pepCount <- "Unique.Stripped.Peptides"
+  sampleSpCountPostfix <- ".Razor.Spectral.Count"
+  gName <- ifelse("Gene.Names" %in% names(protData), "Gene.Names", "Gene")
   
-  protData$Gene.Names <- ifelse(
-    protData$Gene.Names == "",
-    protData$Protein.ID,
-    protData$Gene.Names
-  )
-  
+  if (length(grep("Summarized", names(protData))) < 1) {
+    spCount <- "Combined.Spectral.Count"
+    pepCount <- "Combined.Total.Peptides"
+    sampleSpCountPostfix <- ".Spectral.Count"
+  }
+
   protData[[contaminantCol]] <- ""
   
   names(protData)[which(names(protData)=="Protein.ID")] <- "Majority.protein.IDs"
-  names(protData)[which(names(protData)=="Gene.Names")] <- "Gene.names"
-  names(protData)[which(names(protData)=="Summarized.Razor.Spectral.Count")] <- "spectraCount"
-  names(protData)[which(names(protData)=="Unique.Stripped.Peptides")] <- "razorUniqueCount"
+  names(protData)[which(names(protData)==gName)] <- "Gene.names"
+  names(protData)[which(names(protData)==spCount)] <- "spectraCount"
+  names(protData)[which(names(protData)==pepCount)] <- "razorUniqueCount"
+
+  protData$Gene.names <- ifelse(
+    protData$Gene.names == "",
+    protData$Majority.protein.IDs,
+    protData$Gene.names
+  )
   
-  
-  idx <-  grep(".Razor.Spectral.Count", names(protData))
-  
-  names(protData)[idx] <- gsub(".Razor.Spectral.Count", "", names(protData)[idx])
+  query <- paste0(design$samples, sampleSpCountPostfix, collapse = "|")
+  idx <-  grep(query, names(protData))
+
+  names(protData)[idx] <- gsub(sampleSpCountPostfix, "", names(protData)[idx])
   names(protData)[idx] <- paste0("razorUniqueCount.", names(protData)[idx])
   
-  unique_idx <- grep(".Unique.Intensity", colnames(protData))
-  tot_idx <- grep(".Total.Intensity", colnames(protData))
-  razor_idx <- grep(".Razor.Intensity", names(protData))
+  unique_idx <- grep(paste0(design$samples, ".Unique.Intensity", collapse = "|"), colnames(protData))
+  tot_idx <- grep(paste0(design$samples, ".Total.Intensity", collapse = "|"), colnames(protData))
+  razor_idx <- grep(paste0(design$samples, ".Razor.Intensity", collapse = "|"), names(protData))
+  ints_idx <- grep(paste0(design$samples, ".Intensity", collapse = "|"), names(protData))
   
   tots <- protData[,tot_idx]
   names(tots) <- gsub(".Total.Intensity", "", names(tots))
@@ -920,25 +932,42 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   uniqs[uniqs==0] <- NA
   uniqs <- log2(uniqs)
   
-  razor <- protData[,razor_idx]
-  names(razor) <- gsub(".Razor.Intensity", "", names(razor))
-  razor[razor==0] <- NA
-  razor <- log2(razor)
+  razor <- NULL
+  ints <- NULL
   
-  dropIdx <- c(unique_idx, razor_idx, tot_idx)
+  if (length(razor_idx) > 0) {
+    razor <- protData[,razor_idx]
+    names(razor) <- gsub(".Razor.Intensity", "", names(razor))
+    razor[razor==0] <- NA
+    razor <- log2(razor)
+  }
+  
+  if (length(ints_idx) > 0) {
+    ints <- protData[,ints_idx]
+    names(ints) <- gsub(".Intensity", "", names(ints))
+    ints[ints==0] <- NA
+    ints <- log2(ints)
+  }
+  
+  
+  dropIdx <- c(unique_idx, razor_idx, tot_idx, ints_idx)
   dropIdx <- c(dropIdx, grep("Spectral.Count", names(protData)) )
   
-  #se <- ProteomicsData(assays = assayList,
-  #                     rowData = protData,
-  #                     colData = design)
+  assayList <- list(
+    TotalIntensity = tots,
+    UniqueIntensity = uniqs
+  )
+  
+
+  if (!is.null(razor)) {
+    assayList[["RazorIntensity"]] <- razor
+  }
+  if (!is.null(ints)) {
+    assayList[["Intensity"]] <- ints
+  }
   
   se <- ProteomicsData(
-    assays = list(
-      TotalIntensity = tots,
-      UniqueIntensity = uniqs,
-      LFQIntensity = razor
-      #ImputedIntensity = razor
-    ),
+    assays = assayList,
     rowData = protData[,-dropIdx],
     colData = design
   )
