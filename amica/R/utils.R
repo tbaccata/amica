@@ -884,8 +884,7 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
 
 readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
-  
-  row.names(protData) <- protData$Protein.ID
+  row.names(protData) <- protData$Protein
 
   spCount <- "Summarized.Razor.Spectral.Count"
   pepCount <- "Unique.Stripped.Peptides"
@@ -900,7 +899,7 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
 
   protData[[contaminantCol]] <- ""
   
-  names(protData)[which(names(protData)=="Protein.ID")] <- "Majority.protein.IDs"
+  names(protData)[which(names(protData)=="Protein")] <- "Majority.protein.IDs"
   names(protData)[which(names(protData)==gName)] <- "Gene.names"
   names(protData)[which(names(protData)==spCount)] <- "spectraCount"
   names(protData)[which(names(protData)==pepCount)] <- "razorUniqueCount"
