@@ -39,9 +39,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
       tabPanel('Input',
                sidebarLayout(
                  sidebarPanel(
-                   inline(h4("File input")),
-                   inline(actionButton("showFileInput", "", icon = icon("info") )),
-                   
+                   h4("File input"),
                    radioButtons(
                      inputId = "source",
                      label = "Select the file input.",
@@ -85,6 +83,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      # "file" from the radio buttons
                      condition = "input.source == 'maxquant'",
                      h4("1) MaxQuant or FragPipe input"),
+                     # inline(actionButton("showFileInput", "", icon = icon("info") )),
                      fileInput(
                        "maxquantFile",
                        "Upload 'proteinGroups.txt' file from MaxQuant or 'combined_protein.tsv' from FragPipe.",

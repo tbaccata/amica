@@ -259,8 +259,7 @@ server <- function(input, output, session) {
           "Razor...unique.peptides")
       fragNames <-
         c(
-          "Summarized.Razor.Spectral.Count",
-          "Gene.Names",
+          "Indistinguishable.Proteins",
           "Protein.ID",
           "Protein.Probability"
         )
@@ -334,16 +333,20 @@ server <- function(input, output, session) {
     selected <-  "LFQIntensity"
     
     if (reacValues$dbTool == "maxquant") {
-      intensities <- c("LFQIntensity", "RawIntensity", "iBAQ")
+      intensities <- assayNames(reacValues$proteinData)
     } else {
-      intensities <- c("LFQIntensity", "UniqueIntensity", "TotalIntensity")
+      intensities <- assayNames(reacValues$proteinData)
+      selected <-
+        ifelse("RazorIntensity" %in% intensities,
+               "RazorIntensity",
+               "Intensity")
     }
     
     selectizeInput(
       "quantIntensity",
       "Which intensities should be quantified?.",
       intensities,
-      multiple = T,
+      multiple = F,
       selected = selected
     )
   })
@@ -357,11 +360,25 @@ server <- function(input, output, session) {
     
     if (reacValues$amicaInput == FALSE) {
       ###FILTDATA BEGIN
-      quantIntensity <- ifelse(is.null(input$quantIntensity) |
-                                 length(input$quantIntensity)>2, "LFQIntensity", input$quantIntensity)
+      
+      quantIntensity <- "LFQIntensity"
+      if (is.null(input$quantIntensity) | length(input$quantIntensity)>2) {
+        if (reacValues$dbTool == "fragpipe") {
+          quantIntensity <- ifelse("RazorIntensity" %in% assayNames(reacValues$proteinData),
+                                   "RazorIntensity",
+                                   "Intensity")
+        }
+      } else {
+        quantIntensity <- input$quantIntensity
+      }
       
       ### filter on values
       impDf <- assay(reacValues$proteinData, quantIntensity)
+      
+      reacValues$proteinData <-
+        setAssay(x = reacValues$proteinData,
+                 assay = impDf,
+                 assayName = "LFQIntensity")
       
 
       rnames <- filterOnMinValuesRnames(
@@ -391,9 +408,7 @@ server <- function(input, output, session) {
         showNotification(paste("Filtering values..."), type = "message")
       }
       )
-      
-      print(length(tmp))
-      
+
       rowsDf <- rowData(reacValues$proteinData)
       rowsDf$quantified <- ""
       rowsDf[tmp, 'quantified'] <- "+" 
@@ -468,8 +483,8 @@ server <- function(input, output, session) {
 
       tool <- ifelse(input$limmaTrend, "DEqMS", "limma")
       
-      tryCatch({
-        out <- groupComparisons(
+      out <- tryCatch({
+        tmpOut <- groupComparisons(
               as.matrix(
                 assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),]
               ),
@@ -477,20 +492,18 @@ server <- function(input, output, session) {
               reacValues$expDesign,
               pep.count.table
             )
-        
       },
       error=function(cond) {
         showNotification(paste("error in", tool, cond), type = "error", duration = 100)
-        # message(cond)
-        
       },
       warning=function(cond) {
         showNotification(
-          paste("warning in", tool, "\nResults may be invalid!\n", cond),
+          paste("warning in", tool, "\nResults may be invalid!\nPlease deselect DEqMS button to continue.\n", cond),
           type = "warning",
           duration = 100
         )
-      },silent=TRUE
+        shiny:::reactiveStop(conditionMessage(cond))
+      },finally = invalidateLater(1)
       )
       
       out$Gene.names <- reacValues$filtData[,geneName, drop=T]
@@ -955,31 +968,31 @@ server <- function(input, output, session) {
         legend.title = element_blank()
       ) + ylab("Log2 intensity") + xlab("")
     
-    ggplotly(p) %>%
-      config(
-        displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
-        toImageButtonOptions = list(
-          format = "svg",
-          width = input$boxplot_width,
-          height = input$boxplot_height,
-          filename = "boxplot"
-        )
-      )
+    ggplotly(p)
   })
   
   output$boxPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
     withProgress(message = "Plotting boxplot of intensities", {
-      boxplotPlotly()
+      boxplotPlotly()  %>%
+        config(
+          displaylogo = F,
+          modeBarButtonsToRemove = list(
+            'sendDataToCloud',
+            'autoScale2d',
+            'zoomIn2d',
+            'zoomOut2d',
+            'toggleSpikelines',
+            'hoverClosestCartesian',
+            'hoverCompareCartesian'
+          ),
+          toImageButtonOptions = list(
+            format = "svg",
+            width = input$boxplot_width,
+            height = input$boxplot_height,
+            filename = "boxplot"
+          )
+        )
     })
   })
   
@@ -1006,32 +1019,32 @@ server <- function(input, output, session) {
         legend.text = element_text(size = input$density_legend),
       ) + xlab("Log2 intensity") + ylab("Density")
     
-    ggplotly(p) %>%
-      config(
-        displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
-        toImageButtonOptions = list(
-          format = "svg",
-          width = input$density_width,
-          height = input$density_height,
-          filename = "density_plot"
-        )
-      )
+    ggplotly(p) 
   })
 
   output$densityPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
 
     withProgress(message = "Plotting density plot", {
-      densityPlotly()
+      densityPlotly() %>%
+        config(
+          displaylogo = F,
+          modeBarButtonsToRemove = list(
+            'sendDataToCloud',
+            'autoScale2d',
+            'zoomIn2d',
+            'zoomOut2d',
+            'toggleSpikelines',
+            'hoverClosestCartesian',
+            'hoverCompareCartesian'
+          ),
+          toImageButtonOptions = list(
+            format = "svg",
+            width = input$density_width,
+            height = input$density_height,
+            filename = "density_plot"
+          )
+        )
     })
   })
   
@@ -1044,7 +1057,7 @@ server <- function(input, output, session) {
   
   output$assayNames <- renderUI({
     req(reacValues$proteinData)
-    selectInput("assayNames", "Which intensities do you want to plot?", c("",assayNames(reacValues$proteinData)), selected = NULL )
+    selectInput("assayNames", "Which intensities do you want to plot?", c(assayNames(reacValues$proteinData)), selected = "ImputedIntensity" )
   })
   
   output$comparisons <- renderUI({
@@ -1235,45 +1248,23 @@ server <- function(input, output, session) {
       )
   })
   
-  output$corrPlotly <- renderPlotly({
-    input$submitCor
+  corrBasePlot <- eventReactive(input$submitCor,{
+    assayName <- isolate(input$assayNames)
     
     req(reacValues$uploadSuccess)
-
-    width <- isolate(input$cor_width)
-    height <- isolate(input$cor_height)
     
-    assayName <- isolate(input$assayNames)
     validate(need(assayName != "", "Please provide an intensity."))
-
+    
     df <- assay(reacValues$proteinData, assayName)
-
+    
     annot <- colData(reacValues$proteinData)
     row.names(annot) <- annot$samples 
     annot <- annot[names(df),]
     annot$samples <- NULL
     
-    groupIdx <- 1
-    mapping <- c()
-    mnames <- c()
-    relevantGroups <- annot$groups
-    for (i in seq_along(relevantGroups)) {
-      if (relevantGroups[i] %in% names(mapping)) {
-        next
-      } else {
-        color <- myGroupColors()[groupIdx]
-        group = relevantGroups[i]
-        mapping <- c(mapping, color)
-        mnames <- c(mnames, group)
-        names(mapping) <- mnames
-        groupIdx <- groupIdx + 1
-      }
-    }
-
     corDf <- cor(df, method = "pearson", use = "complete.obs")
-
-    withProgress(message = "Plotting correlation plot ", {
-      p <-
+    
+    
         heatmaply_cor(
           round(corDf, 3),
           xlab = "", 
@@ -1285,8 +1276,14 @@ server <- function(input, output, session) {
           plot_method = "plotly",
           key.title = "Pearson Correlation"
         )
-    })
+    
+  })
+  
+  output$corrPlotly <- renderPlotly({
 
+    withProgress(message = "Plotting correlation plot ", {
+    p <- corrBasePlot()
+    })
     p %>%  config(displaylogo = F,
                   modeBarButtonsToRemove = list(
                     'sendDataToCloud',
@@ -1298,8 +1295,8 @@ server <- function(input, output, session) {
                     'hoverCompareCartesian'
                   ),
                   toImageButtonOptions = list(format = "svg",
-                                              width = width,
-                                              height = height,
+                                              width = input$cor_width,
+                                              height = input$cor_height,
                                               filename = "corrplot")
     )
   })
@@ -1342,31 +1339,31 @@ server <- function(input, output, session) {
         legend.text = element_text(size = input$contaminants_legend)
       ) + xlab("") + ylab("% Contaminant")
     
-    ggplotly(p) %>% config(
-      displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
-      toImageButtonOptions = list(
-        format = "svg",
-        width = input$contaminants_width,
-        height = input$contaminants_height,
-        filename = "contaminants_plot"
-      )
-    )
+    ggplotly(p)
   })
   
   
   output$contaminants <- renderPlotly({
     req(reacValues$uploadSuccess)
     withProgress(message = "Plotting barplot of contaminants", {
-      contaminantsPlotly()
+      contaminantsPlotly()  %>% config(
+        displaylogo = F,
+        modeBarButtonsToRemove = list(
+          'sendDataToCloud',
+          'autoScale2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        ),
+        toImageButtonOptions = list(
+          format = "svg",
+          width = input$contaminants_width,
+          height = input$contaminants_height,
+          filename = "contaminants_plot"
+        )
+      )
     })
   })
   
@@ -1465,31 +1462,30 @@ server <- function(input, output, session) {
         legend.text = element_text(size = input$barplotId_legend)
       ) + xlab("") + ylab("#of identified proteins")
     
-    ggplotly(p) %>% config(
-      displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
-      toImageButtonOptions = list(
-        format = "svg",
-        width = input$barplotId_width,
-        height = input$barplotId_height,
-        filename = "barplot_identified_proteins"
-      )
-    )
+    ggplotly(p)
   })
   
   output$barplotProteins <- renderPlotly({
     req(reacValues$uploadSuccess)
     withProgress(message = "Plotting Number of inferred protein groups", {
-      numIdPlotly()
-      
+      numIdPlotly()  %>% config(
+        displaylogo = F,
+        modeBarButtonsToRemove = list(
+          'sendDataToCloud',
+          'autoScale2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        ),
+        toImageButtonOptions = list(
+          format = "svg",
+          width = input$barplotId_width,
+          height = input$barplotId_height,
+          filename = "barplot_identified_proteins"
+        )
+      )
     })
   })
   
@@ -1585,21 +1581,7 @@ server <- function(input, output, session) {
       legend.text = element_text(size = input$cv_legend),
       legend.title = element_blank()) + ylab("Coefficient of Variation (%)") + xlab("")
     
-    ggplotly(p) %>% config(displaylogo = F,
-                           modeBarButtonsToRemove = list(
-                             'sendDataToCloud',
-                             'autoScale2d',
-                             'zoomIn2d',
-                             'zoomOut2d',
-                             'toggleSpikelines',
-                             'hoverClosestCartesian',
-                             'hoverCompareCartesian'
-                           ),
-                           toImageButtonOptions = list(format = "svg",
-                                                       width = input$cv_width,
-                                                       height = input$cv_height,
-                                                       filename = "cv_plot")
-    )
+    ggplotly(p)
   })
   
   output$boxplotCV <- renderPlotly({
@@ -1607,7 +1589,21 @@ server <- function(input, output, session) {
     validate(need(any(duplicated(colData(reacValues$proteinData)$groups)), "Cannot output CV plot for a pilot without replicates")) 
     #validate(need(input$assayName != "", "Please provide an intensity."))
     withProgress(message = "Plotting Coefficient of Variations ", {
-      cvsPlotly()
+      cvsPlotly() %>% config(displaylogo = F,
+                             modeBarButtonsToRemove = list(
+                               'sendDataToCloud',
+                               'autoScale2d',
+                               'zoomIn2d',
+                               'zoomOut2d',
+                               'toggleSpikelines',
+                               'hoverClosestCartesian',
+                               'hoverCompareCartesian'
+                             ),
+                             toImageButtonOptions = list(format = "svg",
+                                                         width = input$cv_width,
+                                                         height = input$cv_height,
+                                                         filename = "cv_plot")
+      )
     })
   })
   
@@ -3717,11 +3713,8 @@ server <- function(input, output, session) {
       title = "Accepted File input",
       
       HTML("<p>
-           Accepted input formats are the output from a database search tool (e.g MaxQuant,
-FragPipe, or some custom format). When you run amica you can download a tab-delimited output file
-           that is also getting recognized as an input format.</p>
-           <p>If you are want to inspect the formatting in detail you can download example input formats 
-           from an interaction proteomics study from Teakel et al.
+           Recognized input files are MaxQuant's 'proteinGroups.txt' and 
+FragPipe's 'combined_proteins.txt'.
            </p>"),
       easyClose = TRUE,
       footer = NULL
@@ -3820,7 +3813,8 @@ position of the groups needs to be switched in the file (e.g group2-group1 inste
            </p>"),
       
       DTOutput("specificationsExplanation"),
-      HTML("<br>Ig razorUnique count is missing some functionality will be lost (DEqMS)
+      HTML("<br>The proteinId column must only contain unique entries.
+      If razorUnique count is missing some functionality will be lost (DEqMS)
            <br>An example format to reanalyze amica output is provided here<br>"),
       DTOutput("exampleSpecifications"),
       
