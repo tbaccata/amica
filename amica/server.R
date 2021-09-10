@@ -907,23 +907,7 @@ server <- function(input, output, session) {
     
     
     # p
-    p %>%  config(displaylogo = F,
-                  modeBarButtonsToRemove = list(
-                    'sendDataToCloud',
-                    'autoScale2d',
-                    'zoomIn2d',
-                    'zoomOut2d',
-                    'toggleSpikelines',
-                    'hoverClosestCartesian',
-                    'hoverCompareCartesian'
-                  ),
-                   toImageButtonOptions = list(format = "svg",
-                                               width = input$pca_width,
-                                               height = input$pca_height,
-                                               #width = 768,
-                                               #height = 676,
-                                               filename = "pca")
-            )
+    p
   })
   
   
@@ -944,7 +928,23 @@ server <- function(input, output, session) {
   output$pca <- renderPlotly({
     req(input$assayNames)
     req(reacValues$uploadSuccess)
-    pcaPlotly()
+    pcaPlotly()  %>%  config(displaylogo = F,
+                             modeBarButtonsToRemove = list(
+                               'sendDataToCloud',
+                               'autoScale2d',
+                               'zoomIn2d',
+                               'zoomOut2d',
+                               'toggleSpikelines',
+                               'hoverClosestCartesian',
+                               'hoverCompareCartesian'
+                             ),
+                             toImageButtonOptions = list(format = "svg",
+                                                         width = input$pca_width,
+                                                         height = input$pca_height,
+                                                         #width = 768,
+                                                         #height = 676,
+                                                         filename = "pca")
+    )
   })
   
   ### ------------------------------------------- BOX PLOT
@@ -1532,30 +1532,30 @@ server <- function(input, output, session) {
         legend.text = element_text(size = input$barplotMv_legend)
       ) + xlab("") + ylab("missing values (%)")
     
-    ggplotly(p) %>% config(
-      displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
-      toImageButtonOptions = list(
-        format = "svg",
-        width = input$barplotMv_width,
-        height = input$barplotMv_height,
-        filename = "barplot_missing_values"
-      )
-    )
+    ggplotly(p) 
   })
   
   output$barplotMissingValues <- renderPlotly({
     req(reacValues$uploadSuccess)
     withProgress(message = "Plotting barplot of missing values ", {
-      pctMvsPlotly()
+      pctMvsPlotly() %>% config(
+        displaylogo = F,
+        modeBarButtonsToRemove = list(
+          'sendDataToCloud',
+          'autoScale2d',
+          'zoomIn2d',
+          'zoomOut2d',
+          'toggleSpikelines',
+          'hoverClosestCartesian',
+          'hoverCompareCartesian'
+        ),
+        toImageButtonOptions = list(
+          format = "svg",
+          width = input$barplotMv_width,
+          height = input$barplotMv_height,
+          filename = "barplot_missing_values"
+        )
+      )
     })
   })
   
