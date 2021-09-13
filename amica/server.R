@@ -1672,7 +1672,9 @@ server <- function(input, output, session) {
     tmp <- cbind(tmp, toAdd)
     tmp <- tmp[, c(1,(idx+1):ncol(tmp), 2:idx)]
     
-    datatable(
+    hasPadj <- ifelse(length(grep(padjPrefix, names(reacValues$dataComp)))>0, TRUE, FALSE )
+      
+    dt <- datatable(
       tmp,
       filter = "top",
       rownames = F,
@@ -1685,7 +1687,10 @@ server <- function(input, output, session) {
         search = list(regex = TRUE),
         buttons = c('csv')
       )
-    ) %>% formatRound(paste0(logfcPrefix,selection), 4) %>% formatSignif(grep("P.Val", names(tmp)), digits = 4)
+    ) %>% formatRound(paste0(logfcPrefix,selection), 4) 
+    
+    if (hasPadj) dt <- dt %>% formatSignif(grep("P.Val", names(tmp)), digits = 4)
+    dt
   }, server = F)
   
   
@@ -2377,6 +2382,8 @@ server <- function(input, output, session) {
     
     idx <- which(reacValues$filtData$Gene.names==input$selectProfilePlotGene)
     
+    hasPadj <- ifelse(length(grep(padjPrefix, names(reacValues$dataLimma)))>0, TRUE, FALSE )
+    
     subSelection <-
       reacValues$dataLimma[idx,
                            grep(paste0(c(
@@ -2386,20 +2393,33 @@ server <- function(input, output, session) {
     
     subSelection[[proteinId]] <- reacValues$filtData[idx, proteinId]
     
-    dt <- data.table::melt(setDT(subSelection),
-                           measure=patterns(logfcPrefix, padjPrefix),
-                           value.name=c("logFC", "adj.P.Val"),
-                           variable.factor = T,
-                           variable.name="Comparison"
-    )
+    dt <- NULL
+    if (hasPadj) {
+      dt <- data.table::melt(setDT(subSelection),
+                             measure=patterns(logfcPrefix, padjPrefix),
+                             value.name=c("logFC", "adj.P.Val"),
+                             variable.factor = T,
+                             variable.name="Comparison"
+      )
+    } else {
+      dt <- data.table::melt(setDT(subSelection),
+                             measure=patterns(logfcPrefix),
+                             value.name=c("logFC"),
+                             variable.factor = T,
+                             variable.name="Comparison"
+      )
+    }
+    
     x <- as.factor(grep(logfcPrefix, names(subSelection), value = T))
     dt$Comparison <- x[dt$Comparison]
     dt$Comparison <- gsub(logfcPrefix, "",as.character(dt$Comparison))
     
-    datatable(
+    dt <- datatable(
       dt,
       rownames=F
-    ) %>% formatRound("logFC",3) %>% formatRound("adj.P.Val",6)
+    ) %>% formatRound("logFC",3) 
+    if (hasPadj) dt <- dt %>% formatRound("adj.P.Val",6)
+    dt
   })
   
   
