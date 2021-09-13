@@ -161,7 +161,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                    actionButton("resetAnalysis", "Reset"),
                    
                    conditionalPanel(
-                     condition = "input.source != 'example' && input.source != 'amica' && input.submitAnalysis!=0",
+                     condition = "input.source != 'example' 
+                     && input.source != 'amica' 
+                     && input.submitAnalysis!=0
+                     && !output.amicaInput",
                      h3("Analysis Parameters"),
                      bsCollapse(
                        id = "collapseExample",

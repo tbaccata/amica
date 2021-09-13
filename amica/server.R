@@ -771,10 +771,18 @@ server <- function(input, output, session) {
     )
   })
   
+  output$amicaInput <- reactive({
+    req(reacValues$uploadSuccess)
+    reacValues$amicaInput
+  })
+  outputOptions(output, "amicaInput", suspendWhenHidden = FALSE)
+  
   output$uploadSummary <- renderText({
     req(reacValues$uploadSuccess)
     
-    if (!is.null(reacValues$analysisSuccess)) return(NULL)
+    if (!is.null(reacValues$analysisSuccess) || reacValues$amicaInput == TRUE ||
+        input$source == "example"
+        ) return(NULL)
     
     paste0(
       "Successfully uploaded data!\n",
@@ -1888,7 +1896,6 @@ server <- function(input, output, session) {
           fontsize_row = fontsize,
           fontsize_col = fontsize,
           showticklabels = c(TRUE, show_labels),
-          #col_side_palette = mapping,
           col_side_palette = myGroupColors(),
           col_side_colors = annot,
           row_dend_left = TRUE,
