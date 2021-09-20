@@ -1014,6 +1014,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   step = 10
                 ),
                 radioButtons(
+                  "scatter_showLine",
+                  "Show line in plot?",
+                  choices = c("straight line", "none", "linear regression"),
+                  selected = "straight line"
+                ),
+                radioButtons(
                   "scatter_format",
                   "Save image",
                   choices = c("svg", "png"),
@@ -1338,7 +1344,8 @@ settings in a tab-separated  format that can be shared  with collaborators."
           </p>
           <p>Subsequent visualizations (heatmap, fold change plot, PPI network) 
           and ORA will be computed on the proteins in the output table. </p>"
-                   )
+                   ),
+                   actionButton("showQueryTutorial", "Advanced Queries", icon = icon("info") ),
                    ),
             column(width = 3)
           ),
@@ -1486,6 +1493,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       min = 1,
                       max = 4,
                       step = 1
+                    ),
+                    radioButtons(
+                      "fc_showLine",
+                      "Show line in plot?",
+                      choices = c("straight line", "none", "linear regression"),
+                      selected = "straight line"
                     ),
                     uiOutput('fcPlotColors')
                   )

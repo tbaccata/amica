@@ -1160,6 +1160,7 @@ server <- function(input, output, session) {
     plot_fontsize <- isolate(input$scatter_base)
     plot_legendsize <- isolate(input$scatter_legend)
     scatter_format <- isolate(input$scatter_format)
+    showLine <- isolate(input$scatter_showLine)
     
     validate(need(
       !is.null(selection1) & !is.null(selection2),
@@ -1207,14 +1208,16 @@ server <- function(input, output, session) {
     plotData$Gene <- 
       rowData(reacValues$proteinData)[[geneName]]
     
-    fit1 <- lm(x~y, data=plotData)
-    intercept <- fit1$coefficients[[1]]
-    slope <- fit1$coefficients[[2]]
+    fit1 <- lm(y~x, data=plotData)
+    fit1.intercept <- fit1$coefficients[[1]]
+    fit1.slope <- fit1$coefficients[[2]]
     
-    title = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 3),
-                  "Intercept =",signif(fit1$coef[[1]],3 ),
-                  " Slope =",signif(fit1$coef[[2]], 3),
-                  " P =",signif(summary(fit1)$coef[2,4], 5))
+    title <-
+      paste0(signif(fit1$coef[[1]], 5), 
+             "x + ", 
+             signif(fit1$coef[[2]], 5),
+             ", r2 = ",
+             signif(summary(fit1)$r.squared, 5))
     
     withProgress(message = "Plotting scatter plot", {
       pu <-
@@ -1224,18 +1227,31 @@ server <- function(input, output, session) {
                  y=y,
                  label = Gene,
                  color = Contaminant
-               )) + geom_abline(intercept = 0,#intercept, 
-                                slope = 1, #slope, 
-                                size=1,
-                                alpha = 0.5,
-                                color=myScatterColors()[5]) +
-        #geom_smooth(method = "lm", se=FALSE, color="#fa9fb5", formula = y ~ x) +
-        theme_minimal(base_size = plot_fontsize) + labs(x=xLabel, y=yLabel)  + 
+               )) + theme_minimal(base_size = plot_fontsize) + labs(x=xLabel, y=yLabel)  + 
         theme(legend.title = element_text(size=plot_legendsize),
               legend.text=element_text(size=plot_legendsize)) +
         geom_point() + scale_color_manual(values=myScatterColors() ) # + ggtitle(title) #scale_color_brewer(palette = "Paired")
       
+      intercept <- 0
+      slope <- 1
+      if (showLine == "linear regression") {
+        intercept <- fit1.intercept
+        slope <- fit1.slope
+        pu <- pu + ggtitle(title)
+      } else if (showLine == "straight line") {
+        intercept <- 0
+        slope <- 1
+      }
       
+      if (showLine != "none") {
+        pu <- pu + geom_abline(
+          intercept = intercept,
+          slope = slope,
+          size = 1,
+          alpha = 0.5,
+          color = myScatterColors()[3]
+        )
+      }  
     })
     
     m = list(
@@ -1995,6 +2011,7 @@ server <- function(input, output, session) {
     plot_height <- isolate(input$fc_height)
     pointsize <- isolate(input$fc_pointsize)
     format <- isolate(input$fc_format)
+    showLine <- isolate(input$fc_showLine)
     
     c1 <- isolate(input$fcplotcol_1)
     c2 <- isolate(input$fcplotcol_2)
@@ -2026,8 +2043,8 @@ server <- function(input, output, session) {
                                    paste0(logfcPrefix, selection[1])   ) )
     
     fit1 <- lm(formula, data=plotData)
-    intercept <- fit1$coefficients[[1]]
-    slope <- fit1$coefficients[[2]]
+    fit1.intercept <- fit1$coefficients[[1]]
+    fit1.slope <- fit1$coefficients[[2]]
     
     eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
                      list(a = format(unname(coef(fit1)[1]), digits = 2),
@@ -2036,10 +2053,17 @@ server <- function(input, output, session) {
     txt <- as.character(as.expression(eq))
     
     
-    title = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
-                  "Intercept =",signif(fit1$coef[[1]],5 ),
-                  " Slope =",signif(fit1$coef[[2]], 5),
-                  " P =",signif(summary(fit1)$coef[2,4], 5))
+    title <-
+      paste0(signif(fit1$coef[[1]], 5), 
+             "x + ", 
+             signif(fit1$coef[[2]], 5),
+             ", r2 = ",
+             signif(summary(fit1)$r.squared, 5))
+    
+    # title = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
+    #               "Intercept =",signif(fit1$coef[[1]],5 ),
+    #               " Slope =",signif(fit1$coef[[2]], 5),
+    #               " P =",signif(summary(fit1)$r.squared, 5))
     
     labelNamesX <- paste(unlist(strsplit(selection[1], "__vs__") ), collapse = "/")
     labelNamesX <- paste0("log2FC(", labelNamesX, ")")
@@ -2061,14 +2085,31 @@ server <- function(input, output, session) {
                  label = Gene.names,
                  key = key,
                  color = significant
-               )) + geom_point(size = pointsize) + geom_abline(intercept = 0,#intercept, 
-                                                               slope = 1, #slope, 
-                                                               size=1,
-                                                               alpha = 0.5,
-                                                               color = colors[5]
-                                                               ) +
-        theme_minimal(base_size = fontsize) + scale_color_manual(values=colors ) +
+               )) + geom_point(size = pointsize) + 
+        theme_minimal(base_size = fontsize) + scale_color_manual(values=colors) +
         labs(x = labelNamesX, y = labelNamesY) #, title =  title) 
+      
+      intercept <- 0
+      slope <- 1
+      if (showLine == "linear regression") {
+        intercept <- fit1.intercept
+        slope <- fit1.slope
+        pu <- pu + ggtitle(title)
+      } else if (showLine == "straight line") {
+        intercept <- 0
+        slope <- 1
+      }
+      
+      if (showLine != "none") {
+        pu <- pu + geom_abline(
+          intercept = intercept,
+          slope = slope,
+          size = 1,
+          alpha = 0.5,
+          color = colors[5]
+        )
+      }
+      
       #pu <- pu + ggtitle(expression(txt)) + geom_text(x = 25, y = 300, label = txt, parse = TRUE)
       
       # pu <- pu + geom_smooth(method = "lm", se=FALSE, color="#fa9fb5", formula = y ~ x)
@@ -3933,6 +3974,63 @@ fixes) to identify the relevant columns in your data.</p>"),
     ))
   })
   
+  
+  
+  
+  observeEvent(input$showQueryTutorial, {
+    showModal(modalDialog(
+      title = "Advanced queries",
+      
+      HTML('
+      <h3>Use case: Visualize proteins from over-represented functional term</h3>
+      <p>
+      This small examples have been produced with the provided example data set 
+      (using the same global paramters as in the previous tutorial). 
+      An over-representation analysis was conducted utilizing the 46 enriched 
+      proteins from the comparison PGRMC1__vs__MIAPACA. The "Show genes in 
+      functional enrichment?" button was selected.
+
+      <center><img src="query_tutorial/ora.png" width="100%"></center>
+      </p>
+      
+      <p>
+      Sorting the output table from most significant p-value to least significant 
+      we find the term "actin binding" on top of the list. 15 proteins from the 
+      enriched proteins are annotated with this term.
+      <center><img src="query_tutorial/oratable.png" width="100%"></center>
+      </p>
+      
+      <p>
+      
+      All visualizations (heatmap, fold change plot and PPI network) work 
+      only on the proteins selected in the above output table we can filter that 
+      table to only show proteins annotated with our term of interest. The output 
+      table can parse "regular expressions", so all we need to do is to copy paste 
+      the comma-delimited gene names into a text editor (or text processing tool 
+      like MS Word) and replace all commas with viertical line symbols ("|" which 
+      is the logical "or" operator) with the "Find and Replace" tool:
+      
+      <center><img src="query_tutorial/edit.png" width="100%"></center>
+      </p>
+      
+      <p>
+      We can now paste the the vertical line delimited gene names into the 
+      "Gene.names" search bar in the output table and we could successfully subset 
+      the data table to only show proteins of our interest:
+      <center><img src="query_tutorial/filtereddt.png" width="100%"></center>
+      
+      Below the table there is now a text message telling us that the original 
+      table has been filtered and that only the remaining proteins are used in 
+      subsequent visualizations. As an example you can now observe how the selected 
+      proteins compare across different group comparisons in a heatmap or fold 
+      change plot.
+      </p>
+           '),
+      size = "l",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
   
   observeEvent(input$timeOut, { 
     print(paste0("Session (", session$token, ") timed out at: ", Sys.time()))
