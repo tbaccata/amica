@@ -635,7 +635,10 @@ settings in a tab-separated  format that can be shared  with collaborators."
                            "Save image",
                            choices = c("svg", "png"),
                           selected = "svg"
-                         )
+                         ),
+                         checkboxInput("cor_annot",
+                                       "Annotate samples in dendrogram?",
+                                       value = TRUE),
                        )
                      ),
                      

@@ -1259,6 +1259,7 @@ server <- function(input, output, session) {
   
   corrBasePlot <- eventReactive(input$submitCor,{
     assayName <- isolate(input$assayNames)
+    annotSamples <- isolate(input$cor_annot)
     
     req(reacValues$uploadSuccess)
     
@@ -1273,19 +1274,29 @@ server <- function(input, output, session) {
     
     corDf <- cor(df, method = "pearson", use = "complete.obs")
     
-    
-        heatmaply_cor(
-          round(corDf, 3),
-          xlab = "", 
-          ylab = "",
-          limits = c(min(corDf)-0.003, 1),
-          #row_side_palette = mapping,
-          row_side_palette = myGroupColors(),
-          row_side_colors = annot,
-          plot_method = "plotly",
-          key.title = "Pearson Correlation"
-        )
-    
+    if (annotSamples) {
+      p <- heatmaply_cor(
+        round(corDf, 3),
+        xlab = "", 
+        ylab = "",
+        limits = c(min(corDf)-0.003, 1),
+        #row_side_palette = mapping,
+        row_side_palette = myGroupColors(),
+        row_side_colors = annot,
+        plot_method = "plotly",
+        key.title = "Pearson Correlation"
+      )
+    } else {
+      p <- heatmaply_cor(
+        round(corDf, 3),
+        xlab = "", 
+        ylab = "",
+        limits = c(min(corDf)-0.003, 1),
+        plot_method = "plotly",
+        key.title = "Pearson Correlation"
+      )
+    }
+    p
   })
   
   output$corrPlotly <- renderPlotly({
