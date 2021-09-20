@@ -299,15 +299,26 @@ server <- function(input, output, session) {
       }
       
       inFile <- input$contrastMatrix
-      tmpData <- validateFile(inFile, c("group"))
+      tmpData <- validateFile(inFile, NULL)
       reacValues$contrastMatrix <- tmpData
+      
+      for (elem in unique(c(tmpData[[1]], tmpData[[2]]))) {
+        if (!is.null(reacValues$expDesign) & length(grep(elem, reacValues$expDesign)) < 1) {
+          shiny:::reactiveStop(showNotification(
+            paste("Group", elem, "in contrasts not in uploaded experimental design"),
+            type = "warning",
+            duration = 100
+          ))
+        }
+      }
+
     } else {
       reacValues$nsubmits <- reacValues$nsubmits + 1
       if (reacValues$nsubmits < 2) {
         #toggle('ibaq_help')
         toggle(selector = "#navbar li a[data-value=qctab]")
         toggle(selector = "#navbar li a[data-value=quanttab]")
-        toggle(selector = "#navbar li a[data-value=comparemicatab]")
+        # toggle(selector = "#navbar li a[data-value=comparemicatab]")
         toggle(id = 'hide_before_input', anim = T)
       }
     }
@@ -832,8 +843,8 @@ server <- function(input, output, session) {
       "\n\n\nYou can now inspect\n",
       "\t1) QC\n",
       "\t2) Quantitative results\n",
-      "\t3) Protein-protein interaction networks (only applicable for H.sapiens at the moment)\n",
-      "\t4) or upload another amica file to compare experiments!"
+      "\t3) Protein-protein interaction networks (only applicable for H.sapiens at the moment)"
+      #"\t4) or upload another amica file to compare experiments!"
     )
   })
   

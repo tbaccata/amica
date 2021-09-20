@@ -12,7 +12,8 @@ footer = function(x) {
          <p>Many thanks to the MS facility and the Max Perutz Labs IT team.
          If you have questions, feedback, suggestions, etc. please mail
          them to sebastian.didusch@univie.ac.at.
-         </p>")
+         </p>
+         <p>amica version 2020.09.20</p>")
   )
 }
 
@@ -23,7 +24,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
     tags$script(inactivity),
     useShinyjs(),
     navbarPage(
-      "amica v21.09.08",
+      "amica",
       id = "navbar",
       inverse = TRUE,
       theme = bs_theme(
@@ -312,6 +313,13 @@ settings in a tab-separated  format that can be shared  with collaborators."
                            tabPanel(h4("Available color palettes"),
                                     plotOutput("brewercols", height = "800px")),
                            tabPanel(h4("Qualitative (groups)"),
+                                    HTML("
+                                         <p>
+                                         Each experimental group can be assigned 
+                                         a color that stays consistent for various 
+                                         QC plots (PCA, boxplots, barplots, etc.) 
+                                         and heatmaps.
+                                         </p>"),
                                         uiOutput("brewerOptionsQual"),
                                         radioButtons(
                                           "revQual",
