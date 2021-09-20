@@ -431,6 +431,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                 max = 1352,
                 step = 10
               ),
+              radioButtons(
+                "pca_format",
+                "Save image",
+                choices = c("svg", "png"),
+                selected = "svg"
+              ),
               numericInput(
                 "pca_base",
                 "Base font size in pt.",
@@ -503,6 +509,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                              max = 1352,
                              step = 10
                            ),
+                           radioButtons(
+                             "boxplot_format",
+                             "Save image",
+                             choices = c("svg", "png"),
+                             selected = "svg"
+                           ),
                            numericInput(
                              "boxplot_base",
                              "Base font size in pt.",
@@ -556,6 +568,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                              max = 1352,
                              step = 10
                            ),
+                           radioButtons(
+                             "density_format",
+                             "Save image",
+                             choices = c("svg", "png"),
+                             selected = "svg"
+                           ),
                            numericInput(
                              "density_base",
                              "Base font size in pt.",
@@ -599,7 +617,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                          numericInput(
                            "cor_width",
                            "Width in pixel.",
-                           value = 800,
+                           value = 768,
                            min = 338,
                            max = 1352,
                            step = 10
@@ -607,10 +625,16 @@ settings in a tab-separated  format that can be shared  with collaborators."
                          numericInput(
                            "cor_height",
                            "Height in pixel.",
-                           value = 800,
+                           value = 676,
                            min = 338,
                            max = 1352,
                            step = 10
+                         ),
+                         radioButtons(
+                           "cor_format",
+                           "Save image",
+                           choices = c("svg", "png"),
+                          selected = "svg"
                          )
                        )
                      ),
@@ -646,6 +670,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                            min = 338,
                            max = 1352,
                            step = 10
+                         ),
+                         radioButtons(
+                           "cv_format",
+                           "Save image",
+                           choices = c("svg", "png"),
+                           selected = "svg"
                          ),
                          numericInput(
                            "cv_base",
@@ -709,6 +739,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                              max = 1352,
                              step = 10
                            ),
+                           radioButtons(
+                             "contaminants_format",
+                             "Save image",
+                             choices = c("svg", "png"),
+                             selected = "svg"
+                           ),
                            numericInput(
                              "contaminants_base",
                              "Base font size in pt.",
@@ -762,6 +798,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                            min = 338,
                            max = 1352,
                            step = 10
+                         ),
+                         radioButtons(
+                           "abundant_format",
+                           "Save image",
+                           choices = c("svg", "png"),
+                           selected = "svg"
                          ),
                          numericInput(
                            "abundant_base",
@@ -823,6 +865,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       max = 1352,
                       step = 10
                     ),
+                    radioButtons(
+                      "barplotId_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
+                    ),
                     numericInput(
                       "barplotId_base",
                       "Base font size in pt.",
@@ -874,6 +922,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       min = 338,
                       max = 1352,
                       step = 10
+                    ),
+                    radioButtons(
+                      "barplotMv_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
                     ),
                     numericInput(
                       "barplotMv_base",
@@ -947,6 +1001,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   min = 338,
                   max = 1352,
                   step = 10
+                ),
+                radioButtons(
+                  "scatter_format",
+                  "Save image",
+                  choices = c("svg", "png"),
+                  selected = "svg"
                 ),
                 numericInput(
                   "scatter_base",
@@ -1098,6 +1158,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       min = 338,
                       max = 1352,
                       step = 10
+                    ),
+                    radioButtons(
+                      "volcano_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
                     ),
                     numericInput(
                       "volcano_base",
@@ -1329,6 +1395,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                         max = 1352,
                         step = 10
                       ),
+                      radioButtons(
+                        "heatmap_format",
+                        "Save image",
+                        choices = c("svg", "png"),
+                        selected = "svg"
+                      ),
                       numericInput(
                         "heatmap_base",
                         "Base font size in pt.",
@@ -1381,6 +1453,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       min = 338,
                       max = 1352,
                       step = 10
+                    ),
+                    radioButtons(
+                      "fc_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
                     ),
                     numericInput(
                       "fc_base",
@@ -1449,6 +1527,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       min = 338,
                       max = 1352,
                       step = 10
+                    ),
+                    radioButtons(
+                      "profile_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
                     ),
                     numericInput(
                       "profile_base",
@@ -1573,6 +1657,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       max = 1352,
                       step = 10
                     ),
+                    radioButtons(
+                      "oraBar_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
+                    ),
                     
                     sliderInput(
                       "oraBar_maxTerms",
@@ -1599,314 +1689,314 @@ settings in a tab-separated  format that can be shared  with collaborators."
           )
         ),
         footer()
-      ),
-      tabPanel(
-        title = 'Compare amica datasets',
-        value = 'comparemicatab',
-        
-        bsCollapse(
-          id = "collapseUpload",
-          open = "Upload amica",
-          bsCollapsePanel("Toggle Upload",
-                          style = "info",
-                          fluidRow(
-                            column(
-                              width = 6,
-                              radioButtons(
-                                inputId = "amicaCompareSource",
-                                label = "Select the file input.",
-                                choices = c(#"Load in example" = "example",
-                                            "Upload amica file" = "amica")
-                              ),
-                              conditionalPanel(
-                                condition = "input.amicaCompareSource == 'amica'",
-                                fileInput("amicaFile2", "Upload amica_proteinGroups.txt.",
-                                          width = "60%"),
-                                helpText(
-                                  "Have you run amica before and want to compare it to the currently loaded in dataset?"
-                                )
-                              ),
-                              
-                              radioButtons(
-                                'mergeKey',
-                                'Key column',
-                                c('Gene.names', 'ProteinIDs'),
-                                selected = 'Gene.names'
-                              ),
-                              helpText(
-                                'This column determines the key that is used to merge the experiments.
-                                  Use "ProteinIDs" when both experiments used the same search database.
-                                           Use "Gene.names" when you want to compare experiments from different origins (e.g different organisms)'
-                              )
-                            ),
-                            
-                            column(
-                              width = 6,
-                              textInput("suffix1", "Suffix for original input", value = "exp1"),
-                              helpText(
-                                'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "AP-MS" (without the quotation mark) if your first experiment was of that kind.'
-                              ),
-                              textInput("suffix2", "Suffix for uploaded input", value = "exp2"),
-                              helpText(
-                                'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "TurboID" (without the quotation mark) if your first experiment was of that kind.'
-                              ),
-                              textInput("subPattern", "Pattern to substitute in ProteinID column", value = ";"),
-                              helpText(
-                                'Everything after the pattern will be removed. You might have the case where "ProteinA" is the stable id in your original data, while the uploaded file contains the id "ProteinA;ProteinB". The pattern ";" (enter without the quotation mark) would remove ";ProteinB".'
-                              ),
-                              actionButton("submitAmicaComparisons", strong("Submit"))
-                            )
-                          ))
-        ),
-        
-        
-        verbatimTextOutput("summaryMergedAmica"),
-        
-        
-        shinyjs::hidden(
-          div(
-            id = "compareAmicaInput",
-            
-            uiOutput('download_merged_amica'),
-            br(),
-            br(),
-            br(),
-            
-            fluidRow(
-              column(
-                width = 6,
-                numericInput(
-                  "fcThresh3",
-                  "Fold change threshold",
-                  value = 1.5,
-                  min = 0,
-                  step = 0.01
-                ),
-                helpText(
-                  "While the choice is arbitrary, lower thresholds might result in more false positives. Usual choices are between 1 and 2. You can lower the threshold and try to make sense of the resulting list of proteins (e.g if enriched terms make sense in the over-representation analysis below)."
-                ),
-                
-                radioButtons(
-                  "enrichmentChoice3",
-                  "Which proteins to chose?",
-                  choices = c("enriched", "absolute", "reduced"),
-                  selected = "absolute"
-                ),
-                helpText(
-                  "If 'enriched' is selected only proteins above the FC threshold are selected. 'absolute' selects proteins above and below that negative threshold (e.g if FC-threshold equals 2 'absolute' selects proteins in the ranges [-inf - (-2)] and [2 - inf]. 'reduced' return all significant proteins below the negative FC cutoff."
-                )
-                
-              ),
-              column(
-                width = 6,
-                radioButtons(
-                  "sigCutoffValue3",
-                  "Significance cutoff (which value to use)",
-                  choices = c("p-value", "adj.p-value"),
-                  selected = "adj.p-value"
-                ),
-                helpText(
-                  "Adjusted p-value is recommended. Raw p-value cutoffs yield many false positives and give a general trend, not any statistical significance."
-                )
-              )
-            ),
-            
-            # inline(actionButton("plotMultiComp", label = "Update plot")),
-            # inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
-            # inline(uiOutput("UpsetHelpBox")),
-            
-            uiOutput('upsetSelection2'),
-            inline(actionButton("submitMultiComp2", label = "Submit Analysis")),
-            inline(actionButton("upsetHelp2", icon = icon("info"), label = NULL)),
-            inline(uiOutput("UpsetHelpBox2")),
-            inline(actionButton("upsetParams2", "", icon = icon("wrench"))),
-            shinyjs::hidden(
-              div(
-                style = "display: grid; 
-          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-          grid-gap: 30px;",
-                
-                id = 'toggle_upset_amicas_params',
-                numericInput(
-                  "upset_amicas_width",
-                  "Width in inch.",
-                  value = 12,
-                  min = 3,
-                  max = 18,
-                  step = 1
-                ),
-                numericInput(
-                  "upset_amicas_height",
-                  "Height in inch.",
-                  value = 6,
-                  min = 3,
-                  max = 18,
-                  step = 1
-                ),
-                numericInput(
-                  "upset_amicas_pointsize",
-                  "Size of points in matrix plot.",
-                  value = 4,
-                  min = 1,
-                  max = 8,
-                  step = 1
-                ),
-                numericInput(
-                  "upset_amicas_ratio",
-                  "Ratio between main bar plot to matrix plot.",
-                  value = 0.6,
-                  min = 0.3,
-                  max = 0.7,
-                  step = 0.1
-                ),
-                radioButtons(
-                  'upset_amicas_sorted',
-                  'How to sort bars?',
-                  choices = c('Frequency', 'Degree'),
-                  selected = 'Frequency'
-                )
-              )
-            ),
-            plotOutput('upsetPlotAmicas', height = 600),
-            uiOutput("download_button_upset_amicas"),
-            br(),
-            br(),
-            br(),
-            helpText(
-              "Set comparison of differentially abundant proteins from selected comparisons under selected thresholds. The dots show which sets are getting compared. A dot not connected to another dot shows the number of proteins specific to that comparisons. The top barplot depicts the number of intersecting proteins, and the barplot on the side shows how many proteins are differentially abundant in the comparison. Change the selected comparisons to your needs."
-            ),
-            h3(textOutput("compSummary2")),
-            br(),
-            verbatimTextOutput("parameterSummary2"),
-            br(),
-            div(style = 'overflow-x: scroll; max-width: 100%',
-                DTOutput("groupComparisonsDTamica")),
-            br(),
-            br(),
-            br(),
-            
-            tabsetPanel(
-              type = "tabs",
-              tabPanel(
-                h3("Fold change plot"),
-                uiOutput("foldChangeSelection2"),
-                radioButtons(
-                  'imputeScatterBoolean',
-                  'Replace missing fold changes with constant value?',
-                  choices = c('yes', 'no'),
-                  selected = 'no'
-                ),
-                helpText(
-                  'If enabled proteins not quantified in one condition can be visualized in the fold change plot.'
-                ),
-                conditionalPanel(
-                  condition = "input.imputeScatterBoolean == 'yes'",
-                  numericInput(
-                    "imputeScatterPlot",
-                    "Imputation value",
-                    value = 0,
-                    min = -15,
-                    max = 15,
-                    step = 0.1
-                  )
-                ),
-                actionButton("sumbitFoldChangePlot2", label = "Compare fold changes"),
-                actionButton(
-                  "FoldChangePlotHelp2",
-                  icon = icon("info"),
-                  label = NULL
-                ),
-                uiOutput("FoldChangePlotHelpBox2"),
-                ###
-                actionButton("fcamicaParams", "", icon = icon("wrench")),
-                shinyjs::hidden(
-                  div(
-                    style = "display: grid; 
-          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-          grid-gap: 30px;",
-                    
-                    id = 'toggle_fcamica_params',
-                    numericInput(
-                      "fcamica_width",
-                      "Width in pixel.",
-                      value = 768,
-                      min = 338,
-                      max = 1352,
-                      step = 10
-                    ),
-                    numericInput(
-                      "fcamica_height",
-                      "Height in pixel.",
-                      value = 676,
-                      min = 338,
-                      max = 1352,
-                      step = 10
-                    ),
-                    numericInput(
-                      "fcamica_base",
-                      "Base font size in pt.",
-                      value = 14,
-                      min = 4,
-                      max = 32,
-                      step = 1
-                    )
-                  )
-                ),
-                ###
-                
-                fluidRow(
-                  column(width = 1),
-                  column(width = 10,
-                         plotlyOutput("foldChangePlot2", height = 600)),
-                  column(width = 1)
-                )
-                
-              ),
-              tabPanel(
-                h3('Scatter plot'),
-                uiOutput("compareScatterPlotsAmica"),
-                ###
-                actionButton("scatteramicaParams", "", icon = icon("wrench")),
-                shinyjs::hidden(
-                  div(
-                    style = "display: grid; 
-          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-          grid-gap: 30px;",
-                    
-                    id = 'toggle_scatteramica_params',
-                    numericInput(
-                      "scatteramica_width",
-                      "Width in pixel.",
-                      value = 768,
-                      min = 338,
-                      max = 1352,
-                      step = 10
-                    ),
-                    numericInput(
-                      "scatteramica_height",
-                      "Height in pixel.",
-                      value = 676,
-                      min = 338,
-                      max = 1352,
-                      step = 10
-                    ),
-                    numericInput(
-                      "scatteramica_base",
-                      "Base font size in pt.",
-                      value = 14,
-                      min = 4,
-                      max = 32,
-                      step = 1
-                    )
-                  )
-                ),
-                ###
-                plotlyOutput("scatterPlotsAmica", height = 600)
-              )
-            )
-          )
-        ),
-        footer()
       )
+      # tabPanel(
+      #   title = 'Compare amica datasets',
+      #   value = 'comparemicatab',
+      #   
+      #   bsCollapse(
+      #     id = "collapseUpload",
+      #     open = "Upload amica",
+      #     bsCollapsePanel("Toggle Upload",
+      #                     style = "info",
+      #                     fluidRow(
+      #                       column(
+      #                         width = 6,
+      #                         radioButtons(
+      #                           inputId = "amicaCompareSource",
+      #                           label = "Select the file input.",
+      #                           choices = c(#"Load in example" = "example",
+      #                                       "Upload amica file" = "amica")
+      #                         ),
+      #                         conditionalPanel(
+      #                           condition = "input.amicaCompareSource == 'amica'",
+      #                           fileInput("amicaFile2", "Upload amica_proteinGroups.txt.",
+      #                                     width = "60%"),
+      #                           helpText(
+      #                             "Have you run amica before and want to compare it to the currently loaded in dataset?"
+      #                           )
+      #                         ),
+      #                         
+      #                         radioButtons(
+      #                           'mergeKey',
+      #                           'Key column',
+      #                           c('Gene.names', 'ProteinIDs'),
+      #                           selected = 'Gene.names'
+      #                         ),
+      #                         helpText(
+      #                           'This column determines the key that is used to merge the experiments.
+      #                             Use "ProteinIDs" when both experiments used the same search database.
+      #                                      Use "Gene.names" when you want to compare experiments from different origins (e.g different organisms)'
+      #                         )
+      #                       ),
+      #                       
+      #                       column(
+      #                         width = 6,
+      #                         textInput("suffix1", "Suffix for original input", value = "exp1"),
+      #                         helpText(
+      #                           'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "AP-MS" (without the quotation mark) if your first experiment was of that kind.'
+      #                         ),
+      #                         textInput("suffix2", "Suffix for uploaded input", value = "exp2"),
+      #                         helpText(
+      #                           'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "TurboID" (without the quotation mark) if your first experiment was of that kind.'
+      #                         ),
+      #                         textInput("subPattern", "Pattern to substitute in ProteinID column", value = ";"),
+      #                         helpText(
+      #                           'Everything after the pattern will be removed. You might have the case where "ProteinA" is the stable id in your original data, while the uploaded file contains the id "ProteinA;ProteinB". The pattern ";" (enter without the quotation mark) would remove ";ProteinB".'
+      #                         ),
+      #                         actionButton("submitAmicaComparisons", strong("Submit"))
+      #                       )
+      #                     ))
+      #   ),
+      #   
+      #   
+      #   verbatimTextOutput("summaryMergedAmica"),
+      #   
+      #   
+      #   shinyjs::hidden(
+      #     div(
+      #       id = "compareAmicaInput",
+      #       
+      #       uiOutput('download_merged_amica'),
+      #       br(),
+      #       br(),
+      #       br(),
+      #       
+      #       fluidRow(
+      #         column(
+      #           width = 6,
+      #           numericInput(
+      #             "fcThresh3",
+      #             "Fold change threshold",
+      #             value = 1.5,
+      #             min = 0,
+      #             step = 0.01
+      #           ),
+      #           helpText(
+      #             "While the choice is arbitrary, lower thresholds might result in more false positives. Usual choices are between 1 and 2. You can lower the threshold and try to make sense of the resulting list of proteins (e.g if enriched terms make sense in the over-representation analysis below)."
+      #           ),
+      #           
+      #           radioButtons(
+      #             "enrichmentChoice3",
+      #             "Which proteins to chose?",
+      #             choices = c("enriched", "absolute", "reduced"),
+      #             selected = "absolute"
+      #           ),
+      #           helpText(
+      #             "If 'enriched' is selected only proteins above the FC threshold are selected. 'absolute' selects proteins above and below that negative threshold (e.g if FC-threshold equals 2 'absolute' selects proteins in the ranges [-inf - (-2)] and [2 - inf]. 'reduced' return all significant proteins below the negative FC cutoff."
+      #           )
+      #           
+      #         ),
+      #         column(
+      #           width = 6,
+      #           radioButtons(
+      #             "sigCutoffValue3",
+      #             "Significance cutoff (which value to use)",
+      #             choices = c("p-value", "adj.p-value"),
+      #             selected = "adj.p-value"
+      #           ),
+      #           helpText(
+      #             "Adjusted p-value is recommended. Raw p-value cutoffs yield many false positives and give a general trend, not any statistical significance."
+      #           )
+      #         )
+      #       ),
+      #       
+      #       # inline(actionButton("plotMultiComp", label = "Update plot")),
+      #       # inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
+      #       # inline(uiOutput("UpsetHelpBox")),
+      #       
+      #       uiOutput('upsetSelection2'),
+      #       inline(actionButton("submitMultiComp2", label = "Submit Analysis")),
+      #       inline(actionButton("upsetHelp2", icon = icon("info"), label = NULL)),
+      #       inline(uiOutput("UpsetHelpBox2")),
+      #       inline(actionButton("upsetParams2", "", icon = icon("wrench"))),
+      #       shinyjs::hidden(
+      #         div(
+      #           style = "display: grid; 
+      #     grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+      #     grid-gap: 30px;",
+      #           
+      #           id = 'toggle_upset_amicas_params',
+      #           numericInput(
+      #             "upset_amicas_width",
+      #             "Width in inch.",
+      #             value = 12,
+      #             min = 3,
+      #             max = 18,
+      #             step = 1
+      #           ),
+      #           numericInput(
+      #             "upset_amicas_height",
+      #             "Height in inch.",
+      #             value = 6,
+      #             min = 3,
+      #             max = 18,
+      #             step = 1
+      #           ),
+      #           numericInput(
+      #             "upset_amicas_pointsize",
+      #             "Size of points in matrix plot.",
+      #             value = 4,
+      #             min = 1,
+      #             max = 8,
+      #             step = 1
+      #           ),
+      #           numericInput(
+      #             "upset_amicas_ratio",
+      #             "Ratio between main bar plot to matrix plot.",
+      #             value = 0.6,
+      #             min = 0.3,
+      #             max = 0.7,
+      #             step = 0.1
+      #           ),
+      #           radioButtons(
+      #             'upset_amicas_sorted',
+      #             'How to sort bars?',
+      #             choices = c('Frequency', 'Degree'),
+      #             selected = 'Frequency'
+      #           )
+      #         )
+      #       ),
+      #       plotOutput('upsetPlotAmicas', height = 600),
+      #       uiOutput("download_button_upset_amicas"),
+      #       br(),
+      #       br(),
+      #       br(),
+      #       helpText(
+      #         "Set comparison of differentially abundant proteins from selected comparisons under selected thresholds. The dots show which sets are getting compared. A dot not connected to another dot shows the number of proteins specific to that comparisons. The top barplot depicts the number of intersecting proteins, and the barplot on the side shows how many proteins are differentially abundant in the comparison. Change the selected comparisons to your needs."
+      #       ),
+      #       h3(textOutput("compSummary2")),
+      #       br(),
+      #       verbatimTextOutput("parameterSummary2"),
+      #       br(),
+      #       div(style = 'overflow-x: scroll; max-width: 100%',
+      #           DTOutput("groupComparisonsDTamica")),
+      #       br(),
+      #       br(),
+      #       br(),
+      #       
+      #       tabsetPanel(
+      #         type = "tabs",
+      #         tabPanel(
+      #           h3("Fold change plot"),
+      #           uiOutput("foldChangeSelection2"),
+      #           radioButtons(
+      #             'imputeScatterBoolean',
+      #             'Replace missing fold changes with constant value?',
+      #             choices = c('yes', 'no'),
+      #             selected = 'no'
+      #           ),
+      #           helpText(
+      #             'If enabled proteins not quantified in one condition can be visualized in the fold change plot.'
+      #           ),
+      #           conditionalPanel(
+      #             condition = "input.imputeScatterBoolean == 'yes'",
+      #             numericInput(
+      #               "imputeScatterPlot",
+      #               "Imputation value",
+      #               value = 0,
+      #               min = -15,
+      #               max = 15,
+      #               step = 0.1
+      #             )
+      #           ),
+      #           actionButton("sumbitFoldChangePlot2", label = "Compare fold changes"),
+      #           actionButton(
+      #             "FoldChangePlotHelp2",
+      #             icon = icon("info"),
+      #             label = NULL
+      #           ),
+      #           uiOutput("FoldChangePlotHelpBox2"),
+      #           ###
+      #           actionButton("fcamicaParams", "", icon = icon("wrench")),
+      #           shinyjs::hidden(
+      #             div(
+      #               style = "display: grid; 
+      #     grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+      #     grid-gap: 30px;",
+      #               
+      #               id = 'toggle_fcamica_params',
+      #               numericInput(
+      #                 "fcamica_width",
+      #                 "Width in pixel.",
+      #                 value = 768,
+      #                 min = 338,
+      #                 max = 1352,
+      #                 step = 10
+      #               ),
+      #               numericInput(
+      #                 "fcamica_height",
+      #                 "Height in pixel.",
+      #                 value = 676,
+      #                 min = 338,
+      #                 max = 1352,
+      #                 step = 10
+      #               ),
+      #               numericInput(
+      #                 "fcamica_base",
+      #                 "Base font size in pt.",
+      #                 value = 14,
+      #                 min = 4,
+      #                 max = 32,
+      #                 step = 1
+      #               )
+      #             )
+      #           ),
+      #           ###
+      #           
+      #           fluidRow(
+      #             column(width = 1),
+      #             column(width = 10,
+      #                    plotlyOutput("foldChangePlot2", height = 600)),
+      #             column(width = 1)
+      #           )
+      #           
+      #         ),
+      #         tabPanel(
+      #           h3('Scatter plot'),
+      #           uiOutput("compareScatterPlotsAmica"),
+      #           ###
+      #           actionButton("scatteramicaParams", "", icon = icon("wrench")),
+      #           shinyjs::hidden(
+      #             div(
+      #               style = "display: grid; 
+      #     grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+      #     grid-gap: 30px;",
+      #               
+      #               id = 'toggle_scatteramica_params',
+      #               numericInput(
+      #                 "scatteramica_width",
+      #                 "Width in pixel.",
+      #                 value = 768,
+      #                 min = 338,
+      #                 max = 1352,
+      #                 step = 10
+      #               ),
+      #               numericInput(
+      #                 "scatteramica_height",
+      #                 "Height in pixel.",
+      #                 value = 676,
+      #                 min = 338,
+      #                 max = 1352,
+      #                 step = 10
+      #               ),
+      #               numericInput(
+      #                 "scatteramica_base",
+      #                 "Base font size in pt.",
+      #                 value = 14,
+      #                 min = 4,
+      #                 max = 32,
+      #                 step = 1
+      #               )
+      #             )
+      #           ),
+      #           ###
+      #           plotlyOutput("scatterPlotsAmica", height = 600)
+      #         )
+      #       )
+      #     )
+      #   ),
+      #   footer()
+      # )
     )
   )

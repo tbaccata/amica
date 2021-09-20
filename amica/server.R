@@ -946,7 +946,7 @@ server <- function(input, output, session) {
                                'hoverClosestCartesian',
                                'hoverCompareCartesian'
                              ),
-                             toImageButtonOptions = list(format = "svg",
+                             toImageButtonOptions = list(format = input$pca_format,
                                                          width = input$pca_width,
                                                          height = input$pca_height,
                                                          #width = 768,
@@ -995,7 +995,7 @@ server <- function(input, output, session) {
             'hoverCompareCartesian'
           ),
           toImageButtonOptions = list(
-            format = "svg",
+            format = input$boxplot_format,
             width = input$boxplot_width,
             height = input$boxplot_height,
             filename = "boxplot"
@@ -1047,7 +1047,7 @@ server <- function(input, output, session) {
             'hoverCompareCartesian'
           ),
           toImageButtonOptions = list(
-            format = "svg",
+            format = input$density_format,
             width = input$density_width,
             height = input$density_height,
             filename = "density_plot"
@@ -1148,6 +1148,7 @@ server <- function(input, output, session) {
     plot_height <- isolate(input$scatter_height)
     plot_fontsize <- isolate(input$scatter_base)
     plot_legendsize <- isolate(input$scatter_legend)
+    scatter_format <- isolate(input$scatter_format)
     
     validate(need(
       !is.null(selection1) & !is.null(selection2),
@@ -1221,7 +1222,7 @@ server <- function(input, output, session) {
         theme_minimal(base_size = plot_fontsize) + labs(x=xLabel, y=yLabel)  + 
         theme(legend.title = element_text(size=plot_legendsize),
               legend.text=element_text(size=plot_legendsize)) +
-        geom_point() + scale_color_manual(values=myScatterColors() ) + ggtitle(title) #scale_color_brewer(palette = "Paired")
+        geom_point() + scale_color_manual(values=myScatterColors() ) # + ggtitle(title) #scale_color_brewer(palette = "Paired")
       
       
     })
@@ -1248,7 +1249,7 @@ server <- function(input, output, session) {
           'hoverCompareCartesian'
         ),
         toImageButtonOptions = list(
-          format = "svg",
+          format = scatter_format,
           width = plot_width,
           height = plot_height,
           filename = "scatter_plot"
@@ -1302,7 +1303,7 @@ server <- function(input, output, session) {
                     'hoverClosestCartesian',
                     'hoverCompareCartesian'
                   ),
-                  toImageButtonOptions = list(format = "svg",
+                  toImageButtonOptions = list(format = input$cor_format,
                                               width = input$cor_width,
                                               height = input$cor_height,
                                               filename = "corrplot")
@@ -1366,7 +1367,7 @@ server <- function(input, output, session) {
           'hoverCompareCartesian'
         ),
         toImageButtonOptions = list(
-          format = "svg",
+          format = input$contaminants_format,
           width = input$contaminants_width,
           height = input$contaminants_height,
           filename = "contaminants_plot"
@@ -1420,7 +1421,7 @@ server <- function(input, output, session) {
                              'hoverClosestCartesian',
                              'hoverCompareCartesian'
                            ),
-                           toImageButtonOptions = list(format = "svg",
+                           toImageButtonOptions = list(format = input$abundant_format,
                                                        width = 676,
                                                        height = 676,
                                                        filename = "plot")
@@ -1488,7 +1489,7 @@ server <- function(input, output, session) {
           'hoverCompareCartesian'
         ),
         toImageButtonOptions = list(
-          format = "svg",
+          format = input$barplotId_format,
           width = input$barplotId_width,
           height = input$barplotId_height,
           filename = "barplot_identified_proteins"
@@ -1558,7 +1559,7 @@ server <- function(input, output, session) {
           'hoverCompareCartesian'
         ),
         toImageButtonOptions = list(
-          format = "svg",
+          format = input$barplotMv_format,
           width = input$barplotMv_width,
           height = input$barplotMv_height,
           filename = "barplot_missing_values"
@@ -1607,7 +1608,7 @@ server <- function(input, output, session) {
                                'hoverClosestCartesian',
                                'hoverCompareCartesian'
                              ),
-                             toImageButtonOptions = list(format = "svg",
+                             toImageButtonOptions = list(format = input$cv_format,
                                                          width = input$cv_width,
                                                          height = input$cv_height,
                                                          filename = "cv_plot")
@@ -1844,6 +1845,7 @@ server <- function(input, output, session) {
     plot_height = isolate(input$heatmap_height)
     show_labels <- isolate(input$heatmap_labels)
     show_annot <- isolate(input$heatmap_annot)
+    format <- isolate(input$heatmap_format)
     
     validate(need(
       nrow(reacValues$dataHeatmap) >= 1,
@@ -1931,7 +1933,7 @@ server <- function(input, output, session) {
                  'hoverClosestCartesian',
                  'hoverCompareCartesian'
                ),
-               toImageButtonOptions = list(format = "svg",
+               toImageButtonOptions = list(format = format,
                                            width = plot_width,
                                            height = plot_height,
                                            filename = "heatmap")
@@ -1970,12 +1972,13 @@ server <- function(input, output, session) {
     plot_width <- isolate(input$fc_width)
     plot_height <- isolate(input$fc_height)
     pointsize <- isolate(input$fc_pointsize)
+    format <- isolate(input$fc_format)
     
     c1 <- isolate(input$fcplotcol_1)
     c2 <- isolate(input$fcplotcol_2)
     c3 <- isolate(input$fcplotcol_3)
     c4 <- isolate(input$fcplotcol_4)
-    c5 <- isolate(input$fcplotcol_4)
+    c5 <- isolate(input$fcplotcol_5)
     
     colors <- c(c1, c2, c3, c4, c5)
     
@@ -2071,7 +2074,7 @@ server <- function(input, output, session) {
                      'hoverClosestCartesian',
                      'hoverCompareCartesian'
                    ),
-                   toImageButtonOptions = list(format = "svg",
+                   toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
                                                filename = "foldchange_plot")
@@ -2141,6 +2144,7 @@ server <- function(input, output, session) {
     plot_height <- isolate(input$volcano_height)
     padjY <- isolate(input$volcano_padj_y)
     pointsize <- isolate(input$volcano_pointsize)
+    format <- isolate(input$volcano_format)
     padjYBoolean <- ifelse(padjY == "p-values", FALSE, TRUE)
     
     c1 <- isolate(input$volcanocol_1)
@@ -2208,7 +2212,7 @@ server <- function(input, output, session) {
                      'hoverClosestCartesian',
                      'hoverCompareCartesian'
                    ),
-                   toImageButtonOptions = list(format = "svg",
+                   toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
                                                filename = "volcano_plot")
@@ -2249,6 +2253,7 @@ server <- function(input, output, session) {
     plot_width <- isolate(input$volcano_width)
     plot_height <- isolate(input$volcano_height)
     pointsize <- isolate(input$volcano_pointsize)
+    format <- isolate(input$volcano_format)
     
     pltData <- isolate(volcanoPlotData() )
     c1 <- isolate(input$volcanocol_1)
@@ -2308,7 +2313,7 @@ server <- function(input, output, session) {
                      'hoverClosestCartesian',
                      'hoverCompareCartesian'
                    ),
-                   toImageButtonOptions = list(format = "svg",
+                   toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
                                                filename = "ma_plot")
@@ -2373,7 +2378,7 @@ server <- function(input, output, session) {
         'hoverCompareCartesian'
       ),
       toImageButtonOptions = list(
-        format = "svg",
+        format = input$profile_format,
         width = input$profile_width,
         height = input$profile_height,
         filename = "profile_plot"
@@ -2507,6 +2512,7 @@ server <- function(input, output, session) {
     oraMaxTerm <- isolate(input$oraBar_maxTerms)
     plotWidth <- isolate(input$oraBar_width)
     plotHeight <- isolate(input$oraBar_height)
+    format <- isolate(input$oraBar_format)
 
     oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
     
@@ -2537,7 +2543,7 @@ server <- function(input, output, session) {
         'hoverCompareCartesian'
       ),
       toImageButtonOptions = list(
-        format = "svg",
+        format = format,
         width = plotWidth,
         height = plotHeight,
         filename = "ora_barplot"
