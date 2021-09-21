@@ -219,6 +219,9 @@ getVolcanoPlotData <-
     ),
     colnames(data)
   )
+  
+  if (length(relIdx) < 1) return(NULL)
+  
   comp <- data[, c(geneIdx, relIdx)]
   colnames(comp) <-
     gsub(paste0("_", comparison) ,
