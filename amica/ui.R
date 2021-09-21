@@ -1057,6 +1057,20 @@ settings in a tab-separated  format that can be shared  with collaborators."
         title = 'Differential abundance',
         value = 'quanttab',
         h2("Analyze differentially abundant proteins"),
+        
+        conditionalPanel(
+         "output.multiAmicasInput",
+         selectInput("selectedDataset", 
+                      "Which data set to analzye?",
+                      choices = c("original_data",
+                                  "multiple_amica_data"),
+                      selected = "original_data",
+                     multiple = F),
+         actionButton("submitDatasetSelection", "Submit"),
+         verbatimTextOutput("summaryLoadedDataSet")
+        ),
+        
+        
         br(),br(),br(),
         actionButton("showTutorial", "Tutorial", icon = icon("info") ),
         br(),br(),br(),
@@ -1713,68 +1727,64 @@ settings in a tab-separated  format that can be shared  with collaborators."
           )
         ),
         footer()
+      ),
+      tabPanel(
+        title = 'Compare amica datasets',
+        value = 'comparemicatab',
+
+                          fluidRow(
+                            column(
+                              width = 6,
+                              radioButtons(
+                                inputId = "amicaCompareSource",
+                                label = "Select the file input.",
+                                choices = c(#"Load in example" = "example",
+                                            "Upload amica file" = "amica")
+                              ),
+                              conditionalPanel(
+                                condition = "input.amicaCompareSource == 'amica'",
+                                fileInput("amicaFile2", "Upload amica_proteinGroups.txt.",
+                                          width = "60%"),
+                                helpText(
+                                  "Have you run amica before and want to compare it to the currently loaded in dataset?"
+                                )
+                              ),
+
+                              radioButtons(
+                                'mergeKey',
+                                'Key column',
+                                c('Gene.names', 'ProteinIDs'),
+                                selected = 'Gene.names'
+                              ),
+                              helpText(
+                                'This column determines the key that is used to merge the experiments.
+                                  Use "ProteinIDs" when both experiments used the same search database.
+                                           Use "Gene.names" when you want to compare experiments from different origins (e.g different organisms)'
+                              )
+                            ),
+
+                            column(
+                              width = 6,
+                              textInput("suffix1", "Suffix for original input", value = "exp1"),
+                              helpText(
+                                'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "AP-MS" (without the quotation mark) if your first experiment was of that kind.'
+                              ),
+                              textInput("suffix2", "Suffix for uploaded input", value = "exp2"),
+                              helpText(
+                                'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "TurboID" (without the quotation mark) if your first experiment was of that kind.'
+                              ),
+                              textInput("subPattern", "Pattern to substitute in ProteinID column", value = ";"),
+                              helpText(
+                                'Everything after the pattern will be removed. You might have the case where "ProteinA" is the stable id in your original data, while the uploaded file contains the id "ProteinA;ProteinB". The pattern ";" (enter without the quotation mark) would remove ";ProteinB".'
+                              ),
+                              actionButton("submitAmicaComparisons", strong("Submit"))
+                            )
+                          ),
+        verbatimTextOutput("summaryMergedAmica")
       )
-      # tabPanel(
-      #   title = 'Compare amica datasets',
-      #   value = 'comparemicatab',
-      #   
-      #   bsCollapse(
-      #     id = "collapseUpload",
-      #     open = "Upload amica",
-      #     bsCollapsePanel("Toggle Upload",
-      #                     style = "info",
-      #                     fluidRow(
-      #                       column(
-      #                         width = 6,
-      #                         radioButtons(
-      #                           inputId = "amicaCompareSource",
-      #                           label = "Select the file input.",
-      #                           choices = c(#"Load in example" = "example",
-      #                                       "Upload amica file" = "amica")
-      #                         ),
-      #                         conditionalPanel(
-      #                           condition = "input.amicaCompareSource == 'amica'",
-      #                           fileInput("amicaFile2", "Upload amica_proteinGroups.txt.",
-      #                                     width = "60%"),
-      #                           helpText(
-      #                             "Have you run amica before and want to compare it to the currently loaded in dataset?"
-      #                           )
-      #                         ),
-      #                         
-      #                         radioButtons(
-      #                           'mergeKey',
-      #                           'Key column',
-      #                           c('Gene.names', 'ProteinIDs'),
-      #                           selected = 'Gene.names'
-      #                         ),
-      #                         helpText(
-      #                           'This column determines the key that is used to merge the experiments.
-      #                             Use "ProteinIDs" when both experiments used the same search database.
-      #                                      Use "Gene.names" when you want to compare experiments from different origins (e.g different organisms)'
-      #                         )
-      #                       ),
-      #                       
-      #                       column(
-      #                         width = 6,
-      #                         textInput("suffix1", "Suffix for original input", value = "exp1"),
-      #                         helpText(
-      #                           'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "AP-MS" (without the quotation mark) if your first experiment was of that kind.'
-      #                         ),
-      #                         textInput("suffix2", "Suffix for uploaded input", value = "exp2"),
-      #                         helpText(
-      #                           'Enter a suffix to better distinguish the column names of the experiments. For example you could enter "TurboID" (without the quotation mark) if your first experiment was of that kind.'
-      #                         ),
-      #                         textInput("subPattern", "Pattern to substitute in ProteinID column", value = ";"),
-      #                         helpText(
-      #                           'Everything after the pattern will be removed. You might have the case where "ProteinA" is the stable id in your original data, while the uploaded file contains the id "ProteinA;ProteinB". The pattern ";" (enter without the quotation mark) would remove ";ProteinB".'
-      #                         ),
-      #                         actionButton("submitAmicaComparisons", strong("Submit"))
-      #                       )
-      #                     ))
-      #   ),
       #   
       #   
-      #   verbatimTextOutput("summaryMergedAmica"),
+      #   
       #   
       #   
       #   shinyjs::hidden(
