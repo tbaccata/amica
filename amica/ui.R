@@ -1780,257 +1780,101 @@ settings in a tab-separated  format that can be shared  with collaborators."
                               actionButton("submitAmicaComparisons", strong("Submit"))
                             )
                           ),
-        verbatimTextOutput("summaryMergedAmica")
+        verbatimTextOutput("summaryMergedAmica"),
+        
+        shinyjs::hidden(
+          div(
+            id = "compareAmicaInput",
+            uiOutput('download_merged_amica'),
+            br(),
+            br(),
+            br(),
+            inline(uiOutput("assayNamesAmicas")),
+            
+            fluidRow(
+              column(
+                width = 6,
+                h4('Scatter plot'),
+                uiOutput("compareScatterPlotsAmica"),
+                ###
+                actionButton("scatteramicaParams", "", icon = icon("wrench")),
+                shinyjs::hidden(
+                  div(
+                    style = "display: grid;
+            grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+            grid-gap: 30px;",
+                    
+                    id = 'toggle_scatteramica_params',
+                    numericInput(
+                      "scatteramica_width",
+                      "Width in pixel.",
+                      value = 768,
+                      min = 338,
+                      max = 1352,
+                      step = 10
+                    ),
+                    numericInput(
+                      "scatteramica_height",
+                      "Height in pixel.",
+                      value = 676,
+                      min = 338,
+                      max = 1352,
+                      step = 10
+                    ),
+                    numericInput(
+                      "scatteramica_base",
+                      "Base font size in pt.",
+                      value = 14,
+                      min = 4,
+                      max = 32,
+                      step = 1
+                    )
+                  )
+                ),
+                ###
+                plotlyOutput("scatterPlotsAmica", height = 800)
+              ),
+              column(width = 6,
+                     h4("Correlation plot"),
+                     inline(actionButton("submitCorAmicas", "Plot Correlation", icon = icon("cog"))),
+                     inline(actionButton("corAmicasParams", "", icon = icon("wrench"))),
+                     shinyjs::hidden(
+                       div(
+                         style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                         
+                         id = 'toggle_corAmicas_params',
+                         numericInput(
+                           "corAmicas_width",
+                           "Width in pixel.",
+                           value = 768,
+                           min = 338,
+                           max = 1352,
+                           step = 10
+                         ),
+                         numericInput(
+                           "corAmicas_height",
+                           "Height in pixel.",
+                           value = 676,
+                           min = 338,
+                           max = 1352,
+                           step = 10
+                         ),
+                         radioButtons(
+                           "corAmicas_format",
+                           "Save image",
+                           choices = c("svg", "png"),
+                           selected = "svg"
+                         )
+                       )
+                     ),
+                     plotlyOutput("corrAmicasPlotly", height = 800)
+            )
+            )
+          )
+        ),
+        footer()
       )
-      #   
-      #   
-      #   
-      #   
-      #   
-      #   shinyjs::hidden(
-      #     div(
-      #       id = "compareAmicaInput",
-      #       
-      #       uiOutput('download_merged_amica'),
-      #       br(),
-      #       br(),
-      #       br(),
-      #       
-      #       fluidRow(
-      #         column(
-      #           width = 6,
-      #           numericInput(
-      #             "fcThresh3",
-      #             "Fold change threshold",
-      #             value = 1.5,
-      #             min = 0,
-      #             step = 0.01
-      #           ),
-      #           helpText(
-      #             "While the choice is arbitrary, lower thresholds might result in more false positives. Usual choices are between 1 and 2. You can lower the threshold and try to make sense of the resulting list of proteins (e.g if enriched terms make sense in the over-representation analysis below)."
-      #           ),
-      #           
-      #           radioButtons(
-      #             "enrichmentChoice3",
-      #             "Which proteins to chose?",
-      #             choices = c("enriched", "absolute", "reduced"),
-      #             selected = "absolute"
-      #           ),
-      #           helpText(
-      #             "If 'enriched' is selected only proteins above the FC threshold are selected. 'absolute' selects proteins above and below that negative threshold (e.g if FC-threshold equals 2 'absolute' selects proteins in the ranges [-inf - (-2)] and [2 - inf]. 'reduced' return all significant proteins below the negative FC cutoff."
-      #           )
-      #           
-      #         ),
-      #         column(
-      #           width = 6,
-      #           radioButtons(
-      #             "sigCutoffValue3",
-      #             "Significance cutoff (which value to use)",
-      #             choices = c("p-value", "adj.p-value"),
-      #             selected = "adj.p-value"
-      #           ),
-      #           helpText(
-      #             "Adjusted p-value is recommended. Raw p-value cutoffs yield many false positives and give a general trend, not any statistical significance."
-      #           )
-      #         )
-      #       ),
-      #       
-      #       # inline(actionButton("plotMultiComp", label = "Update plot")),
-      #       # inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
-      #       # inline(uiOutput("UpsetHelpBox")),
-      #       
-      #       uiOutput('upsetSelection2'),
-      #       inline(actionButton("submitMultiComp2", label = "Submit Analysis")),
-      #       inline(actionButton("upsetHelp2", icon = icon("info"), label = NULL)),
-      #       inline(uiOutput("UpsetHelpBox2")),
-      #       inline(actionButton("upsetParams2", "", icon = icon("wrench"))),
-      #       shinyjs::hidden(
-      #         div(
-      #           style = "display: grid; 
-      #     grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-      #     grid-gap: 30px;",
-      #           
-      #           id = 'toggle_upset_amicas_params',
-      #           numericInput(
-      #             "upset_amicas_width",
-      #             "Width in inch.",
-      #             value = 12,
-      #             min = 3,
-      #             max = 18,
-      #             step = 1
-      #           ),
-      #           numericInput(
-      #             "upset_amicas_height",
-      #             "Height in inch.",
-      #             value = 6,
-      #             min = 3,
-      #             max = 18,
-      #             step = 1
-      #           ),
-      #           numericInput(
-      #             "upset_amicas_pointsize",
-      #             "Size of points in matrix plot.",
-      #             value = 4,
-      #             min = 1,
-      #             max = 8,
-      #             step = 1
-      #           ),
-      #           numericInput(
-      #             "upset_amicas_ratio",
-      #             "Ratio between main bar plot to matrix plot.",
-      #             value = 0.6,
-      #             min = 0.3,
-      #             max = 0.7,
-      #             step = 0.1
-      #           ),
-      #           radioButtons(
-      #             'upset_amicas_sorted',
-      #             'How to sort bars?',
-      #             choices = c('Frequency', 'Degree'),
-      #             selected = 'Frequency'
-      #           )
-      #         )
-      #       ),
-      #       plotOutput('upsetPlotAmicas', height = 600),
-      #       uiOutput("download_button_upset_amicas"),
-      #       br(),
-      #       br(),
-      #       br(),
-      #       helpText(
-      #         "Set comparison of differentially abundant proteins from selected comparisons under selected thresholds. The dots show which sets are getting compared. A dot not connected to another dot shows the number of proteins specific to that comparisons. The top barplot depicts the number of intersecting proteins, and the barplot on the side shows how many proteins are differentially abundant in the comparison. Change the selected comparisons to your needs."
-      #       ),
-      #       h3(textOutput("compSummary2")),
-      #       br(),
-      #       verbatimTextOutput("parameterSummary2"),
-      #       br(),
-      #       div(style = 'overflow-x: scroll; max-width: 100%',
-      #           DTOutput("groupComparisonsDTamica")),
-      #       br(),
-      #       br(),
-      #       br(),
-      #       
-      #       tabsetPanel(
-      #         type = "tabs",
-      #         tabPanel(
-      #           h3("Fold change plot"),
-      #           uiOutput("foldChangeSelection2"),
-      #           radioButtons(
-      #             'imputeScatterBoolean',
-      #             'Replace missing fold changes with constant value?',
-      #             choices = c('yes', 'no'),
-      #             selected = 'no'
-      #           ),
-      #           helpText(
-      #             'If enabled proteins not quantified in one condition can be visualized in the fold change plot.'
-      #           ),
-      #           conditionalPanel(
-      #             condition = "input.imputeScatterBoolean == 'yes'",
-      #             numericInput(
-      #               "imputeScatterPlot",
-      #               "Imputation value",
-      #               value = 0,
-      #               min = -15,
-      #               max = 15,
-      #               step = 0.1
-      #             )
-      #           ),
-      #           actionButton("sumbitFoldChangePlot2", label = "Compare fold changes"),
-      #           actionButton(
-      #             "FoldChangePlotHelp2",
-      #             icon = icon("info"),
-      #             label = NULL
-      #           ),
-      #           uiOutput("FoldChangePlotHelpBox2"),
-      #           ###
-      #           actionButton("fcamicaParams", "", icon = icon("wrench")),
-      #           shinyjs::hidden(
-      #             div(
-      #               style = "display: grid; 
-      #     grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-      #     grid-gap: 30px;",
-      #               
-      #               id = 'toggle_fcamica_params',
-      #               numericInput(
-      #                 "fcamica_width",
-      #                 "Width in pixel.",
-      #                 value = 768,
-      #                 min = 338,
-      #                 max = 1352,
-      #                 step = 10
-      #               ),
-      #               numericInput(
-      #                 "fcamica_height",
-      #                 "Height in pixel.",
-      #                 value = 676,
-      #                 min = 338,
-      #                 max = 1352,
-      #                 step = 10
-      #               ),
-      #               numericInput(
-      #                 "fcamica_base",
-      #                 "Base font size in pt.",
-      #                 value = 14,
-      #                 min = 4,
-      #                 max = 32,
-      #                 step = 1
-      #               )
-      #             )
-      #           ),
-      #           ###
-      #           
-      #           fluidRow(
-      #             column(width = 1),
-      #             column(width = 10,
-      #                    plotlyOutput("foldChangePlot2", height = 600)),
-      #             column(width = 1)
-      #           )
-      #           
-      #         ),
-      #         tabPanel(
-      #           h3('Scatter plot'),
-      #           uiOutput("compareScatterPlotsAmica"),
-      #           ###
-      #           actionButton("scatteramicaParams", "", icon = icon("wrench")),
-      #           shinyjs::hidden(
-      #             div(
-      #               style = "display: grid; 
-      #     grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-      #     grid-gap: 30px;",
-      #               
-      #               id = 'toggle_scatteramica_params',
-      #               numericInput(
-      #                 "scatteramica_width",
-      #                 "Width in pixel.",
-      #                 value = 768,
-      #                 min = 338,
-      #                 max = 1352,
-      #                 step = 10
-      #               ),
-      #               numericInput(
-      #                 "scatteramica_height",
-      #                 "Height in pixel.",
-      #                 value = 676,
-      #                 min = 338,
-      #                 max = 1352,
-      #                 step = 10
-      #               ),
-      #               numericInput(
-      #                 "scatteramica_base",
-      #                 "Base font size in pt.",
-      #                 value = 14,
-      #                 min = 4,
-      #                 max = 32,
-      #                 step = 1
-      #               )
-      #             )
-      #           ),
-      #           ###
-      #           plotlyOutput("scatterPlotsAmica", height = 600)
-      #         )
-      #       )
-      #     )
-      #   ),
-      #   footer()
-      # )
     )
   )
