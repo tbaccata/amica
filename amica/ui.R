@@ -1057,27 +1057,25 @@ settings in a tab-separated  format that can be shared  with collaborators."
         title = 'Differential abundance',
         value = 'quanttab',
         h2("Analyze differentially abundant proteins"),
-        
-        conditionalPanel(
-         "output.multiAmicasInput",
-         selectInput("selectedDataset", 
-                      "Which data set to analzye?",
-                      choices = c("original_data",
-                                  "multiple_amica_data"),
-                      selected = "original_data",
-                     multiple = F),
-         actionButton("submitDatasetSelection", "Submit"),
-         verbatimTextOutput("summaryLoadedDataSet")
-        ),
-        
-        
-        br(),br(),br(),
-        actionButton("showTutorial", "Tutorial", icon = icon("info") ),
-        br(),br(),br(),
         p(
           "Get an overview, compare multiple conditions, find proteins specific 
           to certain conditions and find functionally related biological terms."
         ),
+        br(),br(),br(),
+        actionButton("showTutorial", "Tutorial", icon = icon("info") ),
+        br(),br(),br(),
+        conditionalPanel(
+          "output.multiAmicasInput",
+          selectInput("selectedDataset", 
+                      "Which data set to analzye?",
+                      choices = c("original_data",
+                                  "multiple_amica_data"),
+                      selected = "original_data",
+                      multiple = F),
+          actionButton("submitDatasetSelection", "Submit"),
+          verbatimTextOutput("summaryLoadedDataSet")
+        ),
+        br(),br(),br(),
         wellPanel(
           h3("Global parameters"),
           
@@ -1445,10 +1443,16 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   ),
                   actionButton("submitHeatmap", strong("Submit"))
                 ),
-                shinyjs::hidden(div(
-                  id = 'hide_heatmap_before_submit',
-                  plotlyOutput("compareHeatmap", height = 800, width = "auto"), #height = "auto"),
-                ))
+                shinyjs::hidden(div(id = 'hide_heatmap_before_submit',
+                                    fluidRow(
+                                      column(width = 2),
+                                      column(
+                                        width = 8,
+                                        plotlyOutput("compareHeatmap", height = 800, width = "auto"),
+                                        #height = "auto"),
+                                      ),
+                                      column(width = 2)
+                                    )))
               ),
               
               tabPanel(
@@ -1521,7 +1525,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                 fluidRow(
                   column(width = 1),
                   column(width = 10,
-                         plotlyOutput("foldChangePlot", height = 600)),
+                         plotlyOutput("foldChangePlot", height = 800)),
                   column(width = 1)
                 )
                 
@@ -1591,7 +1595,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   )
                 ),
                 ###
-                plotlyOutput("profilePlot", height = 600),
+                plotlyOutput("profilePlot", height = 800),
                 div(style = 'overflow-x: scroll; max-width: 100%',
                     DTOutput("geneSummary"))
               ),
@@ -1611,7 +1615,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   )
                 ),
                 inline(uiOutput("download_button_spec_network")),
-                visNetworkOutput("network", width = "100%", height = "600px")
+                visNetworkOutput("network", width = "100%", height = "1000px")
               )
             ),
             
@@ -1650,9 +1654,10 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   type = "tabs",
                   tabPanel(
                     h3("Manhattan plot"),
-                    #fluidRow(
-                             plotlyOutput("gostplot", height = 800),
-                    #)
+                    fluidRow(column(width = 2),
+                             column(width = 8,
+                                    plotlyOutput("gostplot", height = 800)),
+                             column(width = 2))
                   ),
                   tabPanel(
                     h3("Bar plot"),

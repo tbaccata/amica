@@ -3083,7 +3083,7 @@ server <- function(input, output, session) {
 
     pu <- pu + geom_point(color=clrs)  +
       geom_smooth(method='lm', se = F, color="#fa9fb5") + labs(x = paste0(assayNameAmicas, ' ', xvar, ' (log2)'),
-                                                               y = paste0(assayNameAmicas, ' ', yvar, '(log2)'))
+                                                               y = paste0(assayNameAmicas, ' ', yvar, ' (log2)'))
     p <- ggplotly(pu)
     print(
       p  %>% config(
