@@ -120,12 +120,9 @@ server <- function(input, output, session) {
   shinyjs::onclick("upsetParams",
                    shinyjs::toggle(id = "toggle_upset_params"))
   
-  shinyjs::onclick("upsetParams2",
-                   shinyjs::toggle(id = "toggle_upset_amicas_params"))
-  
-  
-  
-  
+  shinyjs::onclick("corAmicasParams",
+                   shinyjs::toggle(id = "toggle_corAmicas_params"))
+
   ### RESET 
   
   observeEvent(input$resetAnalysis,{
@@ -357,7 +354,7 @@ server <- function(input, output, session) {
     
     selectizeInput(
       "quantIntensity",
-      "Which intensities should be quantified?.",
+      "Which intensities should be quantified?",
       intensities,
       multiple = F,
       selected = selected
@@ -1078,7 +1075,10 @@ server <- function(input, output, session) {
   
   output$assayNames <- renderUI({
     req(reacValues$proteinData)
-    selectInput("assayNames", "Which intensities do you want to plot?", c(assayNames(reacValues$proteinData)), selected = "ImputedIntensity" )
+    selectInput("assayNames",
+                "Which intensities do you want to plot?",
+                c(assayNames(reacValues$proteinData)),
+                selected = "ImputedIntensity")
   })
   
   output$comparisons <- renderUI({
@@ -2103,10 +2103,6 @@ server <- function(input, output, session) {
         )
       }
       
-      #pu <- pu + ggtitle(expression(txt)) + geom_text(x = 25, y = 300, label = txt, parse = TRUE)
-      
-      # pu <- pu + geom_smooth(method = "lm", se=FALSE, color="#fa9fb5", formula = y ~ x)
-      
       pu <- pu + geom_text(
         data = subset(plotData, show_id),
         aes(!!sym(paste0(logfcPrefix, selection[1])),
@@ -2115,7 +2111,6 @@ server <- function(input, output, session) {
         #hjust=0, vjust=0
         ,position = position_jitter(width=0.25,height=0.25)
       )
-      
     })
     
     p <- ggplotly(pu, source = "subset") %>% layout(dragmode = "select")
@@ -2187,12 +2182,8 @@ server <- function(input, output, session) {
   
   output$volcanoPlot <- renderPlotly({
     input$maVolcanoSubmit
-    #input$maVolcanoPlot
     req(reacValues$dataComp)
-    # input$maVolcanoSubmit
     sample <- isolate(input$maVolcanoSampleSelect)
-    # pltData <- isolate(volcanoPlotData())
-    # matrixSet <- isolate(enrichedMatrixSet())
     validate(need(length(grep(sample, names(reacValues$dataComp))) > 0,""))
     
     fontsize <- isolate(input$volcano_base)
@@ -2213,9 +2204,7 @@ server <- function(input, output, session) {
       c2 <- pal[2]
     }
     pcols <- c(c1,c2,"red")
-
     setChoice <- "union"#isolate(input$setChoice)
-    
     validate(need(!is.null(sample) & sample!="" & length(sample)>0, "Please select a group comparison."))
     
     pltData <- volcanoPlotData()
@@ -2285,10 +2274,7 @@ server <- function(input, output, session) {
     }
     sigCutoffValue <- isolate(input$sigCutoffValue)
     reacValues$sigCutoffValue <- sigCutoffValue
-    
     sample <- isolate(input$maVolcanoSampleSelect)
-    #pltData <- isolate(volcanoPlotData())
-    #matrixSet <- isolate(enrichedMatrixSet())
     
     reacValues$dataComp <-
       getComparisonsData2(reacValues$dataLimma,
@@ -2302,7 +2288,6 @@ server <- function(input, output, session) {
   
   output$maplot <- renderPlotly({
     input$maVolcanoSubmit
-    #input$maVolcanoPlot
     req(reacValues$dataComp)
     sample <- isolate(input$maVolcanoSampleSelect)
     fontsize <- isolate(input$volcano_base)
@@ -2351,9 +2336,7 @@ server <- function(input, output, session) {
       
       p <- p + geom_text(
         data = subset(pltData, show_id),
-        aes(logFC, AveExpr, label = Gene.names)
-        #hjust=0, vjust=0
-        ,
+        aes(logFC, AveExpr, label = Gene.names),
         position = position_jitter(width = 0.25, height = 0.25)
       ) + xlab(xText)
     })
@@ -2389,9 +2372,6 @@ server <- function(input, output, session) {
     )
   })
   
-  
-  
-  
   output$profilePlot <- renderPlotly({
     req(reacValues$dataLimma)
     req(input$selectProfilePlotGene)
@@ -2402,9 +2382,7 @@ server <- function(input, output, session) {
                          plot a profile plot") ))
     
     rowIdx <- which(rowData(reacValues$proteinData)[[geneName]]==input$selectProfilePlotGene)
-    
-    
-    
+
     object <- toLongFormat(
       assay(reacValues$proteinData, "ImputedIntensity")[rowIdx, ],
       reacValues$proteinData,
@@ -2415,7 +2393,6 @@ server <- function(input, output, session) {
     
     stats <- Rmisc::summarySE(object, measurevar="value", groupvars=c("rowname","group"))
     stats <- stats[!is.na(stats$value),]
-    
     names(stats)[which(names(stats)=="rowname")] <- "Protein.IDs"
     
     p <- ggplot(stats, aes(x = group, y = value, color = Protein.IDs)) +
@@ -2457,7 +2434,6 @@ server <- function(input, output, session) {
     req(reacValues$dataLimma)
     
     idx <- which(reacValues$filtData$Gene.names==input$selectProfilePlotGene)
-    
     hasPadj <- ifelse(length(grep(padjPrefix, names(reacValues$dataLimma)))>0, TRUE, FALSE )
     
     subSelection <-
@@ -2511,13 +2487,6 @@ server <- function(input, output, session) {
     #sources <- c("GO:MF","GO:CC","GO:BP","KEGG","REAC","CORUM","WP", "HPA", "TF")
     sources <- c("GO:MF","GO:CC","GO:BP","KEGG","REAC","CORUM","WP")
 
-    # if (organism == "mmusculus") {
-    #   gprofiler2::set_base_url("http://biit.cs.ut.ee/gprofiler_archive3/e102_eg49_p15")
-    # } else {
-    #   gprofiler2::set_base_url("http://biit.cs.ut.ee/gprofiler")
-    # }
-    
-    
     withProgress(message = 'Computing ORA ', {
       reacValues$dataGprofiler <- gost(
         query = queryGenes,
@@ -2527,15 +2496,10 @@ server <- function(input, output, session) {
         exclude_iea = T,
         significant = input$significantORA
       )
-      
       incProgress(1/1.01, detail = paste("Finished!"))
-      
     })
     
-    
-    
     reacValues$GostPlot <- reacValues$dataGprofiler
-    
     reacValues$dataGprofiler <- reacValues$dataGprofiler$result
     
     cols <- c(
@@ -2557,7 +2521,6 @@ server <- function(input, output, session) {
       toggle(id = 'hide_ora_before_submit', anim = T)
     }
   })
-  
   
   output$gostplot <- renderPlotly({
     req(reacValues$GostPlot )
@@ -2684,7 +2647,6 @@ server <- function(input, output, session) {
           fontsize_row = fontsize
         )
       )
-      
       dev.off()
     }
   )
@@ -2742,15 +2704,12 @@ server <- function(input, output, session) {
       "Select at least 2 groups for the heatmap.",
       reacValues$expDesign$groups,
       multiple = T
-      #, options = list(minItems = 2)
     )
   })
   
   values <- reactiveValues(networkData = NULL)
   
-  
   ppi <- reactive({
-    #read_graph("data/Human_Interactome_high.gml", format="gml")
     simplify(read_graph('data/intact_weighted.edgelist', format="ncol", directed=F))
   })
   
@@ -2777,8 +2736,7 @@ server <- function(input, output, session) {
                           myScatterColors())
     nodes <- nw.data[[1]]
     edges <- nw.data[[2]]
-    
-    #idxs <- match(nodes$label, V(ppi() )$label)
+
     idxs <- match(nodes$label, V(ppi() )$name)
     idxs <- idxs[!is.na(idxs)]
     
@@ -2947,14 +2905,28 @@ server <- function(input, output, session) {
     sourcePath <- input$amicaFile2$datapath
     
     amicaData2 <- read.delim(sourcePath, header=T, sep="\t", stringsAsFactors = F)
+    if ("Intensity" %in% names(amicaData2)) {
+      amicaData2$Intensity <- NULL
+    }
+    if ("iBAQ" %in% names(amicaData2)) {
+      amicaData2$iBAQ <- NULL
+    }
+    if ("iBAQ.peptides" %in% names(amicaData2)) {
+      amicaData2$iBAQ.peptides <- NULL
+    }
+    
     amicaData2 <- amicaData2[amicaData2$quantified=="+",]
-    amicaData2 <- amicaData2[, grep("Majority.protein.IDs|Gene.names|ImputedIntensity_|__vs__", colnames(amicaData2))]
-    
-    
-    
-    tmpInts <-
-      assay(reacValues$proteinData, 'ImputedIntensity')[isQuantRnames(reacValues$proteinData),]
-    colnames(tmpInts) <- paste0("ImputedIntensity_", colnames(tmpInts))
+    amicaData2 <- amicaData2[, grep("Majority.protein.IDs|Gene.names|Intensity|iBAQ|__vs__", colnames(amicaData2))]
+
+    names <- assayNames(reacValues$proteinData)
+    tmpInts <- assay(reacValues$proteinData, names[1])[isQuantRnames(reacValues$proteinData),]
+    names <- names[2:length(names)]
+    for (idx in seq_along(names)) {
+      name <- names[idx]
+      df <- assay(reacValues$proteinData, name)[isQuantRnames(reacValues$proteinData),]
+      colnames(df) <- paste0(name, "_", colnames(df))
+      tmpInts <- cbind(tmpInts, df)
+    }
     
     premerged <-
       cbind(reacValues$dataLimma, tmpInts)
@@ -2973,9 +2945,7 @@ server <- function(input, output, session) {
     TRUE
   })
   outputOptions(output, "multiAmicasInput", suspendWhenHidden = FALSE)
-    
-  
-  
+
   ####
   
   output$download_merged_amica <- renderUI({
@@ -2992,9 +2962,7 @@ server <- function(input, output, session) {
   )
   
   ####
-  
-  
-  
+
   output$summaryMergedAmica <- renderText({
     req(reacValues$combinedData)
     paste0(
@@ -3008,7 +2976,6 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$submitDatasetSelection,{
-
     if (input$selectedDataset == "original_data") {
       if (reacValues$compareAmicaSelected == TRUE) {
         tmp <- reacValues$dataLimma
@@ -3032,7 +2999,6 @@ server <- function(input, output, session) {
         comps <-
           grep(logfcPrefix, colnames(reacValues$dataLimma), value = T)
         reacValues$reacConditions <- gsub(logfcPrefix, "", comps)
-        
         reacValues$compareAmicaSelected <- TRUE
       }
     }
@@ -3048,251 +3014,36 @@ server <- function(input, output, session) {
     }
     out
   })
+
   
-  
-  # upset2
-  
-  enrichedMatrixSetAmicas <- reactive({
+  output$assayNamesAmicas <- renderUI({
     req(reacValues$combinedData)
-    matrixData <-
-      generateEnrichedMatrix(
-        reacValues$combinedData,
-        #reacValues$dataLimma[rownames(reacValues$dataComp), ],
-        input$enrichmentChoice3,
-        input$sigCutoffValue3,
-        input$fcThresh3
-      )
-    as.data.frame(matrixData)
-  })
-  
-  
-  plotUpsetAmicas <- function() {
-    selection <- isolate(input$upsetSelection2)
-    compMatrix <- isolate(enrichedMatrixSetAmicas() )
     
-    ps <- isolate(input$upset_amicas_pointsize)
-    ratio <- isolate(input$upset_amicas_ratio)
-    upset_sorted <- isolate(input$upset_sorted)
-    
-    upset_sorted <- ifelse(upset_sorted == 'Degree', 'degree', 'freq')
-    
-    validate(need((length(selection) > 1), "Please enter at least two comparisons."))
-    
-    
-    mb.ratio <- c(ratio, 1 - ratio)
-    
-    upset(
-      compMatrix,
-      sets = selection,
-      mb.ratio = mb.ratio,
-      order.by = upset_sorted,
-      #set_size.numbers_size = 8,
-      #set_size.show = T,
-      text.scale = c(2, 2,
-                     2, 2,
-                     2, 3),
-      point.size = ps
-    )
-  }
-  
-  ### amica comparison upset
-  output$upsetPlotAmicas <- renderPlot({
-    input$submitMultiComp2
-    
-    plotUpsetAmicas()
-  })
-  
-  output$download_button_upset_amicas <- renderUI({
-    #req(upsetPlot())
-    downloadButton("download_upset_amicas", "Download UpSet plot")
-  })
-  
-  output$download_upset_amicas <- downloadHandler(
-    filename = function() {
-      paste("upset_plot_amicas.pdf")
-    },
-    content = function(file) {
-      pdf(file, width = input$upset_amicas_width, height = input$upset_amicas_height, onefile = F)
-      print(plotUpsetAmicas())
-      dev.off()
+    tmp <- grep("Intensity", names(reacValues$combinedData), value = T)
+    prefixes <- unique(gsub("Intensity.*", "Intensity", tmp))
+    if (length(grep("iBAQ", names(reacValues$combinedData))) > 0 ||
+        length(grep("iBAQ", assayNames(reacValues$proteinData))) > 0) {
+      prefixes <- c(prefixes, "iBAQ")
     }
-  )
-  
-  
-  output$upsetSelection2 <- renderUI({
-    req(reacValues$combinedData)
-    samples <-
-      colnames(reacValues$combinedData)[grep(logfcPrefix, colnames(reacValues$combinedData))]
-    samples <- gsub(logfcPrefix, "", samples)
-    selectInput("upsetSelection2", "Compare the overlap between comparisons.", c("",samples), multiple = T, selected = NULL)
+    selectInput("assayNamesAmicas",
+                "Which intensities do you want to plot?",
+                prefixes,
+                selected = "ImputedIntensity")
   })
   
-  
-  output$groupComparisonsDTamica <- renderDT({
-    req(enrichedMatrixSetAmicas())
-    
-    if (is.null(input$upsetSelection2)) return(NULL)
-    reacValues$dataCompAmica  <- getComparisonsData2(
-      reacValues$combinedData,
-      enrichedMatrixSetAmicas(),
-      "union",#input$setChoice3,
-      input$upsetSelection2
-    )
-    
-    validate(need(
-      nrow(reacValues$dataCompAmica) >= 1,
-      paste0(
-        "Need more than ",
-        nrow(reacValues$dataCompAmica),
-        " proteins selected. Apply less stringent thresholds."
-      )
-    ))
-    
-    selection <- gsub(logfcPrefix, "", grep(logfcPrefix, names(reacValues$dataCompAmica), value = T) )
-    
-    tmp <- enrichedMatrixSetAmicas()[row.names(enrichedMatrixSetAmicas()) %in% 
-                                       row.names(reacValues$dataCompAmica),selection, drop = F]
-    toAdd <- as.data.frame(ifelse(tmp==1, "yes", "no"))
-    names(toAdd) <- paste0("significant_", names(toAdd))
-    tmp <- reacValues$dataCompAmica
-    
-    idx <- ncol(tmp)
-    tmp <- cbind(tmp, toAdd)
-    tmp <- tmp[, c(1,(idx+1):ncol(tmp), 2:idx)]
-    
-    datatable(
-      tmp, #reacValues$dataCompAmica,
-      filter = "top",
-      rownames = F,
-      options = list(
-        dom = 'Bfrtip',
-        pageLength = 10,
-        autoWidth = TRUE,
-        search = list(regex = TRUE),
-        #scrollX = TRUE,
-        #scroller = TRUE,
-        buttons = c('csv')
-        #fixedColumns = list(leftColumns = 1)
-      )
-    )
-  })
-  
-  ### FOLD CHANGE PLOT AMICA COMPARISONS
-  output$foldChangeSelection2 <- renderUI({
-    req(reacValues$combinedData)
-    
-    samples <-
-      colnames(reacValues$combinedData)[grep(logfcPrefix, colnames(reacValues$combinedData))]
-    samples <- gsub(logfcPrefix, "", samples)
-    
-    selectizeInput(
-      "foldChangeSelection2",
-      "Select 2 comparisons for a fold change plot",
-      c("",samples),
-      selected = NULL,
-      options = list(maxItems = 2)
-    )
-  })
-  
-  
-  get_fc_data2 <- reactive({
-    event_data("plotly_selected", source = "subset")
-  })
-  
-  output$foldChangePlot2 <- renderPlotly({
-    input$sumbitFoldChangePlot2
-    #req(input$foldChangeSelection)
-    req(reacValues$combinedData)
-    selection <- isolate(input$foldChangeSelection2)
-    compMatrix <- isolate(enrichedMatrixSetAmicas())
-    imputationValue <- isolate(input$imputeScatterPlot)
-    imputeBoolean <- isolate(input$imputeScatterBoolean)
-    
-    validate(need(length(selection)>1, "Please enter two comparisons."))
-    
-    ridx <- isolate(input$groupComparisonsDTamica_rows_all)
-    rnames <- rownames(reacValues$dataCompAmica[ridx,])
-    
-    plotData <-
-      getFCPlotData(rnames,
-                    reacValues$combinedData,
-                    compMatrix,
-                    selection)
-    
-    
-    if (imputeBoolean == 'yes' & !is.null(imputationValue)) {
-      plotData[is.na(plotData)] <- imputationValue
-    }
-    
-    plotData$show_id <- FALSE
-    if (!is.null(get_fc_data2() )) {
-      plotData[plotData$key %in% get_fc_data2()$key, "show_id"] <- TRUE
-    }
-    
-    plotData$significant <- factor(plotData$significant, levels=c('both', selection[1], selection[2], 'none') )
-    
-    labelNamesX <- paste(unlist(strsplit(selection[1], "__vs__") ), collapse = "/")
-    labelNamesX <- paste0("log2FC(", labelNamesX, ")")
-    labelNamesY <- paste(unlist(strsplit(selection[2], "__vs__") ), collapse = "/")
-    labelNamesY <- paste0("log2FC(", labelNamesY, ")")
-    
-    pu <-
-      ggplot(plotData,
-             # variable != literal in the R "programming" ""language""
-             aes(
-               x = !!sym(paste0(logfcPrefix, selection[1])),
-               y = !!sym(paste0(logfcPrefix, selection[2])),
-               label = Gene.names,
-               key = key,
-               color = significant
-             )) + geom_point() + geom_abline(intercept = 0,#intercept, 
-                                             slope = 1, #slope, 
-                                             size=1,
-                                             alpha = 0.6,
-                                             color=myScatterColors()[5]) +
-      theme_minimal(base_size = input$fcamica_base) + 
-      scale_color_manual(values=myScatterColors() ) +
-      labs(x = labelNamesX, y = labelNamesY)
-    
-    pu <- pu + geom_text(
-      data = subset(plotData, show_id),
-      aes(!!sym(paste0(logfcPrefix, selection[1])),
-          !!sym(paste0(logfcPrefix, selection[2])),
-          label = Gene.names)
-      #hjust=0, vjust=0
-      ,position = position_jitter(width=0.25,height=0.25)
-    )
-    
-    pMain <- ggplotly(pu, source = "subset") %>% layout(dragmode = "select")
-    
-    print(pMain %>% config(displaylogo = F,
-                           modeBarButtonsToRemove = list(
-                             'sendDataToCloud',
-                             'autoScale2d',
-                             'zoomIn2d',
-                             'zoomOut2d',
-                             'toggleSpikelines',
-                             'hoverClosestCartesian',
-                             'hoverCompareCartesian'
-                           ),
-                           toImageButtonOptions = list(format = "svg",
-                                                       width = input$fcamica_width,
-                                                       height = input$fcamica_height,
-                                                       filename = "foldchange_plot_experiments")
-    )
-    )
-  })
-  
-  ### AMICA COMPARISON SCATTER PLOTS
+  ## AMICA COMPARISON SCATTER PLOTS
   output$compareScatterPlotsAmica <- renderUI({
     req(reacValues$combinedData)
-    samples <- grep("ImputedIntensity",
+    req(input$assayNamesAmicas)
+    assayNameAmicas <- isolate(input$assayNamesAmicas)
+    
+    samples <- grep(paste0("^",assayNameAmicas),
                     names(reacValues$combinedData),
                     value = T
     )
-    
-    samples <- gsub("ImputedIntensity_", "", samples)
-    
+
+    samples <- gsub(paste0(assayNameAmicas, "."), "", samples)
+
     selectizeInput(
       "selectScatterSamplesAmica",
       "Select 2 samples for a scatter plot",
@@ -3301,33 +3052,38 @@ server <- function(input, output, session) {
       options = list(maxItems = 2)
     )
   })
-  
+
   output$scatterPlotsAmica <- renderPlotly({
     req(input$selectScatterSamplesAmica)
+    req(input$assayNamesAmicas)
+    assayNameAmicas <- isolate(input$assayNamesAmicas)
+    
     validate(need(length(input$selectScatterSamplesAmica)==2, ""))
     clrs <- isolate(myScatterColors())
-    
+
     plot_width <- isolate(input$scatteramica_width)
     plot_height <- isolate(input$scatteramica_height)
     fontsize <- isolate(input$scatteramica_base)
-    
+
     clrs <- clrs[1]
     xvar <- input$selectScatterSamplesAmica[1]
     yvar <- input$selectScatterSamplesAmica[2]
-    
-    
+
+    sampleX <- grep(xvar, grep(assayNameAmicas, names(reacValues$combinedData), value = T ), value = T)
+    sampleY <- grep(yvar, grep(assayNameAmicas, names(reacValues$combinedData), value = T ), value = T)
+
     pu <-
       ggplot(reacValues$combinedData,
              # variable != literal in the R "programming" ""language""
              aes(
-               x = !!sym(paste0('ImputedIntensity_', xvar)),
-               y = !!sym(paste0('ImputedIntensity_', yvar)),
+               x = !!sym(paste0(sampleX)),
+               y = !!sym(paste0(sampleY)),
                label = Gene.names
              )) + scale_color_brewer(palette="Paired") + theme_minimal(base_size = fontsize)
-    
-    pu <- pu + geom_point(color=clrs)  + 
-      geom_smooth(method='lm', se = F, color="#fa9fb5") + labs(x = paste0('Log2 ImputedIntensity ', xvar),
-                                                               y = paste0('Log2 ImputedIntensity ', yvar))
+
+    pu <- pu + geom_point(color=clrs)  +
+      geom_smooth(method='lm', se = F, color="#fa9fb5") + labs(x = paste0(assayNameAmicas, ' ', xvar, ' (log2)'),
+                                                               y = paste0(assayNameAmicas, ' ', yvar, '(log2)'))
     p <- ggplotly(pu)
     print(
       p  %>% config(
@@ -3349,9 +3105,54 @@ server <- function(input, output, session) {
         )
       )
     )
-    #geom_smooth(method='lm')
   })
   
+  
+  ### CORR PLOT
+  
+  corrBaseAmicasPlot <- eventReactive(input$submitCorAmicas,{
+    assayName <- isolate(input$assayNamesAmicas)
+
+    validate(need(assayName != "", "Please provide an intensity."))
+    
+    df <- reacValues$combinedData[, grep(paste0("^", assayName), names(reacValues$combinedData))]
+    names(df) <- gsub(paste0(assayName, "."), "", names(df))
+    corDf <- cor(df, method = "pearson", use = "complete.obs")
+
+    heatmaply_cor(
+        round(corDf, 3),
+        xlab = "", 
+        ylab = "",
+        limits = c(min(corDf)-0.003, 1),
+        plot_method = "plotly",
+        key.title = "Pearson Correlation"
+      )
+  })
+  
+  output$corrAmicasPlotly <- renderPlotly({
+    
+    withProgress(message = "Plotting correlation plot ", {
+      p <- corrBaseAmicasPlot()
+    })
+    p %>%  config(displaylogo = F,
+                  modeBarButtonsToRemove = list(
+                    'sendDataToCloud',
+                    'autoScale2d',
+                    'zoomIn2d',
+                    'zoomOut2d',
+                    'toggleSpikelines',
+                    'hoverClosestCartesian',
+                    'hoverCompareCartesian'
+                  ),
+                  toImageButtonOptions = list(format = input$corAmicas_format,
+                                              width = input$corAmicas_width,
+                                              height = input$corAmicas_height,
+                                              filename = "corrplot")
+    )
+  })
+  
+  ### 
+
   
   ### headers
   output$compSummary <- renderText({
@@ -3388,36 +3189,6 @@ server <- function(input, output, session) {
     }
   })
   
-  
-  ### SUMMARY STATS COMPARE AMICA DATA SETS
-  output$compSummary2 <- renderText({
-    req(reacValues$dataCompAmica)
-    paste0("There are ", nrow(reacValues$dataCompAmica), " proteins in your selection.")
-  })
-  
-  
-  output$parameterSummary2 <- renderText({
-    req(reacValues$dataCompAmica)
-    multi = ifelse( length(grep(logfcPrefix, names(reacValues$dataCompAmica) ) )>1, TRUE, FALSE)
-    selection <- gsub(logfcPrefix, "", grep(logfcPrefix, names(reacValues$dataCompAmica), value = T) )
-    setChoice <- ""
-    
-    if (multi) {
-      setChoice <- paste0("\n\tset choice: ", input$setChoice3)
-      selection <- paste0(selection, collapse = ", ")
-    }
-    
-    paste0(
-      "Parameters:\n\tComparison(s): ",
-      selection,
-      ".\n\tFold change threshold: ",
-      input$fcThresh3,
-      "\n\tP-Value: ", input$sigCutoffValue3,
-      "\n\tConsidered proteins (fold change): ", input$enrichmentChoice3,
-      setChoice
-    )
-  })
-
   
   output$VolcanoHelpBox <- renderUI({
     if (input$volcanoHelp %% 2){
@@ -3472,23 +3243,7 @@ server <- function(input, output, session) {
       return()
     }
   })
-  
-  output$UpsetHelpBox2 <- renderUI({
-    if (input$upsetHelp2 %% 2){
-      
-      HTML("<p>Set comparison of differentially abundant proteins from selected comparisons 
-      under selected thresholds. The dots show which sets are getting compared. 
-      A dot not connected to another dot shows the number of proteins specific to that comparisons. 
-      The top barplot depicts the number of intersecting proteins, and the barplot on 
-      the side shows how many proteins are differentially abundant in the comparison. 
-      Change the selected comparisons to your needs.
-               <a href='https://jku-vds-lab.at/tools/upset/' target='_blank'>
-      <img src='https://jku-vds-lab.at/assets/images/projects/upset/matrix.png' alt='UpSet plot explained'>
-      </a>")
-    } else {
-      return()
-    }
-  })
+
   
   output$exampleHelpBox <- renderUI({
     if (!(input$exampleHelp %% 2)){
@@ -3527,15 +3282,6 @@ server <- function(input, output, session) {
   
   output$FoldChangePlotHelpBox <- renderUI({
     if (input$FoldChangePlotHelp %% 2){
-      helpText("The fold change plot gets plotted for the proteins in your selection.
-      Points are colored on their specificity to the comparison. In some cases fold changes 
-      seem to be high in both comparisons, but are only significantly differentially abundant in one comparison.
-               ")
-    }
-  })
-  
-  output$FoldChangePlotHelpBox2 <- renderUI({
-    if (input$FoldChangePlotHelp2 %% 2){
       helpText("The fold change plot gets plotted for the proteins in your selection.
       Points are colored on their specificity to the comparison. In some cases fold changes 
       seem to be high in both comparisons, but are only significantly differentially abundant in one comparison.
@@ -3640,9 +3386,12 @@ server <- function(input, output, session) {
   # })
   
   
-  # output$isPilot <- reactive({
-  #   any(duplicated(reacValues$proteinData$groups))
-  # })
+  output$isPilot <- reactive({
+    req(reacValues$proteinData)
+    any(duplicated(colData(reacValues$proteinData)$groups))
+  })
+  outputOptions(output, "isPilot", suspendWhenHidden = FALSE)
+  
   # 
   # conditionalPanel(
   #   condition = 'output.isPilot',
