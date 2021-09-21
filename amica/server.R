@@ -38,7 +38,8 @@ server <- function(input, output, session) {
       enrichmentChoice = NULL,
       sigCutoffValue = NULL,
       nwNodes = NULL,
-      nwEdges = NULL
+      nwEdges = NULL,
+      compareAmicaSelected = FALSE
     )
   nclicks <- reactiveVal(0)
   
@@ -146,6 +147,7 @@ server <- function(input, output, session) {
     reacValues$selection <- NULL
     reacValues$dataCompAmica <- NULL
     reacValues$dataGprofiler <- NULL
+    reacValues$compareAmicaSelected <- FALSE
   })
   
   ### UPLOAD
@@ -318,7 +320,7 @@ server <- function(input, output, session) {
         #toggle('ibaq_help')
         toggle(selector = "#navbar li a[data-value=qctab]")
         toggle(selector = "#navbar li a[data-value=quanttab]")
-        # toggle(selector = "#navbar li a[data-value=comparemicatab]")
+        toggle(selector = "#navbar li a[data-value=comparemicatab]")
         toggle(id = 'hide_before_input', anim = T)
       }
     }
@@ -1877,6 +1879,16 @@ server <- function(input, output, session) {
   
   output$compareHeatmap <- renderPlotly({
     input$submitHeatmap
+    
+    validate(need(reacValues$compareAmicaSelected==FALSE,
+                  paste0("Cannot output heatmap for 'multiple_amica_upload'\n
+                         Change the data set back to the original data to 
+                         plot a heatmap.") ))
+    
+    
+    
+    
+    
     req(reacValues$dataHeatmap)
     fontsize = isolate(input$heatmap_base)
     plot_width = isolate(input$heatmap_width)
@@ -1884,6 +1896,8 @@ server <- function(input, output, session) {
     show_labels <- isolate(input$heatmap_labels)
     show_annot <- isolate(input$heatmap_annot)
     format <- isolate(input$heatmap_format)
+    
+    validate(need(all(names(reacValues$dataHeatmap) %in% colData(reacValues$proteinData)$samples),""))
     
     validate(need(
       nrow(reacValues$dataHeatmap) >= 1,
@@ -1894,30 +1908,9 @@ server <- function(input, output, session) {
       )
     ))
     
-    
     annot <- colData(reacValues$proteinData)
     row.names(annot) <- annot$samples
-    
     annot <- annot[names(reacValues$dataHeatmap),]
-    
-    groupIdx <- 1
-    mapping <- c()
-    mnames <- c()
-    relevantGroups <- annot$groups
-    for (i in seq_along(relevantGroups)) {
-      if (relevantGroups[i] %in% names(mapping)) {
-        next
-      } else {
-        color <- myGroupColors()[groupIdx]
-        group = relevantGroups[i]
-        mapping <- c(mapping, color)
-        mnames <- c(mnames, group)
-        names(mapping) <- mnames
-        groupIdx <- groupIdx + 1
-      }
-    }
-    
-    cols <- myGroupColors()[1:ncol(reacValues$dataHeatmap)]
     annot$samples <- NULL
     
     cbarTitle <-
@@ -2200,6 +2193,7 @@ server <- function(input, output, session) {
     sample <- isolate(input$maVolcanoSampleSelect)
     # pltData <- isolate(volcanoPlotData())
     # matrixSet <- isolate(enrichedMatrixSet())
+    validate(need(length(grep(sample, names(reacValues$dataComp))) > 0,""))
     
     fontsize <- isolate(input$volcano_base)
     legend_fontsize <- isolate(input$volcano_legend)
@@ -2401,7 +2395,14 @@ server <- function(input, output, session) {
   output$profilePlot <- renderPlotly({
     req(reacValues$dataLimma)
     req(input$selectProfilePlotGene)
+    
+    validate(need(reacValues$compareAmicaSelected==FALSE,
+                  paste0("Cannot output profile plot for 'multiple_amica_upload'\n
+                         Change the data set back to the original data to 
+                         plot a profile plot") ))
+    
     rowIdx <- which(rowData(reacValues$proteinData)[[geneName]]==input$selectProfilePlotGene)
+    
     
     
     object <- toLongFormat(
@@ -2933,7 +2934,7 @@ server <- function(input, output, session) {
   })
   
   #### COMPARE amica EXPERIMENTS
-  observeEvent(input$submitAmicaComparisons,{
+  observeEvent(input$submitAmicaComparisons, {
     
     suffix1 <- isolate(input$suffix1)
     suffix2 <- isolate(input$suffix2)
@@ -2967,6 +2968,12 @@ server <- function(input, output, session) {
     toggle(id = 'compareAmicaInput', anim = T)
   })
   
+  output$multiAmicasInput <- reactive({
+    req(reacValues$combinedData)
+    TRUE
+  })
+  outputOptions(output, "multiAmicasInput", suspendWhenHidden = FALSE)
+    
   
   
   ####
@@ -2998,6 +3005,50 @@ server <- function(input, output, session) {
       length(grep("logFC", colnames(req(reacValues$combinedData))))
     )
   })
+  
+  
+  observeEvent(input$submitDatasetSelection,{
+
+    if (input$selectedDataset == "original_data") {
+      if (reacValues$compareAmicaSelected == TRUE) {
+        tmp <- reacValues$dataLimma
+        reacValues$dataLimma <- reacValues$combinedData
+        reacValues$combinedData <- tmp
+        tmp <- NULL
+        
+        comps <-
+          grep(logfcPrefix, colnames(reacValues$dataLimma), value = T)
+        reacValues$reacConditions <- gsub(logfcPrefix, "", comps)
+        
+        reacValues$compareAmicaSelected <- FALSE
+      }
+    } else {
+      if (reacValues$compareAmicaSelected == FALSE) {
+        tmp <- reacValues$dataLimma
+        reacValues$dataLimma <- reacValues$combinedData
+        reacValues$combinedData <- tmp
+        tmp <- NULL
+        
+        comps <-
+          grep(logfcPrefix, colnames(reacValues$dataLimma), value = T)
+        reacValues$reacConditions <- gsub(logfcPrefix, "", comps)
+        
+        reacValues$compareAmicaSelected <- TRUE
+      }
+    }
+  })
+  
+  output$summaryLoadedDataSet <- renderText({
+    req(reacValues$combinedData)
+    out <- ""
+    if (reacValues$compareAmicaSelected) {
+      out <- paste0("Current data set: compare multiple amica files")
+    } else {
+      out <- paste0("Current data set: original upload")
+    }
+    out
+  })
+  
   
   # upset2
   
