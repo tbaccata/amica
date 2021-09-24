@@ -609,7 +609,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
             fluidRow(
               column(width = 6,
                      h4("Correlation"),
-                     
+                     uiOutput("corrSamplesInput"),
                      inline(actionButton("submitCor", "Plot Correlation", icon = icon("cog"))),
                      inline(actionButton("corHelp", icon = icon("info") , label = NULL)),
                      inline(uiOutput("corHelpBox")),
@@ -1448,7 +1448,9 @@ settings in a tab-separated  format that can be shared  with collaborators."
                                       column(width = 2),
                                       column(
                                         width = 8,
-                                        plotlyOutput("compareHeatmap", height = 800, width = "auto"),
+                                        div(style='scroll;height:800px;overflow-y: scroll;',
+                                        plotlyOutput("compareHeatmap")
+                                        )
                                         #height = "auto"),
                                       ),
                                       column(width = 2)
@@ -1841,6 +1843,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
               ),
               column(width = 6,
                      h4("Correlation plot"),
+                     uiOutput("corrAmicasSamplesInput"),
                      inline(actionButton("submitCorAmicas", "Plot Correlation", icon = icon("cog"))),
                      inline(actionButton("corAmicasParams", "", icon = icon("wrench"))),
                      shinyjs::hidden(
