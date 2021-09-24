@@ -1286,15 +1286,35 @@ server <- function(input, output, session) {
       )
   })
   
+  output$corrSamplesInput <- renderUI({
+    req(input$assayNames)
+    selectizeInput(
+      "corrSamplesInput",
+      "Press on 'Plot Correlation'.
+      Leave the input blank to plot all samples.
+      Only select specific groups when you have really have to.",
+      unique(reacValues$expDesign$groups),
+      multiple = T,
+      options = list(minItems = 2)
+    )
+  })
+  
   corrBasePlot <- eventReactive(input$submitCor,{
     assayName <- isolate(input$assayNames)
     annotSamples <- isolate(input$cor_annot)
+    groupInputs <- isolate(input$corrSamplesInput)
+    tmpCols <- colData(reacValues$proteinData)
     
     req(reacValues$uploadSuccess)
     
     validate(need(assayName != "", "Please provide an intensity."))
     
+    validate(need(length(groupInputs) > 1 | is.null(groupInputs), "Please select at least two groups. If none is selected all are considered."))
+    
+    if (is.null(groupInputs)) groupInputs <- unique(colData(reacValues$proteinData)$groups)
+    
     df <- assay(reacValues$proteinData, assayName)
+    df <- df[,tmpCols$samples[tmpCols$groups %in% groupInputs]]
     
     annot <- colData(reacValues$proteinData)
     row.names(annot) <- annot$samples 
@@ -1907,7 +1927,6 @@ server <- function(input, output, session) {
         " proteins selected. Apply less stringent thresholds."
       )
     ))
-    
     annot <- colData(reacValues$proteinData)
     row.names(annot) <- annot$samples
     annot <- annot[names(reacValues$dataHeatmap),]
@@ -1953,7 +1972,10 @@ server <- function(input, output, session) {
         )
       }
       
-      p %>%
+      calc_height <- min(15 * nrow(reacValues$dataHeatmap), 1200)
+      if (calc_height < 600) calc_height <- 600
+      
+      p %>% layout(height=calc_height) %>%
         config(displaylogo = F,
                modeBarButtonsToRemove = list(
                  'sendDataToCloud',
@@ -2888,7 +2910,10 @@ server <- function(input, output, session) {
     } else {
       out <- singleNetwork(input$edgeWeightThresh)
     }
-    out
+    out %>% visEvents(click = "function(nodes){
+                  Shiny.onInputChange('click', nodes.nodes[0]);
+                  ;}"
+    )
   })
   
   #### COMPARE amica EXPERIMENTS
@@ -3110,12 +3135,47 @@ server <- function(input, output, session) {
   
   ### CORR PLOT
   
+  output$corrAmicasSamplesInput <- renderUI({
+    req(input$assayNamesAmicas)
+    
+    assayNameAmicas <- isolate(input$assayNamesAmicas)
+    samples <- grep(paste0("^",assayNameAmicas),
+                    names(reacValues$combinedData),
+                    value = T
+    )
+    samples <- gsub(paste0(assayNameAmicas, "."), "", samples)
+    
+    selectizeInput(
+      "corrAmicasSamplesInput",
+      "Press on 'Plot Correlation'.
+      Leave the input blank to plot all samples.
+      Only select specific groups when you have really have to.",
+      samples,
+      multiple = T,
+      options = list(minItems = 2)
+    )
+  })
+  
   corrBaseAmicasPlot <- eventReactive(input$submitCorAmicas,{
     assayName <- isolate(input$assayNamesAmicas)
 
     validate(need(assayName != "", "Please provide an intensity."))
     
-    df <- reacValues$combinedData[, grep(paste0("^", assayName), names(reacValues$combinedData))]
+    groupInputs <- isolate(input$corrAmicasSamplesInput)
+
+    validate(need(length(groupInputs) > 1 | is.null(groupInputs), 
+                  "Please select at least two groups. If none is selected all are considered."))
+    
+    if (is.null(groupInputs)) {
+      samples <- grep(paste0("^",assayName),
+                      names(reacValues$combinedData),
+                      value = T
+      )
+      groupInputs <- gsub(paste0(assayName, "."), "", samples)
+    }
+
+    df <- reacValues$combinedData[, grep(assayName, names(reacValues$combinedData))]
+    df <- df[, grep(paste0(groupInputs, collapse = "|"), names(df))]
     names(df) <- gsub(paste0(assayName, "."), "", names(df))
     corDf <- cor(df, method = "pearson", use = "complete.obs")
 
