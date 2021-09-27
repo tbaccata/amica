@@ -3120,24 +3120,35 @@ server <- function(input, output, session) {
     )
   })
 
-  output$scatterPlotsAmica <- renderPlotly({
+  
+  scatterPlotsAmicaBase <- eventReactive(input$submitScatterAmicas,{
     req(input$selectScatterSamplesAmica)
     req(input$assayNamesAmicas)
     assayNameAmicas <- isolate(input$assayNamesAmicas)
+    fontsize <- isolate(input$scatteramica_base)
     
     validate(need(length(input$selectScatterSamplesAmica)==2, ""))
-    clrs <- isolate(myScatterColors())
+    colors <- isolate(myScatterColors())
 
-    plot_width <- isolate(input$scatteramica_width)
-    plot_height <- isolate(input$scatteramica_height)
-    fontsize <- isolate(input$scatteramica_base)
-
-    clrs <- clrs[1]
+    clrs <- colors[1]
     xvar <- input$selectScatterSamplesAmica[1]
     yvar <- input$selectScatterSamplesAmica[2]
 
     sampleX <- grep(xvar, grep(assayNameAmicas, names(reacValues$combinedData), value = T ), value = T)
     sampleY <- grep(yvar, grep(assayNameAmicas, names(reacValues$combinedData), value = T ), value = T)
+    
+    formula <- as.formula(paste0(sampleY, ' ~ ', sampleX))
+    fit1 <- lm(formula, data=reacValues$combinedData)
+    fit1.intercept <- fit1$coefficients[[1]]
+    fit1.slope <- fit1$coefficients[[2]]
+
+    title <-
+      paste0(signif(fit1$coef[[1]], 5), 
+             "x + ", 
+             signif(fit1$coef[[2]], 5),
+             ", r2 = ",
+             signif(summary(fit1)$r.squared, 5)
+             )
 
     pu <-
       ggplot(reacValues$combinedData,
@@ -3148,32 +3159,55 @@ server <- function(input, output, session) {
                label = Gene.names
              )) + scale_color_brewer(palette="Paired") + theme_minimal(base_size = fontsize)
 
-    pu <- pu + geom_point(color=clrs)  +
-      geom_smooth(method='lm', se = F, color="#fa9fb5") + labs(x = paste0(assayNameAmicas, ' ', xvar, ' (log2)'),
-                                                               y = paste0(assayNameAmicas, ' ', yvar, ' (log2)'))
+    pu <- pu + geom_point(color=clrs) + labs(x = paste0(assayNameAmicas, ' ', xvar, ' (log2)'),
+                                             y = paste0(assayNameAmicas, ' ', yvar, ' (log2)'))
+      
+    intercept <- 0
+    slope <- 1
+    if (input$scatteramica_showLine == "linear regression") {
+      intercept <- fit1.intercept
+      slope <- fit1.slope
+      pu <- pu + ggtitle(title)
+    } else if (input$scatteramica_showLine == "straight line") {
+      intercept <- 0
+      slope <- 1
+    }
+    
+    if (input$scatteramica_showLine != "none") {
+      pu <- pu + geom_abline(
+        intercept = intercept,
+        slope = slope,
+        size = 1,
+        alpha = 0.5,
+        color = colors[5]
+      )
+    }
+    
     p <- ggplotly(pu)
-    print(
-      p  %>% config(
-        displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
-        toImageButtonOptions = list(
-          format = "svg",
-          width = plot_width,
-          height = plot_height,
-          filename = "scatterplot_experiments"
-        )
+    p
+  })
+  
+  output$scatterPlotsAmica <- renderPlotly({
+    
+    scatterPlotsAmicaBase() %>% config(
+      displaylogo = F,
+      modeBarButtonsToRemove = list(
+        'sendDataToCloud',
+        'autoScale2d',
+        'zoomIn2d',
+        'zoomOut2d',
+        'toggleSpikelines',
+        'hoverClosestCartesian',
+        'hoverCompareCartesian'
+      ),
+      toImageButtonOptions = list(
+        format = input$scatteramica_format,
+        width = input$scatteramica_width,
+        height = input$scatteramica_height,
+        filename = "scatterplot_experiments"
       )
     )
   })
-  
   
   ### CORR PLOT
   

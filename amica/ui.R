@@ -1817,7 +1817,8 @@ settings in a tab-separated  format that can be shared  with collaborators."
                 h4('Scatter plot'),
                 uiOutput("compareScatterPlotsAmica"),
                 ###
-                actionButton("scatteramicaParams", "", icon = icon("wrench")),
+                inline(actionButton("submitScatterAmicas", "Plot scatter plot", icon = icon("cog"))),
+                inline(actionButton("scatteramicaParams", "", icon = icon("wrench"))),
                 shinyjs::hidden(
                   div(
                     style = "display: grid;
@@ -1848,6 +1849,18 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       min = 4,
                       max = 32,
                       step = 1
+                    ),
+                    radioButtons(
+                      "scatteramica_showLine",
+                      "Show line in plot?",
+                      choices = c("straight line", "none", "linear regression"),
+                      selected = "straight line"
+                    ),
+                    radioButtons(
+                      "scatteramica_format",
+                      "Save image",
+                      choices = c("svg", "png"),
+                      selected = "svg"
                     )
                   )
                 ),
