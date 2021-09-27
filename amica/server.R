@@ -11,6 +11,7 @@ server <- function(input, output, session) {
       expDesign=NULL,
       uploadSuccess=NULL,
       analysisSuccess=NULL,
+      inputParameterSummary=NULL,
       filtData = NULL,
       dataLimma = NULL,
       dataComp = NULL,
@@ -53,12 +54,8 @@ server <- function(input, output, session) {
   shinyjs::onclick("toggleAdvancedHeatmap",
                    shinyjs::toggle(id = "advancedHeatmap"))
   
-  # shinyjs::onclick("toggleAmicaInput",
-  #                  shinyjs::toggle(id = "advancedAmicaInput"))
-  
   shinyjs::onclick("heatmapParams",
                    shinyjs::toggle(id = "toggle_heatmap_params"))
-  
   
   shinyjs::onclick("toggleCompareAmicaInput",
                    shinyjs::toggle(id = "compareAmicaInput"))
@@ -129,6 +126,7 @@ server <- function(input, output, session) {
     reacValues$proteinData <- NULL
     reacValues$amicaInput <- FALSE
     reacValues$dbTool <- NULL
+    reacValues$inputParameterSummary <- NULL
     reacValues$dataHeatmap <- NULL
     reacValues$GostPlot <- NULL
     reacValues$expDesign <- NULL
@@ -149,6 +147,7 @@ server <- function(input, output, session) {
   
   ### UPLOAD
   observeEvent(input$submitAnalysis, {
+    reacValues$inputParameterSummary <- NULL
     ### EXAMPLE
     if (input$source == "example") {
       sourcePath <- "data/PXD0016455/"
@@ -370,6 +369,7 @@ server <- function(input, output, session) {
     
     if (reacValues$amicaInput == FALSE) {
       ###FILTDATA BEGIN
+      reacValues$inputParameterSummary <- NULL
       
       quantIntensity <- "LFQIntensity"
       if (is.null(input$quantIntensity) | length(input$quantIntensity)>2) {
@@ -382,6 +382,8 @@ server <- function(input, output, session) {
         quantIntensity <- input$quantIntensity
       }
       
+      reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
+                                                 "Intensities used for quantification:\t", quantIntensity, "\n")
       ### filter on values
       impDf <- assay(reacValues$proteinData, quantIntensity)
       
@@ -397,6 +399,9 @@ server <- function(input, output, session) {
         minRazor = input$minRazor
       )
       
+      reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
+                                                 "Minimum MS/MS counts:\t", input$minMSMS, "\n",
+                                                 "Minimum razour/unique peptides:\t", input$minRazor, "\n")
 
       tmp <- tryCatch({
         filterOnValidValues(
@@ -418,6 +423,11 @@ server <- function(input, output, session) {
         showNotification(paste("Filtering values..."), type = "message")
       }
       )
+      
+      reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
+                                                 "Filter on groups:\t", paste(input$filterValuesInput, collapse = ","), "\n",
+                                                 "Filter on min. value in group:\t", input$minValidValue, "\n",
+                                                 "Filter on min. value in:\t",input$validValuesGroup, "\n")
 
       rowsDf <- rowData(reacValues$proteinData)
       rowsDf$quantified <- ""
@@ -448,6 +458,10 @@ server <- function(input, output, session) {
         )
       }
       
+      reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
+                                                 "Re-normaliztion method:\t",
+                                                 input$renormalizationMethod, "\n")
+      
       normDf <- tryCatch({
         imputeIntensities(
           normDf,
@@ -468,6 +482,12 @@ server <- function(input, output, session) {
         #message("Imputing intensities...", )
       }
       )
+      
+      reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
+                                                 "Imputation method:\t",
+                                                 input$impMethod,
+                                                 "\nDownshift:\t",input$downshift,
+                                                 "\nWidth:\t",input$width,"\n")
       
       impDf[row.names(normDf),] <- normDf
       reacValues$proteinData <- setAssay(x = reacValues$proteinData, assay = impDf, assayName = "ImputedIntensity")
@@ -515,6 +535,10 @@ server <- function(input, output, session) {
         shiny:::reactiveStop(conditionMessage(cond))
       },finally = invalidateLater(1)
       )
+      
+      reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
+                                                 "Differential abundance statistics:\t",
+                                                 tool,"\n")
       
       out$Gene.names <- reacValues$filtData[,geneName, drop=T]
       
@@ -852,6 +876,12 @@ server <- function(input, output, session) {
     req(reacValues$proteinData)
     numQuant <- length(isQuantRnames(reacValues$proteinData))
     paste0("Number of quantified proteins in ImputedIntensity: ", numQuant)
+  })
+  
+  output$inputParameterSummary <- renderText({
+    req(reacValues$analysisSuccess)
+    req(reacValues$inputParameterSummary)
+    reacValues$inputParameterSummary
   })
   
   # ------------------------------------------- intensity boxplots

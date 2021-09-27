@@ -188,11 +188,6 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                          numericInput("minMSMS", "min. MSMS count", min = 1, value = 3),
                          
                          h4("Filter on valid values per group"),
-                         
-                         conditionalPanel(
-                           condition = "input.source == 'maxquant'",
-                           uiOutput("intensitySelection")
-                         ),
                          uiOutput("filterValuesInput"),
                          radioButtons(
                            "validValuesGroup",
@@ -208,6 +203,10 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                          ),
                          
                          h4("Normalization and statistical testing"),
+                         conditionalPanel(
+                           condition = "input.source == 'maxquant'",
+                           uiOutput("intensitySelection")
+                         ),
                          radioButtons(
                            "renormalizationMethod",
                            "Normalization method",
@@ -292,6 +291,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                    uiOutput("uploadSuccessMsg"),
                    uiOutput("analysisSuccessMsg"),
                    verbatimTextOutput("summaryText", placeholder = F),
+                   verbatimTextOutput("inputParameterSummary", placeholder = F),
                    
                    shinyjs::hidden(div(
                      id = 'hide_before_input',
