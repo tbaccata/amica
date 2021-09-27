@@ -603,7 +603,7 @@ mergeAmicas <-
       key2 <- toupper(exp2$Gene.names)
     }
     
-    if (!is.null(splitDelim) | splitDelim != "") {
+    if (!is.null(splitDelim) && splitDelim != "") {
       key1 <- gsub(paste0(splitDelim,".*"),"",key1)
       key2 <- gsub(paste0(splitDelim,".*"),"",key2)
     }

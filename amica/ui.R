@@ -1792,10 +1792,23 @@ settings in a tab-separated  format that can be shared  with collaborators."
         shinyjs::hidden(
           div(
             id = "compareAmicaInput",
-            uiOutput('download_merged_amica'),
-            br(),
-            br(),
-            br(),
+            fluidRow(column(width = 6,
+                            uiOutput('download_merged_amica'),),
+                     column(
+                       width = 6,
+                       HTML(
+                         '
+            <p>On this tab you can correlate samples of both data sets. <br>
+            If you go back to the "Differential Abundance" tab you see a select
+            bar at the of the page.</p>
+                 <img src="compare_amicas_tutorial/multi_amica_data.png">
+                 <p>Select "multiple_amica_input" and press the Submit button.
+                 The merged data set is now selected and you can compare multiple
+                 group comparisons across experiment.</p>
+                 '
+                       )
+                     )), 
+            br(),br(),br(),
             inline(uiOutput("assayNamesAmicas")),
             
             fluidRow(

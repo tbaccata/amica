@@ -14,6 +14,7 @@ server <- function(input, output, session) {
       inputParameterSummary=NULL,
       filtData = NULL,
       dataLimma = NULL,
+      dataLimmaOriginal = NULL,
       dataComp = NULL,
       geneNames = NULL,
       reacConditions = NULL,
@@ -40,7 +41,8 @@ server <- function(input, output, session) {
       sigCutoffValue = NULL,
       nwNodes = NULL,
       nwEdges = NULL,
-      compareAmicaSelected = FALSE
+      compareAmicaSelected = FALSE,
+      compareAmicasToggled = FALSE
     )
   nclicks <- reactiveVal(0)
   
@@ -135,6 +137,7 @@ server <- function(input, output, session) {
     reacValues$analysisSuccess <- NULL
     reacValues$filtData <- NULL
     reacValues$dataLimma <- NULL
+    reacValues$dataLimmaOriginal <- NULL
     reacValues$dataComp <- NULL
     reacValues$geneNames <- NULL
     reacValues$reacConditions <- NULL
@@ -143,6 +146,7 @@ server <- function(input, output, session) {
     reacValues$dataCompAmica <- NULL
     reacValues$dataGprofiler <- NULL
     reacValues$compareAmicaSelected <- FALSE
+    reacValues$compareAmicasToggled <- FALSE
   })
   
   ### UPLOAD
@@ -167,6 +171,7 @@ server <- function(input, output, session) {
         reacValues$proteinData <- outData$protData
         reacValues$contrastMatrix = outData$contrasts
         reacValues$dataLimma = outData$comparisons
+        reacValues$dataLimmaOriginal <- reacValues$dataLimma
         
         ### filtData
         reacValues$filtData <-
@@ -208,6 +213,7 @@ server <- function(input, output, session) {
         reacValues$proteinData <- outData$protData
         reacValues$contrastMatrix = outData$contrasts
         reacValues$dataLimma = outData$comparisons
+        reacValues$dataLimmaOriginal <- reacValues$dataLimma
         
         reacValues$amicaInput = TRUE
         reacValues$analysisSuccess <- TRUE
@@ -545,6 +551,7 @@ server <- function(input, output, session) {
       tmp <- grep(logfcPrefix, colnames(out), value = T)
       reacValues$reacConditions <- gsub(logfcPrefix, "", tmp)
       reacValues$dataLimma <- out[, c(ncol(out), 1:(ncol(out) - 1))]
+      reacValues$dataLimmaOriginal <- reacValues$dataLimma
       
       gc()
     }
@@ -831,7 +838,9 @@ server <- function(input, output, session) {
     HTML(
       "<h4>Successfully uploaded data!</h4>
       <p>
-      Open the 'Analysis' section on the sidebar and press 'Analyze'.
+      If you have uploaded an amica file format you can inspect your data 
+      in the main tab bar. <br>
+      Otherwise open the 'Analysis' section on the sidebar and press 'Analyze'.
       </p>"
     )
   })
@@ -2454,7 +2463,7 @@ server <- function(input, output, session) {
     p <- ggplot(stats, aes(x = group, y = value, color = Protein.IDs)) +
       geom_point(size = input$profile_pointsize) + 
       geom_errorbar(aes(ymin = value - se, ymax = value + se), width = .2) +
-      xlab("") + ylab("log2 Intensity") + theme_minimal(base_size = input$profile_base) + ggtitle(input$selectProfilePlotGene) + 
+      xlab("") + ylab("Intensity (log2)") + theme_minimal(base_size = input$profile_base) + ggtitle(input$selectProfilePlotGene) + 
       scale_color_manual(values=myScatterColors() ) +
       theme(axis.text.x = element_text(
         angle = 90,
@@ -2718,7 +2727,7 @@ server <- function(input, output, session) {
       "amica_proteinGroups.tsv"
     },
     content = function(file) {
-      outDf <- amicaOutput(reacValues$proteinData, reacValues$dataLimma )
+      outDf <- amicaOutput(reacValues$proteinData, reacValues$dataLimmaOriginal )
       write.table(outDf, file, row.names = F, quote = F, sep = "\t")
     }
   )
@@ -2988,7 +2997,7 @@ server <- function(input, output, session) {
     }
     
     premerged <-
-      cbind(reacValues$dataLimma, tmpInts)
+      cbind(reacValues$dataLimmaOriginal, tmpInts)
     
     reacValues$combinedData <- mergeAmicas(premerged,
                                            amicaData2,
@@ -2996,7 +3005,11 @@ server <- function(input, output, session) {
                                            delim,
                                            suffix1,
                                            suffix2)
-    toggle(id = 'compareAmicaInput', anim = T)
+    
+    if (reacValues$compareAmicasToggled == FALSE) {
+      toggle(id = 'compareAmicaInput', anim = T)
+      reacValues$compareAmicasToggled <- TRUE
+    }
   })
   
   output$multiAmicasInput <- reactive({
@@ -3008,7 +3021,7 @@ server <- function(input, output, session) {
   ####
   
   output$download_merged_amica <- renderUI({
-    downloadButton("downloadMerged", h4("Download amica output"))
+    downloadButton("downloadMerged", h4("Download merged amica files"))
   })
   
   output$downloadMerged <- downloadHandler(
@@ -3034,13 +3047,11 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(input$submitDatasetSelection,{
+  observeEvent(input$submitDatasetSelection, {
     if (input$selectedDataset == "original_data") {
       if (reacValues$compareAmicaSelected == TRUE) {
-        tmp <- reacValues$dataLimma
-        reacValues$dataLimma <- reacValues$combinedData
-        reacValues$combinedData <- tmp
-        tmp <- NULL
+        #reacValues$dataLimmaOriginal <- reacValues$dataLimma
+        reacValues$dataLimma <- reacValues$dataLimmaOriginal
         
         comps <-
           grep(logfcPrefix, colnames(reacValues$dataLimma), value = T)
@@ -3050,11 +3061,8 @@ server <- function(input, output, session) {
       }
     } else {
       if (reacValues$compareAmicaSelected == FALSE) {
-        tmp <- reacValues$dataLimma
         reacValues$dataLimma <- reacValues$combinedData
-        reacValues$combinedData <- tmp
-        tmp <- NULL
-        
+
         comps <-
           grep(logfcPrefix, colnames(reacValues$dataLimma), value = T)
         reacValues$reacConditions <- gsub(logfcPrefix, "", comps)
