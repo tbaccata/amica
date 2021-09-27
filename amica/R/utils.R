@@ -696,7 +696,23 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   
   df$nodes <-
     merge(df$nodes, cellmap, by="label", all.x = T)
-  
+
+  # convert id to integer for cytoscape  
+  df$nodes$id <- 1:nrow(df$nodes)
+  tmpFrom <- c()
+  tmpTo <- c()
+  for (idx in 1:nrow(df$edges)) {
+    from <- df$edges[idx, 'from']
+    to <- df$edges[idx, 'to']
+    fromId <- df$nodes[df$nodes$label == from, 'id']
+    toId <- df$nodes[df$nodes$label == to, 'id']
+    
+    tmpFrom[idx] <- fromId
+    tmpTo[idx] <- toId
+  }
+
+  df$edges$from <- tmpFrom
+  df$edges$to <- tmpTo
   return(df)
 }
 
