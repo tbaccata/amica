@@ -326,9 +326,17 @@ plotVolcanoPlot <- function(plt, colPalette, padjYBoolean, pointsize=2) {
            aes(
              x = logFC,
              y = nlog10_pval,
-             #fill = significant,
              color = significant,
              label = Gene.names,
+             # label = paste(
+             #   Gene.names,
+             #   '<br>',
+             #   "log2FC",
+             #   logFC,
+             #   '<br>',
+             #   'adj.p-value',
+             #   formatC(adj.P.Val, format = "e", digits = 3)
+             # ),
              key = key
            )) + geom_point(size = pointsize) + scale_color_manual(values=colPalette) +
     coord_cartesian()
