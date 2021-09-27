@@ -1897,9 +1897,8 @@ server <- function(input, output, session) {
     }
   )
   
-  output$compareHeatmap <- renderPlotly({
-    input$submitHeatmap
-    
+  compareHeatmapBase <- eventReactive(input$submitHeatmap,{
+
     validate(need(reacValues$compareAmicaSelected==FALSE,
                   paste0("Cannot output heatmap for 'multiple_amica_upload'\n
                          Change the data set back to the original data to 
@@ -1975,23 +1974,28 @@ server <- function(input, output, session) {
       calc_height <- min(15 * nrow(reacValues$dataHeatmap), 1200)
       if (calc_height < 600) calc_height <- 600
       
-      p %>% layout(height=calc_height) %>%
-        config(displaylogo = F,
-               modeBarButtonsToRemove = list(
-                 'sendDataToCloud',
-                 'autoScale2d',
-                 'zoomIn2d',
-                 'zoomOut2d',
-                 'toggleSpikelines',
-                 'hoverClosestCartesian',
-                 'hoverCompareCartesian'
-               ),
-               toImageButtonOptions = list(format = format,
-                                           width = plot_width,
-                                           height = plot_height,
-                                           filename = "heatmap")
-        )
+      p %>% layout(height=calc_height)
     })
+  })
+  
+  output$compareHeatmap <- renderPlotly({
+
+    compareHeatmapBase() %>%
+      config(displaylogo = F,
+             modeBarButtonsToRemove = list(
+               'sendDataToCloud',
+               'autoScale2d',
+               'zoomIn2d',
+               'zoomOut2d',
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             ),
+             toImageButtonOptions = list(format = input$heatmap_format,
+                                         width = input$heatmap_width,
+                                         height = input$heatmap_height,
+                                         filename = "heatmap")
+      )
   })
   
   
