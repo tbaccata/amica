@@ -1023,7 +1023,7 @@ server <- function(input, output, session) {
         ),
         legend.text = element_text(size = input$boxplot_legend),
         legend.title = element_blank()
-      ) + ylab("Log2 intensity") + xlab("")
+      ) + ylab("Intensity (log2)") + xlab("")
     
     ggplotly(p)
   })
@@ -1074,7 +1074,7 @@ server <- function(input, output, session) {
         ),
         legend.title = element_blank(),
         legend.text = element_text(size = input$density_legend),
-      ) + xlab("Log2 intensity") + ylab("Density")
+      ) + xlab("intensity (log2)") + ylab("Density")
     
     ggplotly(p) 
   })
@@ -1971,7 +1971,7 @@ server <- function(input, output, session) {
     annot$samples <- NULL
     
     cbarTitle <-
-      ifelse(reacValues$scaleHeatmap != "none", "Z-score", "log2 Intensity")
+      ifelse(reacValues$scaleHeatmap != "none", "Z-score", "Intensity (log2)")
     
     withProgress(message = "Plotting heatmap ", {
       p <- 0
@@ -2596,34 +2596,37 @@ server <- function(input, output, session) {
     # %>% layout(yaxis = list(title = '-log10(p-adj)'))
   })
   
-  output$oraBarplot <- renderPlotly({
-    input$submitORABar
+  oraBarBase <- eventReactive(input$submitORABar,{
     req(reacValues$dataGprofiler)
     orasource <- isolate(input$orasource)
     oracolor <- isolate(input$oraBar_color)
     oraMaxTerm <- isolate(input$oraBar_maxTerms)
-    plotWidth <- isolate(input$oraBar_width)
-    plotHeight <- isolate(input$oraBar_height)
-    format <- isolate(input$oraBar_format)
-
+    
     oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
     
     plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
-
+    
     validate(need(nrow(plotDf)>0, "No significant over-represented terms detected."))
-
+    
     plotDf$minusLog10p_value <- -log10(plotDf$p_value)
     plotDf <- plotDf[!duplicated(plotDf$term_name),]
     plotDf <- plotDf[order(plotDf$minusLog10p_value),]
     plotDf <- head(plotDf, min(nrow(plotDf), oraMaxTerm))
     plotDf$term_name <- factor(plotDf$term_name, levels = plotDf$term_name)
-
+    
     p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
       geom_bar(stat = "identity", fill=oracolor, width = 0.9)  + xlab("") +
       ylab("-log10(p-value)") +
       theme_minimal( base_size = 14) + coord_flip()
+    
+    ggplotly(p)
+  })
+  
+  output$oraBarplot <- renderPlotly({
+    
 
-    ggplotly(p) %>% config(
+    
+    oraBarBase() %>% config(
       displaylogo = F,
       modeBarButtonsToRemove = list(
         'sendDataToCloud',
@@ -2635,9 +2638,9 @@ server <- function(input, output, session) {
         'hoverCompareCartesian'
       ),
       toImageButtonOptions = list(
-        format = format,
-        width = plotWidth,
-        height = plotHeight,
+        format = input$oraBar_format,
+        width = input$oraBar_width,
+        height = input$oraBar_height,
         filename = "ora_barplot"
       )
     )
