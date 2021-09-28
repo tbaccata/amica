@@ -8,7 +8,7 @@ amica: an interactive and user-friendly web-platform for the analysis of proteom
 ![amica_logo](/www/ga_amica.png)
 
 
-## Raison d'etre
+## Functionality
 
 - Faciliting interactive analyses and visualizations with just a couple of clicks
 
@@ -72,7 +72,7 @@ amica: an interactive and user-friendly web-platform for the analysis of proteom
 - Differential abundance analysis for combined amica data set
 
 
-### Local installation
+## Local installation
 
 - Using git and Rstudio
 ```
@@ -100,12 +100,12 @@ git clone https://github.com/tbaccata/amica.git
 ## Move to the folder
 cd amica
 
-## Build LFQ-Analyst (Any name after -t)
-> docker build -t amica .
+## Build amica, the -t flag is the name of the docker image
+docker build -t amica .
 
 ## Start amica from terminal
 
-> docker run -p 3838:3838 amica
+docker run -p 3838:3838 amica
 
 ## Open local interface
 
@@ -114,9 +114,37 @@ https://localhost:3838/amica
 
 ```
 
+## Deploy amica with ShinyProxy 
 
+When deploying a Shiny application with ShinyProxy, the application is simply bundled as an R package and installed into a Docker image. Every time a user runs an application, a container spins up and serves the application.
 
+Detailed documentation is provided here (https://www.shinyproxy.io/documentation/).
 
+A minimum working example based on documentation (https://www.shinyproxy.io/documentation/deployment):
 
+```
 
+## install docker image for amica
+git clone https://github.com/tbaccata/amica.git
+cd amica
+docker build -t amica .
+ 
+## download latest version and install it
+wget https://www.shinyproxy.io/downloads/shinyproxy_2.5.0_amd64.deb
+sudo dpkg -i shinyproxy_2.5.0_amd64.deb
 
+## enable system process
+sudo systemctl enable shinyproxy
+
+## Add amica into specs part of the server /etc/shinyproxy/application.yml:
+## In this file you can also specify the port for shinyproxy.
+
+specs:
+  - id: amica
+    display-name: amica Shiny App
+    description: Analysis and visualization tool for quantitative MS
+    container-cmd: ["R", "-e", "shiny::runApp('/root/amica')"]
+    container-image: amica
+    access-groups: [scientists, mathematicians]
+
+```
