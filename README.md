@@ -5,7 +5,7 @@
 # amica
 amica: an interactive and user-friendly web-platform for the analysis of proteomics data
 
-![amica_logo](.www/ga_amica.png)
+![amica_logo](/www/ga_amica.png)
 
 
 ## Raison d'etre
