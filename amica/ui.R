@@ -992,8 +992,8 @@ settings in a tab-separated  format that can be shared  with collaborators."
             shinyjs::hidden(
               div(
                 style = "display: grid; 
-          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-          grid-gap: 30px;",
+          grid-template-columns: 40% repeat(2, 40%); ## same as repeat(4, 20%)
+          grid-gap: 20px;",
                 
                 id = 'toggle_scatter_params',
                 numericInput(
