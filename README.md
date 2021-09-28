@@ -7,7 +7,7 @@ amica: an interactive and user-friendly web-platform for the analysis of proteom
 
 
 
-![amica_logo](/www/ga_amica.png)
+![amica_logo](/amica/www/ga_amica.png)
 
 
 
