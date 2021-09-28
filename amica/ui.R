@@ -13,7 +13,7 @@ footer = function(x) {
          If you have questions, feedback, suggestions, etc. please mail
          them to sebastian.didusch@univie.ac.at.
          </p>
-         <p>amica version 2020.09.20</p>")
+         <p>amica version 2020.09.28</p>")
   )
 }
 
@@ -45,9 +45,8 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      inputId = "source",
                      label = "Select the file input.",
                      choices = c(
-                       
-                       "Upload output from MaxQuant or FragPipe" = "maxquant",
                        "Upload amica format" = "amica",
+                       "Upload output from MaxQuant or FragPipe" = "maxquant",
                        "Upload custom format" = "custom",
                        "Load in example" = "example"
                      )
