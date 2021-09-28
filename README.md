@@ -77,6 +77,36 @@ amica: an interactive and user-friendly web-platform for the analysis of proteom
 
 ## Dependencies
 
+### Loaded packages
+
+```
+
+shiny
+shinyjs
+shinyBS
+ggplot2
+ggfortify
+plotly
+heatmaply
+DT
+tools
+DEqMS
+gprofiler2
+bslib
+reshape2
+igraph
+visNetwork
+UpSetR
+colourvalues
+pheatmap
+Rmisc
+data.table
+dplyr
+RColorBrewer
+colourpicker
+
+```
+
 ### Session info
 
 ```
