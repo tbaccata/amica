@@ -378,16 +378,19 @@ server <- function(input, output, session) {
       reacValues$inputParameterSummary <- NULL
       
       quantIntensity <- "LFQIntensity"
-      if (is.null(input$quantIntensity) | length(input$quantIntensity)>2) {
-        if (reacValues$dbTool == "fragpipe") {
-          quantIntensity <- ifelse("RazorIntensity" %in% assayNames(reacValues$proteinData),
-                                   "RazorIntensity",
-                                   "Intensity")
-        }
-      } else {
-        quantIntensity <- input$quantIntensity
-      }
       
+      if (!is.null(reacValues$dbTool)) {
+        if (is.null(input$quantIntensity) | length(input$quantIntensity) < 2) {
+          if (reacValues$dbTool == "fragpipe") {
+            quantIntensity <- ifelse("RazorIntensity" %in% assayNames(reacValues$proteinData),
+                                     "RazorIntensity",
+                                     "Intensity")
+          }
+        } else {
+          quantIntensity <- input$quantIntensity
+        }
+      }
+
       reacValues$inputParameterSummary <- paste0(reacValues$inputParameterSummary,
                                                  "Intensities used for quantification:\t", quantIntensity, "\n")
       ### filter on values
@@ -3849,8 +3852,9 @@ position of the groups needs to be switched in the file (e.g group2-group1 inste
       
       DTOutput("specificationsExplanation"),
       HTML("<br>The proteinId column must only contain unique entries.
-      If razorUnique count is missing some functionality will be lost (DEqMS)
-           <br>An example format to reanalyze amica output is provided here<br>"),
+      If razorUnique count is missing some functionality will be lost (DEqMS).<br>
+      It is important that the provided intensities are not log2-transformed.
+           <br>An example format is provided in the examples.zip file<br>"),
       DTOutput("exampleSpecifications"),
       
       HTML("<p>
