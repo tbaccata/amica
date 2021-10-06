@@ -3756,7 +3756,7 @@ server <- function(input, output, session) {
       <p>
       If you want to (re-)inspect previously analyzed amica output you can just upload 
       the amica_protein_groups.tsv file together with the experimental design and
-      after pressing the 'Upload' button you can 
+      after pressing the 'Upload' button you can also inspect the aforementioned tabs.
       </p>
        <p>
            One property that can be changed in the 'Input' tab are the colors for 
@@ -3767,7 +3767,7 @@ server <- function(input, output, session) {
            <center><img src='input_tutorial/colors.png' width='100%'></center>
            </p>
       <p>
-      <h4>Analzing a data set</h4>
+      <h4>Analyzing a data set</h4>
       Automatically recognized input files are MaxQuant's 'proteinGroups.txt' file and 
 FragPipe's 'combined_proteins.txt' file, however you can also upload a generic 
 tab-separated format which can easily be processed by the addition of a file 
@@ -3802,7 +3802,7 @@ that maps relevant search engine-specific columns to a standard format.
         <li>IntensityPrefix, ImputedIntensityPrefix and abundancePrefix columns 
         are log2 transformed, all 0s need to be converted to NANs. 
         No INF values allowed. amica searches for all Intensity prefixes in 
-        the column names, if you want to provide more than the dafalt intensities.
+        the column names, if you want to provide more than the default intensities.
         However, all intensity prefixes must have the same number of samples in 
         order to get processed.</li>
         <li>ImputedIntensityPrefix should only contain filtered, 
@@ -3859,7 +3859,7 @@ moment not considered when uploaded.
            The contrast matrix tells amica which group comparisons to perform. The column names of
 this file can be freely chosen, but column names must be provided. For each row in this file the
 comparison group1-group2 is performed. If one wants to change the sign of the fold changes the
-position of the groups needs to be switched in the file (e.g group2-group1 instead of group1-group2</p>"),
+position of the groups needs to be switched in the file (e.g group2-group1 instead of group1-group2)</p>"),
       
       
       DTOutput("exampleContrasts"),
@@ -3871,7 +3871,7 @@ position of the groups needs to be switched in the file (e.g group2-group1 inste
   
   observeEvent(input$showSpecifications, {
     showModal(modalDialog(
-      title = "Example contrast matrix",
+      title = "Specification file",
       
       HTML("<p>
            Following variables can be parsed:
