@@ -1673,8 +1673,10 @@ server <- function(input, output, session) {
   ### -------------------------------------------- CVs BOX PLOT
   
   cvsPlotly <- eventReactive(input$submitCVs, {
+    calcData <- dataAssay()
+    calcData$value <- 2^calcData$value
     cvs <-
-      aggregate(value ~ rowname + group, dataAssay(), function(x)
+      aggregate(value ~ rowname + group, calcData, function(x)
         100 * (sd(x) / mean(x)) )
     
     p <- ggplot(cvs[!is.na(cvs$value),], aes(x=group, y=value, fill=group)) + 
@@ -2057,6 +2059,7 @@ server <- function(input, output, session) {
     event_data("plotly_selected", source = "subset")
   })
   
+  
   output$foldChangePlot <- renderPlotly({
     input$sumbitFoldChangePlot
     req(reacValues$dataComp)
@@ -2121,11 +2124,6 @@ server <- function(input, output, session) {
              ", r2 = ",
              signif(summary(fit1)$r.squared, 5))
     
-    # title = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
-    #               "Intercept =",signif(fit1$coef[[1]],5 ),
-    #               " Slope =",signif(fit1$coef[[2]], 5),
-    #               " P =",signif(summary(fit1)$r.squared, 5))
-    
     labelNamesX <- paste(unlist(strsplit(selection[1], "__vs__") ), collapse = "/")
     labelNamesX <- paste0("log2FC(", labelNamesX, ")")
     labelNamesY <- paste(unlist(strsplit(selection[2], "__vs__") ), collapse = "/")
@@ -2182,22 +2180,20 @@ server <- function(input, output, session) {
     })
     
     p <- ggplotly(pu, source = "subset") %>% layout(dragmode = "select")
-    print(ggplotly(p) %>%
-            config(displaylogo = F,
-                   modeBarButtonsToRemove = list(
-                     'sendDataToCloud',
-                     'autoScale2d',
-                     'zoomIn2d',
-                     'zoomOut2d',
-                     'toggleSpikelines',
-                     'hoverClosestCartesian',
-                     'hoverCompareCartesian'
-                   ),
-                   toImageButtonOptions = list(format = format,
-                                               width = plot_width,
-                                               height = plot_height,
-                                               filename = "foldchange_plot")
-            )
+    p %>% config(displaylogo = F,
+             modeBarButtonsToRemove = list(
+               'sendDataToCloud',
+               'autoScale2d',
+               'zoomIn2d',
+               'zoomOut2d',
+               'toggleSpikelines',
+               'hoverClosestCartesian',
+               'hoverCompareCartesian'
+             ),
+             toImageButtonOptions = list(format = input$fc_format,
+                                         width = input$fc_width,
+                                         height = input$fc_height,
+                                         filename = "foldchange_plot")
     )
   })
   
@@ -2786,8 +2782,8 @@ server <- function(input, output, session) {
   
   cellmap <- reactive({
     cellmap <- read.table("data/preys-latest.txt", header = T, sep = "\t", stringsAsFactors = F)
-    cellmap <- cellmap[, c("symbol", "MMF.localization")]
-    colnames(cellmap) <- c("label", "CellMap localization")
+    cellmap <- cellmap[, c("symbol", "MMF.localization", "SAFE.localization")]
+    colnames(cellmap) <- c("label", "CellMap MMF localization", "CellMap SAFE localization")
     cellmap
   })
   
@@ -2842,7 +2838,7 @@ server <- function(input, output, session) {
                layout = "layout_nicely",
                type = "full") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "CellMap localization",
+      visOptions(selectedBy = "CellMap SAFE localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
       visEdges(smooth=F) %>%
@@ -2861,7 +2857,7 @@ server <- function(input, output, session) {
         width = 0.3
       ) %>%
       visExport(
-        type = "png",
+        type = "pdf",
         name = "Network",
         float = "left",
         label = "Save network (png)",
@@ -2878,7 +2874,7 @@ server <- function(input, output, session) {
       validate(need(nrow(reacValues$dataComp) > 1,"Not enough data to display."))
       
       outs <- dfs2gml(reacValues$nwNodes, reacValues$nwEdges)
-      writeLines(outs, file) # "amica_specificity_network.gml")
+      writeLines(outs, file)
     }
   )
 
@@ -2929,7 +2925,7 @@ server <- function(input, output, session) {
                layout = "layout_nicely",
                type = "full") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "CellMap localization",
+      visOptions(selectedBy = "CellMap SAFE localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
       visEdges(smooth=F, color=list(color = "grey", highlight = "red")) %>%
@@ -3750,10 +3746,41 @@ server <- function(input, output, session) {
     showModal(modalDialog(
       title = "Accepted File input",
       
-      HTML("<p>
-           Recognized input files are MaxQuant's 'proteinGroups.txt' and 
-FragPipe's 'combined_proteins.txt'.
-           </p>"),
+      HTML("
+      <h4>Inspecting previously analyzed output:</h4>
+      <p>
+      If you just want to try out the software select the 'Load in example' option 
+      and press 'Upload'. After the upload the QC -, Diff. abundance - and Compare 
+      amica data sets - tabs open in the main tab bar.
+      </p>
+      <p>
+      If you want to (re-)inspect previously analyzed amica output you can just upload 
+      the amica_protein_groups.tsv file together with the experimental design and
+      after pressing the 'Upload' button you can 
+      </p>
+       <p>
+           One property that can be changed in the 'Input' tab are the colors for 
+           all upcoming plots. Press on 'Choose colors' to toggle the color selection 
+           that is separated into different categories, depending on which plots 
+           are outputted. The selected colors propagate to all subsequent visualizations 
+           (e.g groups from the exp. design will always have the same color in a plot legend.)
+           <center><img src='input_tutorial/colors.png' width='100%'></center>
+           </p>
+      <p>
+      <h4>Analzing a data set</h4>
+      Automatically recognized input files are MaxQuant's 'proteinGroups.txt' file and 
+FragPipe's 'combined_proteins.txt' file, however you can also upload a generic 
+tab-separated format which can easily be processed by the addition of a file 
+that maps relevant search engine-specific columns to a standard format.
+           </p>
+           
+           <p>
+           After uploading all required files and pressing the 'Upload' button 
+           a new field becomes accessible which allows for changing analysis parameters:
+           <center><img src='input_tutorial/advanced.png' width='100%'></center>
+           </p>
+          
+           "),
       easyClose = TRUE,
       footer = NULL
     ))
