@@ -1167,8 +1167,10 @@ dfs2gml <- function(nodes, edges) {
     
     for (elem in names(nodes)) {
       attribute <- elem
-      if (length(grep("localization", elem))>0) {
-        attribute <- "CellMap"
+      if (length(grep("MMF localization", elem))>0) {
+        attribute <- "CellMap_MMF"
+      } else if (length(grep("SAFE localization", elem))>0) {
+        attribute <- "CellMap_SAFE"
       }
       
       if (is(t[[elem]] ,'character') | is.na(t[[elem]]) ) {
