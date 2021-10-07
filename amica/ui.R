@@ -1256,21 +1256,11 @@ settings in a tab-separated  format that can be shared  with collaborators."
           tabPanel(
             h4("Analyze multiple comparisons"),
             
-            fluidRow(
-              column(
                 width = 6,
-                inline(uiOutput("upset1Sample")),
-                inline(actionButton("multiNameChange", "Change labels?", icon = icon("wrench"))),
-                shinyjs::hidden(div(
-                  id = 'toggle_multi_name_change',
-                  uiOutput("varsInput"),
-                  actionButton("changeMultiCompNames", "Change labels")
-                )),
-                helpText("Select at least 2 comparisons."), 
-                inline(actionButton("submitMultiComp", label = "Submit Analysis")),
+                uiOutput("upset1Sample"),
                 
-              )
-            ),
+                helpText("Select at least 2 comparisons."),
+                inline(actionButton("submitMultiComp", label = "Submit Analysis")),
             shinyjs::hidden(
               div(
                 id = 'hide_before_multi_submit',
@@ -1283,7 +1273,6 @@ settings in a tab-separated  format that can be shared  with collaborators."
                          inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
                          inline(uiOutput("UpsetHelpBox")),
                          inline(actionButton("upsetParams", "", icon = icon("wrench"))),
-                         ###
                          shinyjs::hidden(
                            div(
                              style = "display: grid; 
@@ -1337,6 +1326,16 @@ settings in a tab-separated  format that can be shared  with collaborators."
                                choices = c('Frequency', 'Degree'),
                                selected = 'Frequency'
                              )
+                           )
+                         ),
+                         inline(
+                           actionButton("multiNameChange", "Change labels?", icon = icon("wrench"))
+                         ),
+                         shinyjs::hidden(
+                           div(
+                             id = 'toggle_multi_name_change',
+                             uiOutput("varsInput"),
+                             actionButton("changeMultiCompNames", "Change labels")
                            )
                          ),
                          plotOutput('upsetPlot', height = 600),
