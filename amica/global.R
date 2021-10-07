@@ -21,6 +21,7 @@ require(data.table)
 require(dplyr)
 require(RColorBrewer)
 require(colourpicker)
+require(eulerr)
 #require(pryr)
 ###
 source("R/utils.R")
