@@ -2002,6 +2002,7 @@ server <- function(input, output, session) {
       #set_size.numbers_size = 8,
       #set_size.show = T,
       order.by = upset_sorted,
+      #cutoff = cutoff,
       text.scale = scale,
       # text.scale = c(2, 2,
       #                2, 2,
@@ -3480,7 +3481,6 @@ server <- function(input, output, session) {
       A dot not connected to another dot shows the number of proteins specific to that comparisons. 
       The top barplot depicts the number of intersecting proteins, and the barplot on 
       the side shows how many proteins are differentially abundant in the comparison. 
-      Change the selected comparisons to your needs.
                <a href='https://jku-vds-lab.at/tools/upset/' target='_blank'>
       <img src='https://jku-vds-lab.at/assets/images/projects/upset/matrix.png' alt='UpSet plot explained'>
       </a>")
@@ -3961,13 +3961,10 @@ moment not considered when uploaded.
   observeEvent(input$showDesign, {
     showModal(modalDialog(
       title = "Example experimental design",
-      
       HTML("<p>
            The design file has two columns: <b>samples</b> and <b>groups</b>. The sample names in the samples column need to match 
            the column names of the input file in the order of the input file.</p>"),
-      
       DTOutput("exampleDesign"),
-
       easyClose = TRUE,
       footer = NULL
     ))
@@ -4007,9 +4004,10 @@ position of the groups needs to be switched in the file (e.g group2-group1 inste
       DTOutput("exampleSpecifications"),
       
       HTML("<p>
-           The specification file needs to be uploaded if a custom tab-delimited file is analyzed.
-           The file has two columns, Variable and Pattern, these are used to change the prefixes (or post-
-fixes) to identify the relevant columns in your data.</p>"),
+           The specification file needs to be uploaded if a custom tab-delimited 
+           file is analyzed. The file has two columns, Variable and Pattern, 
+           these are used to change the prefixes (or post-fixes) to identify the
+           relevant columns in your data.</p>"),
       
       easyClose = TRUE,
       footer = NULL
@@ -4076,8 +4074,8 @@ fixes) to identify the relevant columns in your data.</p>"),
       HTML('
       <h3>Use case: Visualize proteins from over-represented functional term</h3>
       <p>
-      This small examples have been produced with the provided example data set 
-      (using the same global paramters as in the previous tutorial). 
+      This small example has been produced with the provided example data set 
+      (using the same global parameters as in the above tutorial). 
       An over-representation analysis was conducted utilizing the 46 enriched 
       proteins from the comparison PGRMC1__vs__MIAPACA. The "Show genes in 
       functional enrichment?" button was selected.
@@ -4086,7 +4084,7 @@ fixes) to identify the relevant columns in your data.</p>"),
       </p>
       
       <p>
-      Sorting the output table from most significant p-value to least significant 
+      Sorting the output table from lowest p-value to highest p-value 
       we find the term "actin binding" on top of the list. 15 proteins from the 
       enriched proteins are annotated with this term.
       <center><img src="query_tutorial/oratable.png" width="100%"></center>
@@ -4095,7 +4093,7 @@ fixes) to identify the relevant columns in your data.</p>"),
       <p>
       
       All visualizations (heatmap, fold change plot and PPI network) work 
-      only on the proteins selected in the above output table we can filter that 
+      only on the proteins selected in the above output table and we can filter that 
       table to only show proteins annotated with our term of interest. The output 
       table can parse "regular expressions", so all we need to do is to copy paste 
       the comma-delimited gene names into a text editor (or text processing tool 
@@ -4114,8 +4112,9 @@ fixes) to identify the relevant columns in your data.</p>"),
       Below the table there is now a text message telling us that the original 
       table has been filtered and that only the remaining proteins are used in 
       subsequent visualizations. As an example you can now observe how the selected 
-      proteins compare across different group comparisons in a heatmap or fold 
-      change plot.
+      proteins compare across different group comparisons in a heatmap, fold 
+      change plot or specificty/PPI - network (which only works for multiple 
+      group comparisons).
       </p>
            '),
       size = "l",
