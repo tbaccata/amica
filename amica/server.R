@@ -41,6 +41,7 @@ server <- function(input, output, session) {
       sigCutoffValue = NULL,
       nwNodes = NULL,
       nwEdges = NULL,
+      newMultiNames = NULL,
       compareAmicaSelected = FALSE,
       compareAmicasToggled = FALSE
     )
@@ -116,8 +117,14 @@ server <- function(input, output, session) {
   shinyjs::onclick("scatteramicaParams",
                    shinyjs::toggle(id = "toggle_scatteramica_params"))
   
+  shinyjs::onclick("multiNameChange",
+                   shinyjs::toggle(id = "toggle_multi_name_change"))
+  
   shinyjs::onclick("upsetParams",
                    shinyjs::toggle(id = "toggle_upset_params"))
+  
+  shinyjs::onclick("eulerParams",
+                   shinyjs::toggle(id = "toggle_euler_params"))
   
   shinyjs::onclick("corAmicasParams",
                    shinyjs::toggle(id = "toggle_corAmicas_params"))
@@ -143,6 +150,7 @@ server <- function(input, output, session) {
     reacValues$reacConditions <- NULL
     reacValues$uniqueGroups <- NULL
     reacValues$selection <- NULL
+    reacValues$newMultiNames <- NULL
     reacValues$dataCompAmica <- NULL
     reacValues$dataGprofiler <- NULL
     reacValues$compareAmicaSelected <- FALSE
@@ -1854,10 +1862,104 @@ server <- function(input, output, session) {
     )
   })
   
+  numOfComps <- reactive({
+    input$upset1Sample
+  })
+  
+  output$varsInput <- renderUI({
+    req(input$upset1Sample)
+    numVars <- length(input$upset1Sample)
+    
+    C = sapply(1:numVars, function(i){paste0("multi_comp_cols_",i)})
+    L = sapply(1:numVars, function(i){paste0("multi_label_",i)})
+    
+    output = tagList()
+    
+    for(i in seq_along(1:numVars)){
+      output[[i]] = tagList()
+      output[[i]][[1]] = selectInput(C[i], "Variable to summarize:", numOfComps()[i])
+      output[[i]][[2]] = textInput(L[i], label = "Label for variable:", 
+                                   value = "")
+    } ## for loop
+    
+    output
+  })
+  
+  observeEvent(input$changeMultiCompNames, {
+    oldNames <- sapply(1:length(numOfComps()), function(i) {input[[paste0("multi_comp_cols_",i)]]})
+    newNames <- sapply(1:length(numOfComps()), function(i) {input[[paste0("multi_label_",i)]]})
+    reacValues$newMultiNames <- list(old=oldNames, new=newNames)
+  })
+  
+  
+  output$upset1Sample <- renderUI({
+    req(reacValues$reacConditions)
+    selectInput(
+      "upset1Sample",
+      "Compare the overlap between comparisons.",
+      c("",reacValues$reacConditions),
+      selected = NULL,
+      multiple = T
+    )
+  })
+  # validate(need(!is.null(comparisons), "Please select at least two comparisons."))
+  
+  multiCompData <- reactiveValues(eulerData = NULL)
+  
+  eulerData <- function() {
+    comparisons <- isolate(input$upset1Sample)
+    binMat <- isolate(enrichedMatrixSet())
+    showQuant <- isolate(input$euler_quant)
+    bool <- isolate(input$euler_line)
+    lty <- ifelse(bool, 1, 0)
+    
+    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "")) {
+      for (idx in seq_along(reacValues$newMultiNames$old)) {
+        names(binMat)[which(names(binMat) == reacValues$newMultiNames$old[idx])] <- reacValues$newMultiNames$new[idx]
+        comparisons[idx] <- reacValues$newMultiNames$new[idx]
+      }
+    }
+
+    validate(need(!is.null(comparisons), "Please select at least two comparisons."))
+    validate(need(length(comparisons) < 6, "Cannot output Euler plot for more than 5 sets."))
+    validate(need(length(colnames(binMat) ) > 1,
+                  "Need at least two comparisons to render UpSet plot. Only one provided.") )
+    fit <- euler(binMat[, comparisons])
+    comps <- grep("&", names(fit$original), invert = T, value = T)
+    numComps <- length(comps)
+    plot(fit, quantities=showQuant, 
+         fills = list(fill = myScatterColors()[1:numComps]),
+         legend = list(labels = comps), 
+         lty = lty
+    )
+  }
+  
+  output$eulerrPlot <- renderPlot({
+    input$submitMultiComp
+    print(eulerData())
+  })
+  
+  output$download_button_eulerr <- renderUI({
+    downloadButton("download_eulerr", "Download Euler plot")
+  })
+  
+  output$download_eulerr <- downloadHandler(
+    filename = function() {
+      paste("eulerr_plot.pdf")
+    },
+    content = function(file) {
+      pdf(file, width = input$euler_width, 
+          height = input$euler_width, onefile = F)
+      print(eulerData())
+      dev.off()
+    }
+  )
+  
   
   plotMultiUpset <- function() {
     matrixSet <- isolate(enrichedMatrixSet() )
     samples <- isolate(input$upset1Sample)
+    scale <- isolate(input$upset_scale)
     setChoice <- "union"
     fcThresh <- isolate(input$fcCutoff)
     enrichmentChoice <- isolate(input$enrichmentChoice)
@@ -1886,12 +1988,12 @@ server <- function(input, output, session) {
     
     mb.ratio <- c(upset_ratio, 1-upset_ratio)
     
-    # newNames <- c()
-    # for (elem in names(matrixSet)) {
-    #   newName <- paste(unlist(strsplit(elem, "__vs__") ), collapse = "/")
-    #   newNames <- c(newNames, newName)
-    # }
-    # names(matrixSet) <- newNames
+    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "")) {
+      for (idx in seq_along(reacValues$newMultiNames$old)) {
+        names(matrixSet)[which(names(matrixSet) == reacValues$newMultiNames$old[idx])] <- reacValues$newMultiNames$new[idx]
+        samples[idx] <- reacValues$newMultiNames$new[idx]
+      }
+    }
     
     upset(
       matrixSet,
@@ -1900,9 +2002,10 @@ server <- function(input, output, session) {
       #set_size.numbers_size = 8,
       #set_size.show = T,
       order.by = upset_sorted,
-      text.scale = c(2, 2,
-                     2, 2,
-                     2, 3),
+      text.scale = scale,
+      # text.scale = c(2, 2,
+      #                2, 2,
+      #                2, 3),
       point.size = upset_pointsize
     )
   }
@@ -2836,7 +2939,9 @@ server <- function(input, output, session) {
     visNetwork(nodes,
                edges,
                layout = "layout_nicely",
-               type = "full") %>%
+               type = "full",
+               height = "1200px",
+               width = "2000px") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
       visOptions(selectedBy = "CellMap SAFE localization",
                  highlightNearest = TRUE,
@@ -2855,14 +2960,6 @@ server <- function(input, output, session) {
           color = c(myScatterColors()[1], myScatterColors()[2])
         ),
         width = 0.3
-      ) %>%
-      visExport(
-        type = "pdf",
-        name = "Network",
-        float = "left",
-        label = "Save network (png)",
-        background = "white",
-        style = ""
       )
   }
 
@@ -2923,7 +3020,9 @@ server <- function(input, output, session) {
     visNetwork(networkData$nodes,
                networkData$edges,
                layout = "layout_nicely",
-               type = "full") %>%
+               type = "full",
+               height = "1200px",
+               width = "2000px") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
       visOptions(selectedBy = "CellMap SAFE localization",
                  highlightNearest = TRUE,
@@ -2937,29 +3036,37 @@ server <- function(input, output, session) {
         width = 0.3,
         ncol = 6,
         stepX = 50
-      ) %>%
-      visExport(
-        type = "png",
-        name = "Network",
-        float = "left",
-        label = "Save network (png)",
-        background = "white",
-        style = ""
       )
   }
   
-  output$network <- renderVisNetwork({
+  
+  ppiNet <- function() {
+  # output$network <- renderVisNetwork({
     out <- 0
     if (length(grep(logfcPrefix, names(reacValues$dataComp)) ) > 1) {
       out <- multiNetwork(input$edgeWeightThresh)
     } else {
       out <- singleNetwork(input$edgeWeightThresh)
     }
-    out %>% visEvents(click = "function(nodes){
-                  Shiny.onInputChange('click', nodes.nodes[0]);
-                  ;}"
-    )
+    out
+  }
+  
+  output$network <- renderVisNetwork({
+    ppiNet()
+  })    
+  
+  output$download_network_button <- renderUI({
+    downloadButton("downloadNetworkHtml", h4("Download network as HTML"))
   })
+  
+  output$downloadNetworkHtml <- downloadHandler(
+    filename = function() {
+      paste('network-', Sys.Date(), '.html', sep='')
+    },
+    content = function(con) {
+      ppiNet() %>% visSave(con)
+    }
+  )
   
   #### COMPARE amica EXPERIMENTS
   observeEvent(input$submitAmicaComparisons, {
@@ -3398,7 +3505,7 @@ server <- function(input, output, session) {
                        of PGRMC1 and the mechanism of the small molecule inhibitor of PGRMC1, AG-205, 
                        proteins differentially bound to PGRMC1 were identified following AG-205 
                        treatment of MIA PaCa-2 cells.</p>
-                       Data have been re-analyzed from PRIDE identifier PXD0016455.
+                       Data have been re-analyzed from PRIDE identifier PXD016455.
                        <a href='https://pubmed.ncbi.nlm.nih.gov/31980178'target='_blank'>Further information</a>.</p>
                        "
       )
@@ -3741,6 +3848,20 @@ server <- function(input, output, session) {
     )
   }, server = F)
   
+  showModal(modalDialog(
+    title = "Welcome to amica",
+    HTML("<p>
+         Changes <br>
+         <hr>
+         <ul>
+          <li>elem 1</li>
+          <li>elem 2</li>
+         </ul>
+         </p>"),
+    size = "l",
+    easyClose = TRUE,
+    footer = NULL
+    ))
   
   observeEvent(input$showFileInput, {
     showModal(modalDialog(
@@ -3781,6 +3902,7 @@ that maps relevant search engine-specific columns to a standard format.
            </p>
           
            "),
+      size = "l",
       easyClose = TRUE,
       footer = NULL
     ))
