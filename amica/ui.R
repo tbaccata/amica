@@ -1259,70 +1259,136 @@ settings in a tab-separated  format that can be shared  with collaborators."
             fluidRow(
               column(
                 width = 6,
-                uiOutput("upset1Sample"),
-                helpText("Select at least 2 comparisons."),
+                inline(uiOutput("upset1Sample")),
+                inline(actionButton("multiNameChange", "Change labels?", icon = icon("wrench"))),
+                shinyjs::hidden(div(
+                  id = 'toggle_multi_name_change',
+                  uiOutput("varsInput"),
+                  actionButton("changeMultiCompNames", "Change labels")
+                )),
+                helpText("Select at least 2 comparisons."), 
                 inline(actionButton("submitMultiComp", label = "Submit Analysis")),
-                inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
-                inline(uiOutput("UpsetHelpBox")),
-                inline(actionButton("upsetParams", "", icon = icon("wrench"))),
-                ###
-                shinyjs::hidden(
-                  div(
-                    style = "display: grid; 
-          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
-          grid-gap: 30px;",
-                    
-                    id = 'toggle_upset_params',
-                    numericInput(
-                      "upset_width",
-                      "Width in inch.",
-                      value = 12,
-                      min = 3,
-                      max = 18,
-                      step = 1
-                    ),
-                    numericInput(
-                      "upset_height",
-                      "Height in inch.",
-                      value = 6,
-                      min = 3,
-                      max = 18,
-                      step = 1
-                    ),
-                    numericInput(
-                      "upset_pointsize",
-                      "Size of points in matrix plot.",
-                      value = 4,
-                      min = 1,
-                      max = 8,
-                      step = 1
-                    ),
-                    numericInput(
-                      "upset_ratio",
-                      "Ratio between main bar plot to matrix plot.",
-                      value = 0.6,
-                      min = 0.3,
-                      max = 0.7,
-                      step = 0.1
-                    ),
-                    radioButtons(
-                      'upset_sorted',
-                      'How to sort bars?',
-                      choices = c('Frequency', 'Degree'),
-                      selected = 'Frequency'
-                    )
-                  )
-                )
+                
               )
             ),
             shinyjs::hidden(
               div(
                 id = 'hide_before_multi_submit',
                 #inline(actionButton("plotMultiComp", label = "Update plot")),
-                
-                
-                plotOutput('upsetPlot', height = 600),
-                uiOutput("download_button_upset"),
+                fluidRow(
+                  
+                  column(width = 6,
+                         h4("UpSet plot"),
+                         br(),
+                         inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
+                         inline(uiOutput("UpsetHelpBox")),
+                         inline(actionButton("upsetParams", "", icon = icon("wrench"))),
+                         ###
+                         shinyjs::hidden(
+                           div(
+                             style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                             
+                             id = 'toggle_upset_params',
+                             numericInput(
+                               "upset_width",
+                               "Width in inch.",
+                               value = 8,
+                               min = 3,
+                               max = 18,
+                               step = 1
+                             ),
+                             numericInput(
+                               "upset_height",
+                               "Height in inch.",
+                               value = 6,
+                               min = 3,
+                               max = 18,
+                               step = 1
+                             ),
+                             numericInput(
+                               "upset_pointsize",
+                               "Size of points in matrix plot.",
+                               value = 4,
+                               min = 1,
+                               max = 8,
+                               step = 1
+                             ),
+                             numericInput(
+                               "upset_scale",
+                               "Scale text sizes",
+                               value = 2,
+                               min = 1,
+                               max = 8,
+                               step = 1
+                             ),
+                             numericInput(
+                               "upset_ratio",
+                               "Ratio between main bar plot to matrix plot.",
+                               value = 0.6,
+                               min = 0.3,
+                               max = 0.7,
+                               step = 0.1
+                             ),
+                             radioButtons(
+                               'upset_sorted',
+                               'How to sort bars?',
+                               choices = c('Frequency', 'Degree'),
+                               selected = 'Frequency'
+                             )
+                           )
+                         ),
+                         plotOutput('upsetPlot', height = 600),
+                         uiOutput("download_button_upset")
+                  ),
+                  column(
+                    width = 6,
+                    h4("Euler diagram"),
+                    br(),
+                    #inline(actionButton("upsetHelp", icon = icon("info"), label = NULL)),
+                    # inline(uiOutput("UpsetHelpBox")),
+                    inline(actionButton("eulerParams", "", icon = icon("wrench"))),
+                    ###
+                    shinyjs::hidden(
+                      div(
+                        style = "display: grid; 
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+                        
+                        id = 'toggle_euler_params',
+                        numericInput(
+                          "euler_width",
+                          "Width in inch.",
+                          value = 6,
+                          min = 3,
+                          max = 18,
+                          step = 0.5
+                        ),
+                        numericInput(
+                          "euler_height",
+                          "Height in inch.",
+                          value = 6,
+                          min = 3,
+                          max = 18,
+                          step = 0.5
+                        ),
+                        checkboxInput(
+                          "euler_quant",
+                          "Show quantities in circles?",
+                          value = TRUE
+                        ),
+                        checkboxInput(
+                          "euler_line",
+                          "Plot circle outline?",
+                          value = FALSE
+                        )
+                      )
+                    ),
+                    plotOutput("eulerrPlot", height = 600),
+                    uiOutput("download_button_eulerr")
+                  )
+                ),
                 br(),
                 br(),
                 br()
@@ -1617,7 +1683,8 @@ settings in a tab-separated  format that can be shared  with collaborators."
                   )
                 ),
                 inline(uiOutput("download_button_spec_network")),
-                visNetworkOutput("network", width = "100%", height = "1000px")
+                visNetworkOutput("network", width = "100%", height = "800px"),
+                uiOutput('download_network_button')
               )
             ),
             
