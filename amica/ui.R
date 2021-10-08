@@ -1334,7 +1334,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                          shinyjs::hidden(
                            div(
                              id = 'toggle_multi_name_change',
-                             uiOutput("varsInput"),
+                             uiOutput("multiCompLabelsInput"),
                              actionButton("changeMultiCompNames", "Change labels")
                            )
                          ),
@@ -1585,7 +1585,8 @@ settings in a tab-separated  format that can be shared  with collaborators."
                       choices = c("straight line", "none", "linear regression"),
                       selected = "straight line"
                     ),
-                    uiOutput('fcPlotColors')
+                    uiOutput('fcPlotColors'),
+                    uiOutput("fcPlotLabelsInput")
                   )
                 ),
                 ###
