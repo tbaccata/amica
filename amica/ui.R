@@ -1378,10 +1378,16 @@ settings in a tab-separated  format that can be shared  with collaborators."
                           value = TRUE
                         ),
                         checkboxInput(
+                          "euler_legend",
+                          "Show legend next to plot?",
+                          value = TRUE
+                        ),
+                        checkboxInput(
                           "euler_line",
                           "Plot circle outline?",
                           value = FALSE
-                        )
+                        ),
+                        uiOutput('eulerColors'),
                       )
                     ),
                     plotOutput("eulerrPlot", height = 600),

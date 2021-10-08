@@ -673,6 +673,15 @@ server <- function(input, output, session) {
     })
   })
   
+  output$eulerColors <- renderUI({
+    req(input$upset1Sample)
+    pal <- myScatterColors()
+    
+    lapply(seq_along(input$upset1Sample), function(i) {
+      colourInput(paste("eulercol", i, sep="_"), paste0("Color ", i, ":"), pal[i])
+    })
+  })
+  
   myGroupColors <- reactive({
     groups <- unique(colData(reacValues$proteinData)$groups)
     
@@ -1927,11 +1936,16 @@ server <- function(input, output, session) {
       }
     }
 
+    cols <- myScatterColors()[1:length(comparisons)]
+    if (!is.null(input$eulercol_1)) {
+      cols <- sapply(1:length(comparisons), function(i) {input[[paste0("eulercol_",i)]]})
+    }
+
     fit <- euler(binMat[, comparisons])
     comps <- grep("&", names(fit$original), invert = T, value = T)
     numComps <- length(comps)
     plot(fit, quantities=showQuant, 
-         fills = list(fill = myScatterColors()[1:numComps]),
+         fills = list(fill = cols),
          legend = ifelse(showLegend, list(labels = comps), F), 
          lty = lty
     )
@@ -1998,10 +2012,6 @@ server <- function(input, output, session) {
         samples[idx] <- reacValues$newMultiNames$new[idx]
       }
     }
-    
-    print(reacValues$newMultiNames$new)
-    print("")
-    print(samples)
     
     upset(
       matrixSet,
