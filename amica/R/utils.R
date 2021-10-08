@@ -640,8 +640,13 @@ mergeAmicas <-
 
 #### foldchange data
 
-getFCPlotData <- function(rnames, dataLimma, enrichedMatrixSet, foldChangeSelection) {
-  keepCols <-
+getFCPlotData <-
+  function(rnames,
+           dataLimma,
+           enrichedMatrixSet,
+           foldChangeSelection,
+           labels = NULL) {
+    keepCols <-
     c(
       geneName,
       paste0(logfcPrefix, foldChangeSelection),
@@ -652,16 +657,24 @@ getFCPlotData <- function(rnames, dataLimma, enrichedMatrixSet, foldChangeSelect
   plotData <- dataLimma[rnames, grep(paste0(keepCols, collapse = "|"),
                                         colnames(dataLimma))]
   
+  print(paste("utils", labels))
+  newNames <- c(foldChangeSelection[1], foldChangeSelection[2])
+  if (!is.null(labels) & all(labels != "")) {
+    newNames[1] <- labels[1]
+    newNames[2] <- labels[2]
+  }
+  print(newNames)
+  
   plotData$significant <- ifelse(
     enrichedMatrixSet[rnames, foldChangeSelection[1]]==1 &
       enrichedMatrixSet[rnames, foldChangeSelection[2]]==1,
     "both",
     ifelse(
       enrichedMatrixSet[rnames, foldChangeSelection[1]]==1,
-      foldChangeSelection[1],
+      newNames[1],
       ifelse(
         enrichedMatrixSet[rnames, foldChangeSelection[2]]==1,
-        foldChangeSelection[2],
+        newNames[2],
         "none"
       )
     )

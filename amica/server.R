@@ -1866,7 +1866,7 @@ server <- function(input, output, session) {
     input$upset1Sample
   })
   
-  output$varsInput <- renderUI({
+  output$multiCompLabelsInput <- renderUI({
     req(input$upset1Sample)
     numVars <- length(input$upset1Sample)
     
@@ -1907,6 +1907,11 @@ server <- function(input, output, session) {
   multiCompData <- reactiveValues(eulerData = NULL)
   
   eulerData <- function() {
+    validate(need(!is.null(comparisons), "Please select at least two comparisons."))
+    validate(need(length(comparisons) < 6, "Cannot output Euler plot for more than 5 sets."))
+    validate(need(length(colnames(binMat) ) > 1,
+                  "Need at least two comparisons to render UpSet plot. Only one provided.") )
+    
     comparisons <- isolate(input$upset1Sample)
     binMat <- isolate(enrichedMatrixSet())
     showQuant <- isolate(input$euler_quant)
@@ -1920,10 +1925,6 @@ server <- function(input, output, session) {
       }
     }
 
-    validate(need(!is.null(comparisons), "Please select at least two comparisons."))
-    validate(need(length(comparisons) < 6, "Cannot output Euler plot for more than 5 sets."))
-    validate(need(length(colnames(binMat) ) > 1,
-                  "Need at least two comparisons to render UpSet plot. Only one provided.") )
     fit <- euler(binMat[, comparisons])
     comps <- grep("&", names(fit$original), invert = T, value = T)
     numComps <- length(comps)
@@ -2158,6 +2159,27 @@ server <- function(input, output, session) {
     )
   })
   
+  output$fcPlotLabelsInput <- renderUI({
+    req(input$foldChangeSelection)
+    numVars <- length(input$foldChangeSelection)
+    
+    C = sapply(1:numVars, function(i){paste0("fcplot_cols_",i)})
+    L = sapply(1:numVars, function(i){paste0("fcplot_label_",i)})
+    
+    output = tagList()
+    
+    for(i in seq_along(1:numVars)){
+      output[[i]] = tagList()
+      output[[i]][[1]] = selectInput(C[i], "Variable to summarize:", input$foldChangeSelection[i])
+      output[[i]][[2]] = textInput(L[i], label = "Label for variable:", 
+                                   value = "")
+    }
+    output
+  })
+  
+  fcPlotLabels <- reactive({
+    unlist(sapply(1:2, function(i) {input[[paste0("fcplot_label_",i)]]}))
+  })
   
   get_fc_data <- reactive({
     event_data("plotly_selected", source = "subset")
@@ -2170,7 +2192,7 @@ server <- function(input, output, session) {
     #req(input$foldChangeSelection)
     matrixSet <- isolate(enrichedMatrixSet() )
     
-    
+    labels <- isolate(fcPlotLabels())
     selection <- isolate(input$foldChangeSelection)
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     
@@ -2200,7 +2222,8 @@ server <- function(input, output, session) {
       getFCPlotData(rnames,
                     reacValues$dataLimma,
                     matrixSet,
-                    selection)
+                    selection,
+                    labels)
     
     plotData$show_id <- FALSE
     if (!is.null(get_fc_data() )) {
@@ -2233,10 +2256,15 @@ server <- function(input, output, session) {
     labelNamesY <- paste(unlist(strsplit(selection[2], "__vs__") ), collapse = "/")
     labelNamesY <- paste0("log2FC(", labelNamesY, ")")
     
+    levels <- c('both', selection[1], selection[2], 'none')
+    if(!is.null(labels) & all(labels != "")) {
+      levels[2] <- labels[1]
+      levels[3] <- labels[2]
+    }
     
     plotData$significant <-
       factor(plotData$significant,
-             levels = c('both', selection[1], selection[2], 'none'))
+             levels = levels)
     
     withProgress(message = "Plotting Fold Change plot", {
       pu <-
