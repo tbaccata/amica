@@ -657,14 +657,12 @@ getFCPlotData <-
   plotData <- dataLimma[rnames, grep(paste0(keepCols, collapse = "|"),
                                         colnames(dataLimma))]
   
-  print(paste("utils", labels))
   newNames <- c(foldChangeSelection[1], foldChangeSelection[2])
   if (!is.null(labels) & all(labels != "")) {
     newNames[1] <- labels[1]
     newNames[2] <- labels[2]
   }
-  print(newNames)
-  
+
   plotData$significant <- ifelse(
     enrichedMatrixSet[rnames, foldChangeSelection[1]]==1 &
       enrichedMatrixSet[rnames, foldChangeSelection[2]]==1,

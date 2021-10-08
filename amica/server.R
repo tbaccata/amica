@@ -1728,7 +1728,7 @@ server <- function(input, output, session) {
     })
   })
   
-  comparisons <- reactive({input$compareComparisons})
+  #comparisons <- reactive({input$compareComparisons})
   
   
   observeEvent(input$submitHeatmap,{
@@ -1907,18 +1907,20 @@ server <- function(input, output, session) {
   multiCompData <- reactiveValues(eulerData = NULL)
   
   eulerData <- function() {
+    comparisons <- isolate(input$upset1Sample)
+    binMat <- isolate(enrichedMatrixSet())
+    showQuant <- isolate(input$euler_quant)
+    bool <- isolate(input$euler_line)
+    showLegend <- isolate(input$euler_legend)
+    lty <- ifelse(bool, 1, 0)
+    
     validate(need(!is.null(comparisons), "Please select at least two comparisons."))
     validate(need(length(comparisons) < 6, "Cannot output Euler plot for more than 5 sets."))
     validate(need(length(colnames(binMat) ) > 1,
                   "Need at least two comparisons to render UpSet plot. Only one provided.") )
     
-    comparisons <- isolate(input$upset1Sample)
-    binMat <- isolate(enrichedMatrixSet())
-    showQuant <- isolate(input$euler_quant)
-    bool <- isolate(input$euler_line)
-    lty <- ifelse(bool, 1, 0)
-    
-    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "")) {
+    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "") &&
+        length(reacValues$newMultiNames$new) == length(comparisons)) {
       for (idx in seq_along(reacValues$newMultiNames$old)) {
         names(binMat)[which(names(binMat) == reacValues$newMultiNames$old[idx])] <- reacValues$newMultiNames$new[idx]
         comparisons[idx] <- reacValues$newMultiNames$new[idx]
@@ -1930,7 +1932,7 @@ server <- function(input, output, session) {
     numComps <- length(comps)
     plot(fit, quantities=showQuant, 
          fills = list(fill = myScatterColors()[1:numComps]),
-         legend = list(labels = comps), 
+         legend = ifelse(showLegend, list(labels = comps), F), 
          lty = lty
     )
   }
@@ -1988,13 +1990,18 @@ server <- function(input, output, session) {
                   "There are no significant proteins to display."))
     
     mb.ratio <- c(upset_ratio, 1-upset_ratio)
-    
-    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "")) {
+
+    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "") && 
+        length(reacValues$newMultiNames$new) == length(samples)) {
       for (idx in seq_along(reacValues$newMultiNames$old)) {
         names(matrixSet)[which(names(matrixSet) == reacValues$newMultiNames$old[idx])] <- reacValues$newMultiNames$new[idx]
         samples[idx] <- reacValues$newMultiNames$new[idx]
       }
     }
+    
+    print(reacValues$newMultiNames$new)
+    print("")
+    print(samples)
     
     upset(
       matrixSet,
@@ -2797,58 +2804,58 @@ server <- function(input, output, session) {
     downloadButton("download1", "Download results")
   })
   
-  
-  
-  
-  output$download_heatmap <- downloadHandler(
-    filename = function() {
-      paste("heatmap.pdf")
-    },
-    content = function(file) {
-      
-      width <- ifelse(!is.null(input$heatmap_width),
-                      input$heatmap_width,
-                      7)
-      height <- ifelse(!is.null(input$heatmap_height),
-                       input$heatmap_height,
-                       7)
-      
-      pdf(file, width = width, height = height, onefile=F)
-      
-      fontsize = 12
-      if (nrow(reacValues$dataHeatmap) > 100) {
-        fontsize = 4
-      } else if (nrow(reacValues$dataHeatmap) > 74) {
-        fontsize = 6
-      } else if (nrow(reacValues$dataHeatmap) > 50) {
-        fontsize = 8
-      } else if (nrow(reacValues$dataHeatmap) > 30) {
-        fontsize = 10
-      }
-      
-      clRows <- ifelse(!is.null(reacValues$clusterRows),
-                       reacValues$clusterRows,
-                       TRUE)
-      clCols <- ifelse(!is.null(reacValues$clusterCols),
-                       reacValues$clusterCols,
-                       TRUE)
-      scaleRows <- ifelse(!is.null(reacValues$scaleHeatmap),
-                          reacValues$scaleHeatmap,
-                          "row")
-      print(
-        pheatmap(
-          reacValues$dataHeatmap,
-          cluster_rows = clRows,
-          cluster_cols = clCols,
-          scale = scaleRows,
-          color = heatColors(),
-          border_color = NA,
-          fontsize_row = fontsize
-        )
-      )
-      dev.off()
-    }
-  )
+  # 
+  # 
+  # 
+  # output$download_heatmap <- downloadHandler(
+  #   filename = function() {
+  #     paste("heatmap.pdf")
+  #   },
+  #   content = function(file) {
+  #     
+  #     width <- ifelse(!is.null(input$heatmap_width),
+  #                     input$heatmap_width,
+  #                     7)
+  #     height <- ifelse(!is.null(input$heatmap_height),
+  #                      input$heatmap_height,
+  #                      7)
+  #     
+  #     pdf(file, width = width, height = height, onefile=F)
+  #     
+  #     fontsize = 12
+  #     if (nrow(reacValues$dataHeatmap) > 100) {
+  #       fontsize = 4
+  #     } else if (nrow(reacValues$dataHeatmap) > 74) {
+  #       fontsize = 6
+  #     } else if (nrow(reacValues$dataHeatmap) > 50) {
+  #       fontsize = 8
+  #     } else if (nrow(reacValues$dataHeatmap) > 30) {
+  #       fontsize = 10
+  #     }
+  #     
+  #     clRows <- ifelse(!is.null(reacValues$clusterRows),
+  #                      reacValues$clusterRows,
+  #                      TRUE)
+  #     clCols <- ifelse(!is.null(reacValues$clusterCols),
+  #                      reacValues$clusterCols,
+  #                      TRUE)
+  #     scaleRows <- ifelse(!is.null(reacValues$scaleHeatmap),
+  #                         reacValues$scaleHeatmap,
+  #                         "row")
+  #     print(
+  #       pheatmap(
+  #         reacValues$dataHeatmap,
+  #         cluster_rows = clRows,
+  #         cluster_cols = clCols,
+  #         scale = scaleRows,
+  #         color = heatColors(),
+  #         border_color = NA,
+  #         fontsize_row = fontsize
+  #       )
+  #     )
+  #     dev.off()
+  #   }
+  # )
   
   output$download_amica <- renderUI({
     req(reacValues$analysisSuccess)
