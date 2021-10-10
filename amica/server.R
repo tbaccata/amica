@@ -18,6 +18,7 @@ server <- function(input, output, session) {
       dataComp = NULL,
       geneNames = NULL,
       reacConditions = NULL,
+      groupFactors = NULL,
       uniqueGroups = NULL,
       selectHeatmapGroups = NULL,
       dataHeatmap = NULL,
@@ -149,6 +150,7 @@ server <- function(input, output, session) {
     reacValues$geneNames <- NULL
     reacValues$reacConditions <- NULL
     reacValues$uniqueGroups <- NULL
+    reacValues$groupFactors <- NULL
     reacValues$selection <- NULL
     reacValues$newMultiNames <- NULL
     reacValues$dataCompAmica <- NULL
@@ -657,6 +659,37 @@ server <- function(input, output, session) {
     })
     })
   
+  output$groupFactors <- renderUI({
+    req(reacValues$analysisSuccess)
+    selectizeInput(
+      "groupFactors",
+      "Select the ordering of groups on the x-axis of plots (QC-plots, profile plots).
+      Ordering will be done from first to last selected.",
+      unique(reacValues$expDesign$groups),
+      multiple = T,
+      selected = NULL
+    )
+  })
+  
+  observeEvent(input$submitGroupFactors, {
+    req(input$groupFactors)
+    reacValues$groupFactors <- input$groupFactors
+  })
+  
+  observeEvent(input$resetGroupFactors, {
+    reacValues$groupFactors <- NULL
+  })
+  
+  output$groupFactorsSummary <- renderText({
+    req(reacValues$groupFactors)
+    out <- "Group factors:\n\n"
+    for (idx in seq_along(reacValues$groupFactors)) {
+      out <- paste0(out, "\t", idx, ": ", reacValues$groupFactors[idx], "\n")
+    }
+    out
+  })
+  
+  
   output$volcanoMAColors <- renderUI({
     pal <- brewer.pal(3, "Set2")
     
@@ -940,6 +973,13 @@ server <- function(input, output, session) {
         addGeneName = FALSE
       )
     }
+    
+    if (!is.null(reacValues$groupFactors) && 
+        all(reacValues$groupFactors %in% unique(object$group))) {
+      object <- object[object$group %in% reacValues$groupFactors,]
+      object$group <- factor(object$group, levels = reacValues$groupFactors)
+    }
+    
     object
   })
   
@@ -1452,6 +1492,12 @@ server <- function(input, output, session) {
     contsInts$Sample <- row.names(contsInts)
     contsInts$value <- 100 * contsInts$value
     
+    if (!is.null(reacValues$groupFactors) && 
+        all(reacValues$groupFactors %in% unique(contsInts$group))) {
+      contsInts <- contsInts[contsInts$group %in% reacValues$groupFactors,]
+      contsInts$group <- factor(contsInts$group, levels = reacValues$groupFactors)
+    }
+    
     p <- ggplot(contsInts, aes(x = Sample, y = value, fill = group)) +
       geom_bar(stat = "identity") +
       theme_minimal(base_size = input$contaminants_base) +
@@ -1575,6 +1621,12 @@ server <- function(input, output, session) {
     midx <- match(df$Sample, colData(reacValues$proteinData)$samples)
     df$group <- colData(reacValues$proteinData)$groups[midx]
     
+    if (!is.null(reacValues$groupFactors) && 
+        all(reacValues$groupFactors %in% unique(df$group))) {
+      df <- df[df$group %in% reacValues$groupFactors,]
+      df$group <- factor(df$group, levels = reacValues$groupFactors)
+    }
+    
     p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
       geom_bar(stat = "identity") +
       theme_minimal(base_size = input$barplotId_base) +
@@ -1644,6 +1696,12 @@ server <- function(input, output, session) {
     
     midx <- match(df$Sample, colData(reacValues$proteinData)$samples)
     df$group <- colData(reacValues$proteinData)$groups[midx]
+    
+    if (!is.null(reacValues$groupFactors) && 
+        all(reacValues$groupFactors %in% unique(df$group))) {
+      df <- df[df$group %in% reacValues$groupFactors,]
+      df$group <- factor(df$group, levels = reacValues$groupFactors)
+    }
     
     p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
       geom_bar(stat = "identity") +
@@ -2603,6 +2661,12 @@ server <- function(input, output, session) {
       addContaminant = TRUE,
       addGeneName = TRUE
     )
+    
+    if (!is.null(reacValues$groupFactors) && 
+        all(reacValues$groupFactors %in% unique(object$group))) {
+      object <- object[object$group %in% reacValues$groupFactors,]
+      object$group <- factor(object$group, levels = reacValues$groupFactors)
+    }
     
     stats <- Rmisc::summarySE(object, measurevar="value", groupvars=c("rowname","group"))
     stats <- stats[!is.na(stats$value),]
@@ -3900,14 +3964,17 @@ server <- function(input, output, session) {
     have been made (2021.10.10):<br>
          <hr>
          <ul>
-         <li>Added 'About' tab that explains libraries that are used in the 
-         analysis and that will act as a 'News' tab in the future.</li>
+         <li>Added option to plot groups on the x-axis in an order for QC-plots 
+         and profile plots (e.g very useful for time series data). 
+         The feature can be set in 'Choose colors' in Input tab)</li>
          <li>Added additional usage tutorial in Input tab.</li>
-          <li>Implemented Euler diagram next UpSet plot when choosing multiple 
+          <li>Added Euler diagram next to UpSet plot when choosing multiple 
           group comparisons in Diff. Abundance tab.</li>
           <li>PPI Networks can be downloaded as HTML and opened in another tab 
           (right-click -> save images as ...) which improves the resolution.</li>
           <li>Fixed bug in CV-plot in QC tab.</li>
+          <li>Added 'About' tab that explains libraries that are used in the 
+         analysis and that will act as a 'News' tab in the future.</li>
          </ul>
          </p>"),
     size = "l",

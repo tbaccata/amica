@@ -301,7 +301,7 @@ settings in a tab-separated  format that can be shared  with collaborators."
                        
                        bsCollapsePanel(
                          style = "info",
-                         "Choose colors v",
+                         "Click to choose colors and ordering of groups in plots",
                          p(
                            "All visualizations are interactive and created with plotly.
                                                              When you hover over a plot with your mouse a toolbar is visable in the top right corner.
@@ -381,6 +381,15 @@ settings in a tab-separated  format that can be shared  with collaborators."
                              helpText(
                                "The Motor Trend Car Road Tests was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
                              )
+                           ),
+                           tabPanel(
+                             h4("Order of groups in plots"),
+                             uiOutput("groupFactors"),
+                             helpText("If you only select a subset of groups 
+                                      the unselected groups will not be plotted."),
+                             inline(actionButton("submitGroupFactors", "Submit factors")),
+                             inline(actionButton("resetGroupFactors", "Reset factors")),
+                             verbatimTextOutput("groupFactorsSummary")
                            )
                          )
                        )
