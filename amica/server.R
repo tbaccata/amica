@@ -3896,11 +3896,18 @@ server <- function(input, output, session) {
   showModal(modalDialog(
     title = "Welcome to amica",
     HTML("<p>
-         Changes <br>
+    Due to public requests and other observations, the following changes 
+    have been made (2021.10.10):<br>
          <hr>
          <ul>
-          <li>elem 1</li>
-          <li>elem 2</li>
+         <li>Added 'About' tab that explains libraries that are used in the 
+         analysis and that will act as a 'News' tab in the future.</li>
+         <li>Added additional usage tutorial in Input tab.</li>
+          <li>Implemented Euler diagram next UpSet plot when choosing multiple 
+          group comparisons in Diff. Abundance tab.</li>
+          <li>PPI Networks can be downloaded as HTML and opened in another tab 
+          (right-click -> save images as ...) which improves the resolution.</li>
+          <li>Fixed bug in CV-plot in QC tab.</li>
          </ul>
          </p>"),
     size = "l",
