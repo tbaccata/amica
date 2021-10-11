@@ -2751,18 +2751,43 @@ server <- function(input, output, session) {
     dt
   })
   
+  gprofilerOrganisms <- reactive({
+    df <- read.delim('data/gprofiler_sources_2021_10.txt', header=T, sep='\t')
+    df
+  })
+  
+  observe({
+    updateSelectizeInput(session,
+                         server = T,
+                         'gprofilerOrganism',
+                         #'selectProfilePlotGene',
+                         choices = gprofilerOrganisms()$id,
+                         selected = "hsapiens"
+    )
+  })
+  
+  output$organismSources <- renderText({
+    req(input$gprofilerOrganism)
+    sources <- gprofilerOrganisms()[gprofilerOrganisms()$id == input$gprofilerOrganism, "sources"]
+    paste0("Available sources: ", sources)
+  })
   
   observeEvent(input$submitORA,{
     req(reacValues$dataComp)
     ridx <- isolate(input$groupComparisonsDT_rows_all)
-    organism <- isolate(input$species)
+    organism <- isolate(input$gprofilerOrganism)
+    sources <- isolate(input$oraSources)
+    
+    validate(need(!is.null(organism), "Please select an organism."))
+    validate(need(!is.null(sources), "Please select at least one source."))
     validate(need(nrow(reacValues$dataComp)>0, "No proteins to plot (output table must be empty)."))
     validate(need(length(ridx)>0, "No proteins to plot (output table must be empty)."))
     if ( nrow(reacValues$dataComp) < 2 ) return(NULL)
     
     queryGenes <- gsub(";.*", "", reacValues$dataComp[ridx, geneName])
-    #sources <- c("GO:MF","GO:CC","GO:BP","KEGG","REAC","CORUM","WP", "HPA", "TF")
-    sources <- c("GO:MF","GO:CC","GO:BP","KEGG","REAC","CORUM","WP")
+    # sources <- c("GO:MF","GO:CC","GO:BP","KEGG","REAC","CORUM","WP", "HPA", "TF")
+    # sources <- c("GO:MF","GO:CC","GO:BP","KEGG","REAC","CORUM","WP")
+    
 
     withProgress(message = 'Computing ORA ', {
       reacValues$dataGprofiler <- gost(
@@ -2999,7 +3024,7 @@ server <- function(input, output, session) {
     colnames(cellmap) <- c("label", "CellMap MMF localization", "CellMap SAFE localization")
     cellmap
   })
-  
+
   #### PPI NETWORK
   multiNetwork <- function(thresh=0) {
     if (is.na(thresh) || is.null(thresh)) thresh <- 0
@@ -3163,10 +3188,26 @@ server <- function(input, output, session) {
   
   output$network <- renderVisNetwork({
     ppiNet()
-  })    
+  })
+  
+  output$networkDT <- renderDT({
+    req(reacValues$nwNodes)
+    datatable(
+      reacValues$nwNodes[, grep("id|color", names(reacValues$nwNodes), invert = T)],
+      extensions = 'Buttons',
+      filter = "top",
+      rownames = F,
+      options = list(
+        pageLength = 10
+        #autoWidth = TRUE
+        #dom = 'Bfrtip',
+        #buttons = c('csv')
+      )
+    )
+  })
   
   output$download_network_button <- renderUI({
-    downloadButton("downloadNetworkHtml", h4("Download network as HTML"))
+    downloadButton("downloadNetworkHtml", "Download html")
   })
   
   output$downloadNetworkHtml <- downloadHandler(
@@ -3707,6 +3748,30 @@ server <- function(input, output, session) {
     }
   })
   
+  output$oraHelpBox <- renderUI({
+    if (input$oraHelp %% 2){
+      HTML(
+        "
+        Information from <a href='https://biit.cs.ut.ee/gprofiler/gost'target='_blank'>
+        gprofiler's web site</a>:
+        <p>
+        gprofiler performs functional enrichment analysis, also known as 
+        over-representation analysis (ORA) or gene set enrichment analysis, on 
+        input gene list. It maps genes to known functional information sources 
+        and detects statistically significantly enriched terms. gprofiler 
+        regularly retrieves data from Ensembl database and fungi, plants or 
+        metazoa specific versions of Ensembl Genomes, and parasite specific data
+        from WormBase ParaSite. In addition to Gene Ontology, gprofiler includes
+        pathways from KEGG Reactome and WikiPathways; miRNA targets from 
+        miRTarBase and regulatory motif matches from TRANSFAC; tissue specificity
+        from Human Protein Atlas; protein complexes from CORUM and human disease
+        phenotypes from Human Phenotype Ontology. g:GOSt supports close to 500 
+        organisms and accepts hundreds of identifier types.
+        </p>"
+      )
+    }
+  })
+  
   output$designTitle <- renderText({
     req(reacValues$proteinData)
     "Experimental Design"
@@ -3961,8 +4026,9 @@ server <- function(input, output, session) {
     title = "Welcome to amica",
     HTML("<p>
     Due to public requests and other observations, the following changes 
-    have been made (2021.10.10):<br>
+    have been made (2021.10.11):<br>
          <hr>
+         <h4>Features</h4>
          <ul>
          <li>Added option to plot groups on the x-axis in an order for QC-plots 
          and profile plots (e.g very useful for time series data). 
@@ -3972,9 +4038,12 @@ server <- function(input, output, session) {
           group comparisons in Diff. Abundance tab.</li>
           <li>PPI Networks can be downloaded as HTML and opened in another tab 
           (right-click -> save images as ...) which improves the resolution.</li>
-          <li>Fixed bug in CV-plot in QC tab.</li>
           <li>Added 'About' tab that explains libraries that are used in the 
          analysis and that will act as a 'News' tab in the future.</li>
+         </ul>
+         <h4>Bug fixes</h4>
+         <ul>
+          <li>Fixed bug in CV-plot in QC tab.</li>
          </ul>
          </p>"),
     size = "l",
