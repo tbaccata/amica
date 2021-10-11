@@ -1700,9 +1700,11 @@ settings in a tab-separated  format that can be shared  with collaborators."
                 visNetworkOutput("network", width = "100%", height = "800px"),
                 inline(uiOutput("download_button_spec_network")),
                 inline(uiOutput('download_network_button')),
+                inline(actionButton("showNodeTable", strong("Show Node table"))),
                 br(),br(),br(),
-                h4("Node table"),
-                DTOutput("networkDT")
+                shinyjs::hidden(div(id = 'toggle_node_table',
+                                    h4("Node table"),
+                                    DTOutput("networkDT")))
               )
             ),
             
@@ -1719,20 +1721,6 @@ settings in a tab-separated  format that can be shared  with collaborators."
                 ),
               ),
               column(width = 6,
-                     # radioButtons(
-                     #   "species",
-                     #   "Organism",
-                     #   choices = c(
-                     #     "hsapiens",
-                     #     "mmusculus",
-                     #     "scerevisiae",
-                     #     "athaliana",
-                     #     "celegans",
-                     #     "dmelanogaster"
-                     #   ),
-                     #   selected = "hsapiens"
-                     # ),
-                     
                      inline(selectizeInput(
                        inputId = "gprofilerOrganism",
                        label = ("Select Organism"),
@@ -1743,7 +1731,9 @@ settings in a tab-separated  format that can be shared  with collaborators."
                                         "Please choose..."),
                        width = '250px'
                      )),
-                     
+                     helpText("Please enter the scientific name by concatenating
+                              the first letter of the name and the family name. 
+                              Example: human - 'hsapiens', mouse - 'mmusculus'."),
                      verbatimTextOutput("organismSources", placeholder = F),
                      checkboxGroupInput(
                        "oraSources",
