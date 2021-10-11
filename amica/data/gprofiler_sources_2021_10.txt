@@ -1,0 +1,715 @@
+name	id	sources
+Wild yak	bmutus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Sloth	choffmanni	GO:MF, GO:CC, GO:BP, HP
+Zebrafish	drerio	GO:MF, GO:CC, GO:BP, KEGG, REAC, TF, MIRNA, HP
+Collared flycatcher	falbicollis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Dingo	cldingo	GO:MF, GO:CC, GO:BP, HP
+African ostrich	scaustralis	GO:MF, GO:CC, GO:BP, HP
+Marmoset	cjacchus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Ryukyu mouse	mcaroli	GO:MF, GO:CC, GO:BP, KEGG, HP
+Lesser Egyptian jerboa	jjaculus	GO:MF, GO:CC, GO:BP, HP
+Sailfin molly	platipinna	GO:MF, GO:CC, GO:BP, HP
+Sheep	oarambouillet	GO:MF, GO:CC, GO:BP, HP
+Mexican tetra	amexicanus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Rabbit	ocuniculus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Rainbow trout	omykiss	GO:MF, GO:CC, GO:BP, HP
+Siberian musk deer	mmoschiferus	GO:MF, GO:CC, GO:BP, HP
+Dog	clfamiliaris	GO:MF, GO:CC, GO:BP, KEGG, HP
+Midas cichlid	acitrinellus	GO:MF, GO:CC, GO:BP, HP
+Turquoise killifish	nfurzeri	GO:MF, GO:CC, GO:BP, HP
+Squirrel	itridecemlineatus	GO:MF, GO:CC, GO:BP, HP
+Asian bonytongue	sformosus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Human	hsapiens	GO:MF, GO:CC, GO:BP, KEGG, REAC, TF, MIRNA, HPA, CORUM, HP, WP
+Atlantic salmon	ssalar	GO:MF, GO:CC, GO:BP, KEGG, HP
+Macaque	mmulatta	GO:MF, GO:CC, GO:BP, KEGG, HP
+Ballan wrasse	lbergylta	GO:MF, GO:CC, GO:BP, HP
+Greater horseshoe bat	rferrumequinum	GO:MF, GO:CC, GO:BP, HP
+Mouse Lemur	mmurinus	GO:MF, GO:CC, GO:BP, HP
+Dolphin	ttruncatus	GO:MF, GO:CC, GO:BP, HP
+Green anole	acarolinensis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Bolivian squirrel monkey	sbboliviensis	GO:MF, GO:CC, GO:BP, KEGG, HP
+C.savignyi	csavignyi	GO:MF, GO:CC, GO:BP, HP
+Red fox	vvulpes	GO:MF, GO:CC, GO:BP, KEGG, HP
+Orange clownfish	apercula	GO:MF, GO:CC, GO:BP, HP
+Climbing perch	atestudineus	GO:MF, GO:CC, GO:BP, HP
+Tarsier	csyrichta	GO:MF, GO:CC, GO:BP, HP
+Eurasian red squirrel	svulgaris	GO:MF, GO:CC, GO:BP, HP
+Coquerel's sifaka	pcoquereli	GO:MF, GO:CC, GO:BP, HP
+Goat	chircus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Arabian camel	cdromedarius	GO:MF, GO:CC, GO:BP, KEGG, HP
+Lyretail cichlid	nbrichardi	GO:MF, GO:CC, GO:BP, HP
+Upper Galilee mountains blind mole rat	ngalili	GO:MF, GO:CC, GO:BP, KEGG, HP
+Tongue sole	csemilaevis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Shrew mouse	mpahari	GO:MF, GO:CC, GO:BP, KEGG, HP
+Tuatara	spunctatus	GO:MF, GO:CC, GO:BP, HP
+Pig	sscrofa	GO:MF, GO:CC, GO:BP, KEGG, REAC, MIRNA, HP, WP
+Yellowtail amberjack	sldorsalis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Burton's mouthbrooder	hburtoni	GO:MF, GO:CC, GO:BP, HP
+Great Tit	pmajor	GO:MF, GO:CC, GO:BP, HP
+Common wombat	vursinus	GO:MF, GO:CC, GO:BP, HP
+Chinese medaka	osinensis	GO:MF, GO:CC, GO:BP, HP
+Siamese fighting fish	bsplendens	GO:MF, GO:CC, GO:BP, HP
+Eastern happy	acalliptera	GO:MF, GO:CC, GO:BP, HP
+Northern pike	elucius	GO:MF, GO:CC, GO:BP, KEGG, HP
+Japanese medaka HdrR	olatipes	GO:MF, GO:CC, GO:BP, KEGG, MIRNA, HP
+Kangaroo rat	dordii	GO:MF, GO:CC, GO:BP, HP
+Common wall lizard	pmuralis	GO:MF, GO:CC, GO:BP, HP
+Duck	applatyrhynchos	GO:MF, GO:CC, GO:BP, HP
+Lumpfish	clumpus	GO:MF, GO:CC, GO:BP, HP
+Wallaby	neugenii	GO:MF, GO:CC, GO:BP, HP
+Chinese hamster CHOK1GS	cgchok1gshd	GO:MF, GO:CC, GO:BP, KEGG, HP
+Pink-footed goose	abrachyrhynchus	GO:MF, GO:CC, GO:BP, HP
+Tropical clawed frog	xtropicalis	GO:MF, GO:CC, GO:BP, KEGG, REAC, MIRNA, HP
+Tiger tail seahorse	hcomes	GO:MF, GO:CC, GO:BP, KEGG, HP
+Chicken	ggallus	GO:MF, GO:CC, GO:BP, KEGG, REAC, TF, MIRNA, HP, WP
+Goodes thornscrub tortoise	gevgoodei	GO:MF, GO:CC, GO:BP, HP
+Coelacanth	lchalumnae	GO:MF, GO:CC, GO:BP, KEGG, HP
+Indian cobra	nnaja	GO:MF, GO:CC, GO:BP, HP
+Capuchin	ccapucinus	GO:MF, GO:CC, GO:BP
+Gilthead seabream	saurata	GO:MF, GO:CC, GO:BP, HP
+Blue whale	bmusculus	GO:MF, GO:CC, GO:BP, HP
+Tree Shrew	tbelangeri	GO:MF, GO:CC, GO:BP, HP
+Hyrax	pcapensis	GO:MF, GO:CC, GO:BP, HP
+Black snub-nosed monkey	rbieti	GO:MF, GO:CC, GO:BP, KEGG, HP
+Golden eagle	acchrysaetos	GO:MF, GO:CC, GO:BP, HP
+Reedfish	ecalabaricus	GO:MF, GO:CC, GO:BP, HP
+Vaquita	psinus	GO:MF, GO:CC, GO:BP, HP
+Naked mole-rat female	hgfemale	GO:MF, GO:CC, GO:BP, KEGG, HP
+Lamprey	pmarinus	GO:MF, GO:CC, GO:BP, HP
+American bison	bbbison	GO:MF, GO:CC, GO:BP, HP
+Barramundi perch	lcalcarifer	GO:MF, GO:CC, GO:BP, KEGG, HP
+Sooty mangabey	catys	GO:MF, GO:CC, GO:BP, HP
+Leishan spiny toad	lleishanense	GO:MF, GO:CC, GO:BP, HP
+Gorilla	ggorilla	GO:MF, GO:CC, GO:BP, KEGG, HP
+Zebra mbuna	mzebra	GO:MF, GO:CC, GO:BP, KEGG, HP
+Zebra finch	tguttata	GO:MF, GO:CC, GO:BP, KEGG, MIRNA, HP
+Painted turtle	cpbellii	GO:MF, GO:CC, GO:BP, KEGG, HP
+Hedgehog	eeuropaeus	GO:MF, GO:CC, GO:BP, HP
+Australian saltwater crocodile	cporosus	GO:MF, GO:CC, GO:BP, HP
+Three-toed box turtle	tctriunguis	GO:MF, GO:CC, GO:BP, HP
+Pika	oprinceps	GO:MF, GO:CC, GO:BP, HP
+Orangutan	pabelii	GO:MF, GO:CC, GO:BP, KEGG, HP
+Gibbon	nleucogenys	GO:MF, GO:CC, GO:BP, KEGG, HP
+Javanese ricefish	ojavanicus	GO:MF, GO:CC, GO:BP, HP
+Huchen	hhucho	GO:MF, GO:CC, GO:BP, HP
+Arctic ground squirrel	uparryii	GO:MF, GO:CC, GO:BP, HP
+Ma's night monkey	anancymaae	GO:MF, GO:CC, GO:BP, HP
+American black bear	uamericanus	GO:MF, GO:CC, GO:BP, HP
+Prairie vole	mochrogaster	GO:MF, GO:CC, GO:BP, HP
+Lesser hedgehog tenrec	etelfairi	GO:MF, GO:CC, GO:BP, HP
+Hybrid - Bos Indicus	bihybrid	GO:MF, GO:CC, GO:BP, HP
+Alpine marmot	mmmarmota	GO:MF, GO:CC, GO:BP, HP
+Elephant shark	cmilii	GO:MF, GO:CC, GO:BP, HP
+Narwhal	mmonoceros	GO:MF, GO:CC, GO:BP, HP
+Sheepshead minnow	cvariegatus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Guinea Pig	cporcellus	GO:MF, GO:CC, GO:BP, HP
+Indian medaka	omelastigma	GO:MF, GO:CC, GO:BP, HP
+Common canary	scanaria	GO:MF, GO:CC, GO:BP, KEGG, HP
+Leopard	ppardus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Beluga whale	dleucas	GO:MF, GO:CC, GO:BP, HP
+Caenorhabditis elegans	celegans	GO:MF, GO:CC, GO:BP, KEGG, TF, MIRNA, HP, WP
+Golden-line barbel	sgrahami	GO:MF, GO:CC, GO:BP, HP
+American mink	nvison	GO:MF, GO:CC, GO:BP, HP
+Shrew	saraneus	GO:MF, GO:CC, GO:BP, HP
+Turbot	smaximus	GO:MF, GO:CC, GO:BP, HP
+Brown trout	strutta	GO:MF, GO:CC, GO:BP, HP
+Chinese softshell turtle	psinensis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Hagfish	eburgeri	GO:MF, GO:CC, GO:BP, HP
+Tiger	ptaltaica	GO:MF, GO:CC, GO:BP, KEGG, HP
+Chacoan peccary	cwagneri	GO:MF, GO:CC, GO:BP, HP
+Giant panda	amelanoleuca	GO:MF, GO:CC, GO:BP, KEGG, HP
+Greater amberjack	sdumerili	GO:MF, GO:CC, GO:BP, KEGG, HP
+Mallard	aplatyrhynchos	GO:MF, GO:CC, GO:BP, KEGG
+Sperm whale	pcatodon	GO:MF, GO:CC, GO:BP, HP
+Atlantic herring	charengus	GO:MF, GO:CC, GO:BP, HP
+Eastern brown snake	ptextilis	GO:MF, GO:CC, GO:BP, HP
+Donkey	eaasinus	GO:MF, GO:CC, GO:BP, HP
+Goldfish	cauratus	GO:MF, GO:CC, GO:BP, HP
+Channel catfish	ipunctatus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Large yellow croaker	lcrocea	GO:MF, GO:CC, GO:BP, KEGG, HP
+Paramormyrops kingsleyae	pkingsleyae	GO:MF, GO:CC, GO:BP, HP
+Bonobo	ppaniscus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Alpaca	vpacos	GO:MF, GO:CC, GO:BP, HP
+Yarkand deer	chyarkandensis	GO:MF, GO:CC, GO:BP, HP
+Chinook salmon	otshawytscha	GO:MF, GO:CC, GO:BP, HP
+Vervet-AGM	csabaeus	GO:MF, GO:CC, GO:BP, KEGG, HP
+C.intestinalis	cintestinalis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Spiny chromis	apolyacanthus	GO:MF, GO:CC, GO:BP, HP
+Crab-eating macaque	mfascicularis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Medium ground-finch	gfortis	GO:MF, GO:CC, GO:BP, HP
+Argentine black and white tegu	smerianae	GO:MF, GO:CC, GO:BP, HP
+Chimpanzee	ptroglodytes	GO:MF, GO:CC, GO:BP, KEGG, TF, HP, WP
+Kakapo	shabroptila	GO:MF, GO:CC, GO:BP, HP
+Greater bamboo lemur	psimus	GO:MF, GO:CC, GO:BP, HP
+Cow	btaurus	GO:MF, GO:CC, GO:BP, KEGG, REAC, MIRNA, CORUM, HP, WP
+Saccharomyces cerevisiae	scerevisiae	GO:MF, GO:CC, GO:BP, KEGG, TF, HP, WP
+Pike-perch	slucioperca	GO:MF, GO:CC, GO:BP, HP
+Clown anemonefish	aocellaris	GO:MF, GO:CC, GO:BP, HP
+Sheep (texel)	oaries	GO:MF, GO:CC, GO:BP, KEGG, MIRNA
+European seabass	dlabrax	GO:MF, GO:CC, GO:BP, HP
+Golden Hamster	mauratus	GO:MF, GO:CC, GO:BP, HP
+Northern American deer mouse	pmbairdii	GO:MF, GO:CC, GO:BP, HP
+Domestic yak	bgrunniens	GO:MF, GO:CC, GO:BP, HP
+Blue-ringed sea krait	llaticaudata	GO:MF, GO:CC, GO:BP, HP
+Golden snub-nosed monkey	rroxellana	GO:MF, GO:CC, GO:BP, KEGG, HP
+Mummichog	fheteroclitus	GO:MF, GO:CC, GO:BP, HP
+Fugu	trubripes	GO:MF, GO:CC, GO:BP, KEGG, HP
+Channel bull blenny	cgobio	GO:MF, GO:CC, GO:BP, HP
+Mangrove rivulus	kmarmoratus	GO:MF, GO:CC, GO:BP, HP
+Spotted gar	loculatus	GO:MF, GO:CC, GO:BP, HP
+Common carp	ccarpio	GO:MF, GO:CC, GO:BP, KEGG, HP
+Cat	fcatus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Tetraodon	tnigroviridis	GO:MF, GO:CC, GO:BP, KEGG, HP
+Polar bear	umaritimus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Platyfish	xmaculatus	GO:MF, GO:CC, GO:BP, HP
+Pig-tailed macaque	mnemestrina	GO:MF, GO:CC, GO:BP, HP
+Bushbaby	ogarnettii	GO:MF, GO:CC, GO:BP, HP
+Turkey	mgallopavo	GO:MF, GO:CC, GO:BP, KEGG, HP
+Amazon molly	pformosa	GO:MF, GO:CC, GO:BP, HP
+Rat	rnorvegicus	GO:MF, GO:CC, GO:BP, KEGG, REAC, TF, MIRNA, CORUM, HP, WP
+Electric eel	eelectricus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Pinecone soldierfish	mmurdjan	GO:MF, GO:CC, GO:BP, HP
+Guppy	preticulata	GO:MF, GO:CC, GO:BP, KEGG, HP
+Microbat	mlucifugus	GO:MF, GO:CC, GO:BP, HP
+Platypus	oanatinus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Megabat	pvampyrus	GO:MF, GO:CC, GO:BP, HP
+Algerian mouse	mspretus	GO:MF, GO:CC, GO:BP, HP
+Long-tailed chinchilla	clanigera	GO:MF, GO:CC, GO:BP, HP
+Elephant	lafricana	GO:MF, GO:CC, GO:BP, KEGG, HP
+Makobe Island cichlid	pnyererei	GO:MF, GO:CC, GO:BP, HP
+Coho salmon	okisutch	GO:MF, GO:CC, GO:BP, HP
+Bicolor damselfish	spartitus	GO:MF, GO:CC, GO:BP, HP
+Horse	ecaballus	GO:MF, GO:CC, GO:BP, KEGG, HP, WP
+Olive baboon	panubis	GO:MF, GO:CC, GO:BP, HP
+Drill	mleucophaeus	GO:MF, GO:CC, GO:BP, HP
+Japanese quail	cjaponica	GO:MF, GO:CC, GO:BP, KEGG, HP
+Degu	odegus	GO:MF, GO:CC, GO:BP, HP
+Drosophila melanogaster	dmelanogaster	GO:MF, GO:CC, GO:BP, KEGG, TF, MIRNA, HP, WP
+Atlantic cod	gmorhua	GO:MF, GO:CC, GO:BP, HP
+Koala	pcinereus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Red-bellied piranha	pnattereri	GO:MF, GO:CC, GO:BP, HP
+Abingdon island giant tortoise	cabingdonii	GO:MF, GO:CC, GO:BP, HP
+Steppe mouse	mspicilegus	GO:MF, GO:CC, GO:BP, HP
+Nile tilapia	oniloticus	GO:MF, GO:CC, GO:BP, KEGG, HP
+Stickleback	gaculeatus	GO:MF, GO:CC, GO:BP, HP
+Tasmanian devil	sharrisii	GO:MF, GO:CC, GO:BP, KEGG, HP
+Zig-zag eel	marmatus	GO:MF, GO:CC, GO:BP, HP
+Armadillo	dnovemcinctus	GO:MF, GO:CC, GO:BP, HP
+Ferret	mpfuro	GO:MF, GO:CC, GO:BP, HP
+Denticle herring	dclupeoides	GO:MF, GO:CC, GO:BP, HP
+Lion	pleo	GO:MF, GO:CC, GO:BP, HP
+Mainland tiger snake	nscutatus	GO:MF, GO:CC, GO:BP, HP
+Opossum	mdomestica	GO:MF, GO:CC, GO:BP, KEGG, HP
+Mouse	mmusculus	GO:MF, GO:CC, GO:BP, KEGG, REAC, TF, MIRNA, COR
+Yarrowia lipolytica	ylipolytica	GO:MF, GO:CC, GO:BP, KEGG
+Colletotrichum orbiculare	corbiculare	GO:MF, GO:CC, GO:BP
+Beauveria bassiana	bbassiana	GO:MF, GO:CC, GO:BP
+Aspergillus fumigatus A1163	afumigatusa1163	GO:MF, GO:CC, GO:BP
+Aspergillus niger	aniger	GO:MF, GO:CC, GO:BP
+Dothistroma septosporum	dseptosporum	GO:MF, GO:CC, GO:BP
+Aspergillus nidulans	anidulans	GO:MF, GO:CC, GO:BP, KEGG
+Schizosaccharomyces japonicus	sjaponicus	GO:MF, GO:CC, GO:BP
+Aspergillus fischeri NRRL 181	nfischeri	GO:MF, GO:CC, GO:BP, KEGG
+Puccinia graminis	pgraminis	GO:MF, GO:CC, GO:BP, KEGG
+Fusarium solani	fsolani	GO:MF, GO:CC, GO:BP, KEGG
+Microbotryum violaceum	mviolaceum	GO:MF, GO:CC, GO:BP
+Komagataella pastoris	kpastoris	GO:MF, GO:CC, GO:BP, KEGG
+Cryptococcus neoformans var. neoformans JEC21	cneoformans	GO:MF, GO:CC, GO:BP, KEGG
+Colletotrichum higginsianum	chigginsianum	GO:MF, GO:CC, GO:BP
+Blumeria graminis	bgraminis	GO:MF, GO:CC, GO:BP
+Puccinia graminis Ug99	pgraminisug99	GO:MF, GO:CC, GO:BP
+Caenorhabditis briggsae	cbriggsae	GO:MF, GO:CC, GO:BP, KEGG
+Glossina brevipalpis	gbrevipalpis	GO:MF, GO:CC, GO:BP
+Aedes albopictus	aalbopictus	GO:MF, GO:CC, GO:BP, KEGG
+Adineta vaga	avaga	GO:MF, GO:CC, GO:BP
+Pristionchus pacificus	ppacificus	GO:MF, GO:CC, GO:BP
+Schistosoma mansoni	smansoni	GO:MF, GO:CC, GO:BP, KEGG
+Drosophila virilis (TSC#15010-1051.87)	dvirilis	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles darlingi	adarlingi	GO:MF, GO:CC, GO:BP
+Bemisia tabaci (ASIAII-5)	btasiaii5	GO:MF, GO:CC, GO:BP
+Strongyloides ratti	sratti	GO:MF, GO:CC, GO:BP
+Anopheles sinensis (China)	aschina	GO:MF, GO:CC, GO:BP
+Drosophila grimshawi (TSC#15287-2541.00)	dgrimshawi	GO:MF, GO:CC, GO:BP, KEGG
+Glossina palpalis	gpalpalis	GO:MF, GO:CC, GO:BP
+Atta cephalotes	acephalotes	GO:MF, GO:CC, GO:BP, KEGG
+Solenopsis invicta	sinvicta	GO:MF, GO:CC, GO:BP, KEGG
+Strongylocentrotus purpuratus (Spur 01)	spurpuratus	GO:MF, GO:CC, GO:BP, KEGG
+Drosophila ananassae (TSC#14024-0371.13)	dananassae	GO:MF, GO:CC, GO:BP, KEGG
+Bemisia tabaci (SSA3 NG)	btssa3nig	GO:MF, GO:CC, GO:BP
+Lepeophtheirus salmonis	lsalmonis	GO:MF, GO:CC, GO:BP
+Biomphalaria glabrata	bglabrata	GO:MF, GO:CC, GO:BP
+Apis mellifera (DH4)	amellifera	GO:MF, GO:CC, GO:BP, KEGG
+Mnemiopsis leidyi	mleidyi	GO:MF, GO:CC, GO:BP
+Caenorhabditis remanei	cremanei	GO:MF, GO:CC, GO:BP
+Branchiostoma lanceolatum	blanceolatum	GO:MF, GO:CC, GO:BP
+Drosophila erecta (TSC#14021-0224.01)	derecta	GO:MF, GO:CC, GO:BP, KEGG
+Megaselia scalaris	mscalaris	GO:MF, GO:CC, GO:BP
+Drosophila willistoni (TSC#14030-0811.24)	dwillistoni	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles minimus	aminimus	GO:MF, GO:CC, GO:BP
+Loa loa	lloa	GO:MF, GO:CC, GO:BP, KEGG
+Strigamia maritima	smaritima	GO:MF, GO:CC, GO:BP
+Dendroctonus ponderosae	dponderosae	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles melas	amelas	GO:MF, GO:CC, GO:BP
+Trichinella spiralis	tspiralis	GO:MF, GO:CC, GO:BP, KEGG
+Bombyx mori	bmori	GO:MF, GO:CC, GO:BP, KEGG, MIRNA
+Tetranychus urticae	turticae	GO:MF, GO:CC, GO:BP, KEGG
+Glossina fuscipes fuscipes	gfuscipes	GO:MF, GO:CC, GO:BP
+Rhodnius prolixus	rprolixus	GO:MF, GO:CC, GO:BP
+Drosophila simulans (w501)	dsimulans	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles epiroticus	aepiroticus	GO:MF, GO:CC, GO:BP
+Anopheles culicifacies	aculicifacies	GO:MF, GO:CC, GO:BP
+Bemisia tabaci (SSA1-SG1 UG)	btssa1ug	GO:MF, GO:CC, GO:BP
+Stegodyphus mimosarum	smimosarum	GO:MF, GO:CC, GO:BP
+Melitaea cinxia	mcinxia	GO:MF, GO:CC, GO:BP
+Caenorhabditis brenneri	cbrenneri	GO:MF, GO:CC, GO:BP
+Aedes aegypti (LVP_AGWG)	aalvpagwg	GO:MF, GO:CC, GO:BP, KEGG
+Ixodes scapularis (ISE6)	isise6	GO:MF, GO:CC, GO:BP, KEGG
+Amphimedon queenslandica	aqueenslandica	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles stephensi	astephensi	GO:MF, GO:CC, GO:BP
+Onchocerca volvulus	ovolvulus	GO:MF, GO:CC, GO:BP
+Anopheles quadriannulatus	aquadriannulatus	GO:MF, GO:CC, GO:BP
+Brugia malayi	bmalayi	GO:MF, GO:CC, GO:BP, KEGG
+Capitella teleta	cteleta	GO:MF, GO:CC, GO:BP
+Belgica antarctica	bantarctica	GO:MF, GO:CC, GO:BP
+Anopheles stephensi (Indian)	asindian	GO:MF, GO:CC, GO:BP
+Danaus plexippus	dplexippus	GO:MF, GO:CC, GO:BP
+Anopheles funestus	afunestus	GO:MF, GO:CC, GO:BP
+Drosophila mojavensis (TSC#15081-1352.22)	dmojavensis	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles atroparvus	aatroparvus	GO:MF, GO:CC, GO:BP
+Tribolium castaneum	tcastaneum	GO:MF, GO:CC, GO:BP, KEGG
+Anoplophora glabripennis	aglabripennis	GO:MF, GO:CC, GO:BP
+Anopheles albimanus	aalbimanus	GO:MF, GO:CC, GO:BP
+Culex quinquefasciatus	cquinquefasciatus	GO:MF, GO:CC, GO:BP, KEGG
+Drosophila persimilis (MSH-3)	dpersimilis	GO:MF, GO:CC, GO:BP, KEGG
+Crassostrea gigas	cgigas	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles gambiae	agambiae	GO:MF, GO:CC, GO:BP, KEGG, WP
+Bemisia tabaci (SSA2 NG)	btssa2nig	GO:MF, GO:CC, GO:BP
+Leptotrombidium deliense	ldeliense	GO:MF, GO:CC, GO:BP
+Daphnia magna	dmagna	GO:MF, GO:CC, GO:BP
+Nematostella vectensis	nvectensis	GO:MF, GO:CC, GO:BP, KEGG
+Drosophila sechellia (Rob3c)	dsechellia	GO:MF, GO:CC, GO:BP, KEGG
+Stomoxys calcitrans	scalcitrans	GO:MF, GO:CC, GO:BP
+Anopheles maculatus	amaculatus	GO:MF, GO:CC, GO:BP
+Bombus terrestris	bterrestris	GO:MF, GO:CC, GO:BP, KEGG
+Octopus bimaculoides	obimaculoides	GO:MF, GO:CC, GO:BP, KEGG
+Teleopsis dalmanni	tdalmanni	GO:MF, GO:CC, GO:BP
+Daphnia pulex	dpulex	GO:MF, GO:CC, GO:BP, KEGG
+Thelohanellus kitauei	tkitauei	GO:MF, GO:CC, GO:BP
+Drosophila yakuba (Tai18E2)	dyakuba	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles coluzzii (Ngousso)	acngousso	GO:MF, GO:CC, GO:BP
+Helobdella robusta	hrobusta	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles dirus	adirus	GO:MF, GO:CC, GO:BP
+Anopheles arabiensis	aarabiensis	GO:MF, GO:CC, GO:BP
+Glossina pallidipes	gpallidipes	GO:MF, GO:CC, GO:BP
+Ixodes scapularis	iscapularis	GO:MF, GO:CC, GO:BP
+Orchesella cincta	ocincta	GO:MF, GO:CC, GO:BP
+Nasonia vitripennis (AsymCx)	nvitripennis	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles merus	amerus	GO:MF, GO:CC, GO:BP
+Dinothrombium tinctorium	dtinctorium	GO:MF, GO:CC, GO:BP
+Lottia gigantea	lgigantea	GO:MF, GO:CC, GO:BP, KEGG
+Cimex lectularius	clectularius	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles coluzzii	acoluzzii	GO:MF, GO:CC, GO:BP
+Anopheles sinensis	asinensis	GO:MF, GO:CC, GO:BP
+Phlebotomus papatasi	ppapatasi	GO:MF, GO:CC, GO:BP
+Pediculus humanus	phumanus	GO:MF, GO:CC, GO:BP, KEGG
+Glossina morsitans	gmorsitans	GO:MF, GO:CC, GO:BP
+Hofstenia miamia	hmiamia	GO:MF, GO:CC, GO:BP
+Lucilia cuprina	lcuprina	GO:MF, GO:CC, GO:BP, KEGG
+Heliconius melpomene	hmelpomene	GO:MF, GO:CC, GO:BP
+Bemisia tabaci (SSA1-SG1 NG)	btssa1nig	GO:MF, GO:CC, GO:BP
+Lutzomyia longipalpis	llongipalpis	GO:MF, GO:CC, GO:BP
+Bemisia tabaci (Uganda 1)	btsweetpotug	GO:MF, GO:CC, GO:BP
+Glossina austeni	gausteni	GO:MF, GO:CC, GO:BP
+Culicoides sonorensis	csonorensis	GO:MF, GO:CC, GO:BP
+Zootermopsis nevadensis	znevadensis	GO:MF, GO:CC, GO:BP, KEGG
+Folsomia candida str. VU population	fcandida	GO:MF, GO:CC, GO:BP, KEGG
+Bombus impatiens	bimpatiens	GO:MF, GO:CC, GO:BP, KEGG
+Sarcoptes scabiei	sscabiei	GO:MF, GO:CC, GO:BP
+Mayetiola destructor	mdestructor	GO:MF, GO:CC, GO:BP
+Anopheles farauti	afarauti	GO:MF, GO:CC, GO:BP
+Lingula anatina	lanatina	GO:MF, GO:CC, GO:BP, KEGG
+Drosophila pseudoobscura pseudoobscura (MV2-25)	dpseudoobscura	GO:MF, GO:CC, GO:BP, KEGG
+Trichoplax adhaerens	tadhaerens	GO:MF, GO:CC, GO:BP, KEGG
+Acyrthosiphon pisum	apisum	GO:MF, GO:CC, GO:BP, KEGG
+Anopheles christyi	achristyi	GO:MF, GO:CC, GO:BP
+Neurospora crassa	ncrassa	GO:MF, GO:CC, GO:BP, KEGG
+Schizosaccharomyces pombe	spombe	GO:MF, GO:CC, GO:BP, KEGG
+Tuber melanosporum	tmelanosporum	GO:MF, GO:CC, GO:BP, KEGG
+Aspergillus terreus NIH2624	aterreus	GO:MF, GO:CC, GO:BP
+Fusarium fujikuroi	ffujikuroi	GO:MF, GO:CC, GO:BP
+Phaeosphaeria nodorum	pnodorum	GO:MF, GO:CC, GO:BP, KEGG
+Aspergillus oryzae RIB40	aoryzae	GO:MF, GO:CC, GO:BP, KEGG
+Puccinia striiformis f. sp. tritici PST-130 str. Race 130	pstriiformis	GO:MF, GO:CC, GO:BP
+Pyrenophora teres	pteres	GO:MF, GO:CC, GO:BP, KEGG
+Verticillium dahliae	vdahliae	GO:MF, GO:CC, GO:BP, KEGG
+Sporisorium reilianum	sreilianum	GO:MF, GO:CC, GO:BP
+Trichoderma virens	tvirens	GO:MF, GO:CC, GO:BP
+Schizosaccharomyces octosporus	soctosporus	GO:MF, GO:CC, GO:BP
+Colletotrichum graminicola	cgraminicola	GO:MF, GO:CC, GO:BP
+Fusarium verticillioides	fverticillioides	GO:MF, GO:CC, GO:BP, KEGG
+Aspergillus clavatus NRRL 1	aclavatus	GO:MF, GO:CC, GO:BP, KEGG
+Ustilago maydis	umaydis	GO:MF, GO:CC, GO:BP, KEGG
+Zymoseptoria tritici	ztritici	GO:MF, GO:CC, GO:BP, KEGG
+Aspergillus flavus NRRL3357	aflavus	GO:MF, GO:CC, GO:BP, KEGG
+Leptosphaeria maculans	lmaculans	GO:MF, GO:CC, GO:BP
+Trichoderma reesei	treesei	GO:MF, GO:CC, GO:BP, KEGG
+Schizosaccharomyces cryophilus	scryophilus	GO:MF, GO:CC, GO:BP
+Gaeumannomyces tritici R3-111a-1	ggraminis	GO:MF, GO:CC, GO:BP
+Aspergillus fumigatus Af293	afumigatus	GO:MF, GO:CC, GO:BP, KEGG
+Pyrenophora tritici-repentis Pt-1C-BFP	ptriticirepentis	GO:MF, GO:CC, GO:BP
+Melampsora larici-populina	mlaricipopulina	GO:MF, GO:CC, GO:BP, KEGG
+Fusarium oxysporum	foxysporum	GO:MF, GO:CC, GO:BP, KEGG
+Botrytis cinerea B05.10	bcinerea	GO:MF, GO:CC, GO:BP, KEGG
+Magnaporthe poae	mpoae	GO:MF, GO:CC, GO:BP
+Fusarium pseudograminearum	fpseudograminearum	GO:MF, GO:CC, GO:BP, KEGG
+Fusarium graminearum str. PH-1	fgraminearum	GO:MF, GO:CC, GO:BP
+Ashbya gossypii	agossypii	GO:MF, GO:CC, GO:BP, KEGG
+Sclerotinia sclerotiorum	ssclerotiorum	GO:MF, GO:CC, GO:BP, KEGG
+Verticillium dahliae JR2	vdahliaejr2	GO:MF, GO:CC, GO:BP
+Colletotrichum gloeosporioides	cgloeosporioides	GO:MF, GO:CC, GO:BP
+Puccinia triticina	ptriticina	GO:MF, GO:CC, GO:BP
+Fusarium culmorum UK99	fculmorum	GO:MF, GO:CC, GO:BP
+Magnaporthe oryzae	moryzae	GO:MF, GO:CC, GO:BP, KEGG
+Mesorhabditis belari (PRJEB30104)	mebelaprjeb30104	GO:MF, GO:CC, GO:BP
+Heligmosomoides polygyrus (PRJEB1203)	hepolyprjeb1203	GO:MF, GO:CC, GO:BP
+Caenorhabditis parvicauda (PRJEB12595)	caparvprjeb12595	GO:MF, GO:CC, GO:BP
+Meloidogyne floridensis (PRJEB6016)	meflorprjeb6016	GO:MF, GO:CC, GO:BP
+Hymenolepis nana (PRJEB508)	hynanaprjeb508	GO:MF, GO:CC, GO:BP
+Necator americanus (PRJNA72135)	neamerprjna72135	GO:MF, GO:CC, GO:BP, KEGG
+Caenorhabditis inopinata (PRJDB5687)	cainopprjdb5687	GO:MF, GO:CC, GO:BP
+Steinernema scapterisci (PRJNA204942)	stscapprjna204942	GO:MF, GO:CC, GO:BP
+Taenia multiceps (PRJNA307624)	tamultprjna307624	GO:MF, GO:CC, GO:BP
+Diploscapter coronatus (PRJDB3143)	dicoroprjdb3143	GO:MF, GO:CC, GO:BP
+Plectus sambesii (PRJNA390260)	plsambprjna390260	GO:MF, GO:CC, GO:BP
+Meloidogyne incognita (PRJEB8714)	meincoprjeb8714	GO:MF, GO:CC, GO:BP
+Trichinella nativa (PRJNA257433)	trnatiprjna257433	GO:MF, GO:CC, GO:BP
+Schistosoma haematobium (PRJNA78265)	schaemprjna78265	GO:MF, GO:CC, GO:BP, KEGG
+Schistosoma margrebowiei (PRJEB522)	scmargprjeb522	GO:MF, GO:CC, GO:BP
+Caenorhabditis elegans (PRJNA13758) [WS276]	caelegprjna13758	GO:MF, GO:CC, GO:BP, KEGG
+Ascaris suum (PRJNA80881)	assuumprjna80881	GO:MF, GO:CC, GO:BP
+Panagrolaimus es5 (PRJEB32708)	paes5prjeb32708	GO:MF, GO:CC, GO:BP
+Brugia malayi (PRJNA10729) [WS276]	brmalaprjna10729	GO:MF, GO:CC, GO:BP, KEGG
+Trichuris muris (PRJEB126) [WS276]	trmuriprjeb126	GO:MF, GO:CC, GO:BP
+Schmidtea mediterranea (PRJNA12585)	scmediprjna12585	GO:MF, GO:CC, GO:BP
+Caenorhabditis latens (PRJNA248912)	calateprjna248912	GO:MF, GO:CC, GO:BP
+Fasciola gigantica (PRJNA230515)	fagigaprjna230515	GO:MF, GO:CC, GO:BP
+Syphacia muris (PRJEB524)	symuriprjeb524	GO:MF, GO:CC, GO:BP
+Caenorhabditis remanei (PRJNA248909)	caremaprjna248909	GO:MF, GO:CC, GO:BP
+Pristionchus exspectatus (PRJEB24288)	prexspprjeb24288	GO:MF, GO:CC, GO:BP
+Elaeophora elaphi (PRJEB502)	elelapprjeb502	GO:MF, GO:CC, GO:BP
+Trichinella sp. T9 (PRJNA257433)	trt9prjna257433	GO:MF, GO:CC, GO:BP
+Parascaris equorum (PRJEB514)	paequoprjeb514	GO:MF, GO:CC, GO:BP
+Echinococcus multilocularis (PRJEB122)	ecmultprjeb122	GO:MF, GO:CC, GO:BP
+Echinococcus granulosus (PRJEB121)	ecgranprjeb121	GO:MF, GO:CC, GO:BP, KEGG
+Steinernema monticolum (PRJNA205067)	stmontprjna205067	GO:MF, GO:CC, GO:BP
+Schistocephalus solidus (PRJEB527)	scsoliprjeb527	GO:MF, GO:CC, GO:BP
+Caenorhabditis angaria (PRJNA51225)	caangaprjna51225	GO:MF, GO:CC, GO:BP
+Hymenolepis diminuta (PRJEB30942)	hydimiprjeb30942	GO:MF, GO:CC, GO:BP
+Brugia timori (PRJEB4663)	brtimoprjeb4663	GO:MF, GO:CC, GO:BP
+Onchocerca flexuosa (PRJEB512)	onflexprjeb512	GO:MF, GO:CC, GO:BP
+Strongyloides venezuelensis (PRJEB530)	stveneprjeb530	GO:MF, GO:CC, GO:BP
+Parapristionchus giblindavisi (PRJEB27334)	pagiblprjeb27334	GO:MF, GO:CC, GO:BP
+Trichinella spiralis (PRJNA257433)	trspirprjna257433	GO:MF, GO:CC, GO:BP, KEGG
+Dracunculus medinensis (PRJEB500)	drmediprjeb500	GO:MF, GO:CC, GO:BP
+Meloidogyne arenaria (PRJEB8714)	mearenprjeb8714	GO:MF, GO:CC, GO:BP
+Haemonchus contortus (PRJEB506)	hacontprjeb506	GO:MF, GO:CC, GO:BP
+Soboliphyme baturini (PRJEB516)	sobatuprjeb516	GO:MF, GO:CC, GO:BP
+Pristionchus pacificus (PRJNA12644) [WS276]	prpaciprjna12644	GO:MF, GO:CC, GO:BP
+Schistosoma rodhaini (PRJEB526)	scrodhprjeb526	GO:MF, GO:CC, GO:BP
+Caenorhabditis nigoni (PRJNA384657)	canigoprjna384657	GO:MF, GO:CC, GO:BP
+Heterodera glycines (PRJNA381081)	heglycprjna381081	GO:MF, GO:CC, GO:BP
+Ditylenchus destructor (PRJNA312427)	didestprjna312427	GO:MF, GO:CC, GO:BP
+Panagrellus redivivus (PRJNA186477)	parediprjna186477	GO:MF, GO:CC, GO:BP
+Caenorhabditis brenneri (PRJNA20035) [WS276]	cabrenprjna20035	GO:MF, GO:CC, GO:BP
+Taenia saginata (PRJNA71493)	tasagiprjna71493	GO:MF, GO:CC, GO:BP
+Panagrolaimus superbus (PRJEB32708)	pasupeprjeb32708	GO:MF, GO:CC, GO:BP
+Haemonchus placei (PRJEB509)	haplacprjeb509	GO:MF, GO:CC, GO:BP
+Diploscapter pachys (PRJNA280107)	dipachprjna280107	GO:MF, GO:CC, GO:BP
+Caenorhabditis panamensis (PRJEB28259)	capanaprjeb28259	GO:MF, GO:CC, GO:BP
+Mesocestoides corti (PRJEB510)	mecortprjeb510	GO:MF, GO:CC, GO:BP
+Ditylenchus dipsaci (PRJNA498219)	didipsprjna498219	GO:MF, GO:CC, GO:BP
+Brugia pahangi (PRJEB497)	brpahaprjeb497	GO:MF, GO:CC, GO:BP
+Echinococcus canadensis (PRJEB8992)	eccanaprjeb8992	GO:MF, GO:CC, GO:BP
+Taenia asiatica (PRJNA299871)	taasiaprjna299871	GO:MF, GO:CC, GO:BP
+Caenorhabditis tribulationis (PRJEB12608)	catribprjeb12608	GO:MF, GO:CC, GO:BP
+Trichinella britovi (PRJNA257433)	trbritprjna257433	GO:MF, GO:CC, GO:BP
+Trichobilharzia regenti (PRJEB4662)	trregeprjeb4662	GO:MF, GO:CC, GO:BP
+Heterorhabditis bacteriophora (PRJNA13977)	hebactprjna13977	GO:MF, GO:CC, GO:BP
+Trichuris trichiura (PRJEB535)	trtricprjeb535	GO:MF, GO:CC, GO:BP
+Panagrolaimus davidi (PRJEB32708)	padaviprjeb32708	GO:MF, GO:CC, GO:BP
+Ascaris suum (PRJNA62057)	assuumprjna62057	GO:MF, GO:CC, GO:BP
+Steinernema glaseri (PRJNA204943)	stglasprjna204943	GO:MF, GO:CC, GO:BP
+Gyrodactylus salaris (PRJNA244375)	gysalaprjna244375	GO:MF, GO:CC, GO:BP
+Globodera pallida (PRJEB123)	glpallprjeb123	GO:MF, GO:CC, GO:BP
+Spirometra erinaceieuropaei (PRJEB1202)	sperinprjeb1202	GO:MF, GO:CC, GO:BP
+Litomosoides sigmodontis (PRJEB3075)	lisigmprjeb3075	GO:MF, GO:CC, GO:BP
+Ascaris lumbricoides (PRJEB4950)	aslumbprjeb4950	GO:MF, GO:CC, GO:BP
+Dibothriocephalus latus (PRJEB1206)	dilatuprjeb1206	GO:MF, GO:CC, GO:BP
+Setaria digitata (PRJNA479729)	sedigiprjna479729	GO:MF, GO:CC, GO:BP
+Echinococcus granulosus (PRJNA182977)	ecgranprjna182977	GO:MF, GO:CC, GO:BP
+Globodera rostochiensis (PRJEB13504)	glrostprjeb13504	GO:MF, GO:CC, GO:BP
+Caenorhabditis remanei (PRJNA53967) [WS276]	caremaprjna53967	GO:MF, GO:CC, GO:BP
+Meloidogyne arenaria (PRJNA438575)	mearenprjna438575	GO:MF, GO:CC, GO:BP
+Oesophagostomum dentatum (PRJNA72579)	oedentprjna72579	GO:MF, GO:CC, GO:BP
+Pristionchus arcanus (PRJEB27334)	prarcaprjeb27334	GO:MF, GO:CC, GO:BP
+Pristionchus maxplancki (PRJEB27334)	prmaxpprjeb27334	GO:MF, GO:CC, GO:BP
+Meloidogyne graminicola (PRJNA411966)	megramprjna411966	GO:MF, GO:CC, GO:BP
+Schistosoma japonicum (PRJEA34885)	scjapoprjea34885	GO:MF, GO:CC, GO:BP
+Clonorchis sinensis (PRJDA72781)	clsineprjda72781	GO:MF, GO:CC, GO:BP
+Onchocerca flexuosa (PRJNA230512)	onflexprjna230512	GO:MF, GO:CC, GO:BP
+Dictyocaulus viviparus (PRJNA72587)	diviviprjna72587	GO:MF, GO:CC, GO:BP
+Opisthorchis viverrini (PRJNA222628)	opviveprjna222628	GO:MF, GO:CC, GO:BP, KEGG
+Parascaris univalens (PRJNA386823)	paunivprjna386823	GO:MF, GO:CC, GO:BP
+Romanomermis culicivorax (PRJEB1358)	roculiprjeb1358	GO:MF, GO:CC, GO:BP
+Steinernema feltiae (PRJNA204661)	stfeltprjna204661	GO:MF, GO:CC, GO:BP
+Haemonchus contortus (PRJNA205202)	hacontprjna205202	GO:MF, GO:CC, GO:BP
+Ancylostoma caninum (PRJNA72585)	ancaniprjna72585	GO:MF, GO:CC, GO:BP
+Trichinella sp. T6 (PRJNA257433)	trt6prjna257433	GO:MF, GO:CC, GO:BP
+Caenorhabditis uteleia (PRJEB12600)	cautelprjeb12600	GO:MF, GO:CC, GO:BP
+Onchocerca volvulus (PRJEB513) [WS276]	onvolvprjeb513	GO:MF, GO:CC, GO:BP
+Steinernema carpocapsae (PRJNA202318)	stcarpprjna202318	GO:MF, GO:CC, GO:BP
+Fasciola hepatica (PRJNA179522)	fahepaprjna179522	GO:MF, GO:CC, GO:BP
+Ancylostoma ceylanicum (PRJNA231479)	anceylprjna231479	GO:MF, GO:CC, GO:BP
+Nippostrongylus brasiliensis (PRJEB511)	nibrasprjeb511	GO:MF, GO:CC, GO:BP
+Wuchereria bancrofti (PRJNA275548)	wubancprjna275548	GO:MF, GO:CC, GO:BP
+Trichinella zimbabwensis (PRJNA257433)	trzimbprjna257433	GO:MF, GO:CC, GO:BP
+Propanagrolaimus ju765 (PRJEB32708)	prju76prjeb32708	GO:MF, GO:CC, GO:BP
+Trichinella nelsoni (PRJNA257433)	trnelsprjna257433	GO:MF, GO:CC, GO:BP
+Dirofilaria immitis (PRJEB1797)	diimmiprjeb1797	GO:MF, GO:CC, GO:BP
+Wuchereria bancrofti (PRJEB536)	wubancprjeb536	GO:MF, GO:CC, GO:BP
+Strongylus vulgaris (PRJEB531)	stvulgprjeb531	GO:MF, GO:CC, GO:BP
+Strongyloides ratti (PRJEB125) [WS276]	strattprjeb125	GO:MF, GO:CC, GO:BP
+Meloidogyne incognita (PRJNA340324)	meincoprjna340324	GO:MF, GO:CC, GO:BP
+Teladorsagia circumcincta (PRJNA72569)	tecircprjna72569	GO:MF, GO:CC, GO:BP
+Caenorhabditis waitukubuli (PRJEB12602)	cawaitprjeb12602	GO:MF, GO:CC, GO:BP
+Angiostrongylus cantonensis (PRJNA350391)	ancantprjna350391	GO:MF, GO:CC, GO:BP
+Enterobius vermicularis (PRJEB503)	envermprjeb503	GO:MF, GO:CC, GO:BP
+Loa loa (PRJNA37757)	loloaprjna37757	GO:MF, GO:CC, GO:BP, KEGG
+Trichinella patagoniensis (PRJNA257433)	trpataprjna257433	GO:MF, GO:CC, GO:BP
+Hymenolepis microstoma (PRJEB124)	hymicrprjeb124	GO:MF, GO:CC, GO:BP
+Schistosoma curassoni (PRJEB519)	sccuraprjeb519	GO:MF, GO:CC, GO:BP
+Hymenolepis diminuta (PRJEB507)	hydimiprjeb507	GO:MF, GO:CC, GO:BP
+Caenorhabditis sulstoni (PRJEB12601)	casulsprjeb12601	GO:MF, GO:CC, GO:BP
+Trichinella pseudospiralis (ISS13 PRJNA257433)	iss13prjna257433	GO:MF, GO:CC, GO:BP
+Gongylonema pulchrum (PRJEB505)	gopulcprjeb505	GO:MF, GO:CC, GO:BP
+Meloidogyne javanica (PRJNA340324)	mejavaprjna340324	GO:MF, GO:CC, GO:BP
+Steinernema feltiae (PRJNA353610)	stfeltprjna353610	GO:MF, GO:CC, GO:BP
+Trichinella pseudospiralis (ISS141 PRJNA257433)	iss141prjna257433	GO:MF, GO:CC, GO:BP
+Micoletzkya japonica (PRJEB27334)	mijapoprjeb27334	GO:MF, GO:CC, GO:BP
+Heligmosomoides polygyrus (PRJEB15396)	hepolyprjeb15396	GO:MF, GO:CC, GO:BP
+Ancylostoma ceylanicum (PRJNA72583)	anceylprjna72583	GO:MF, GO:CC, GO:BP
+Acanthocheilonema viteae (PRJEB1697)	acviteprjeb1697	GO:MF, GO:CC, GO:BP
+Trichinella spiralis (PRJNA12603)	trspirprjna12603	GO:MF, GO:CC, GO:BP, KEGG
+Pristionchus entomophagus (PRJEB27334)	prentoprjeb27334	GO:MF, GO:CC, GO:BP
+Caenorhabditis sinica (PRJNA194557)	casiniprjna194557	GO:MF, GO:CC, GO:BP
+Trichinella sp. T8 (PRJNA257433)	trt8prjna257433	GO:MF, GO:CC, GO:BP
+Trichinella nativa (PRJNA179527)	trnatiprjna179527	GO:MF, GO:CC, GO:BP
+Toxocara canis (PRJNA248777)	tocaniprjna248777	GO:MF, GO:CC, GO:BP
+Onchocerca ochengi (PRJEB1465)	onocheprjeb1465	GO:MF, GO:CC, GO:BP
+Schistosoma bovis (PRJNA451066)	scboviprjna451066	GO:MF, GO:CC, GO:BP
+Trichinella pseudospiralis (ISS588 PRJNA257433)	iss588prjna257433	GO:MF, GO:CC, GO:BP
+Anisakis simplex (PRJEB496)	ansimpprjeb496	GO:MF, GO:CC, GO:BP
+Hydatigera taeniaeformis (PRJEB534)	hytaenprjeb534	GO:MF, GO:CC, GO:BP
+Onchocerca ochengi (PRJEB1204)	onocheprjeb1204	GO:MF, GO:CC, GO:BP
+Echinostoma caproni (PRJEB1207)	eccaprprjeb1207	GO:MF, GO:CC, GO:BP
+Trichinella pseudospiralis (ISS470 PRJNA257433)	iss470prjna257433	GO:MF, GO:CC, GO:BP
+Schmidtea mediterranea (PRJNA379262)	scmediprjna379262	GO:MF, GO:CC, GO:BP
+Caenorhabditis quiockensis (PRJEB11354)	caquioprjeb11354	GO:MF, GO:CC, GO:BP
+Schistosoma japonicum (PRJNA520774)	scjapoprjna520774	GO:MF, GO:CC, GO:BP
+Taenia solium (PRJNA170813)	tasoliprjna170813	GO:MF, GO:CC, GO:BP
+Cylicostephanus goldi (PRJEB498)	cygoldprjeb498	GO:MF, GO:CC, GO:BP
+Ancylostoma duodenale (PRJNA72581)	anduodprjna72581	GO:MF, GO:CC, GO:BP
+Caenorhabditis tropicalis (PRJNA53597)	catropprjna53597	GO:MF, GO:CC, GO:BP
+Angiostrongylus cantonensis (PRJEB493)	ancantprjeb493	GO:MF, GO:CC, GO:BP
+Halicephalobus mephisto (PRJNA528747)	hamephprjna528747	GO:MF, GO:CC, GO:BP
+Protopolystoma xenopodis (PRJEB1201)	prxenoprjeb1201	GO:MF, GO:CC, GO:BP
+Meloidogyne hapla (PRJNA29083)	mehaplprjna29083	GO:MF, GO:CC, GO:BP
+Steinernema carpocapsae (v1 PRJNA202318)	stcav1prjna202318	GO:MF, GO:CC, GO:BP
+Trichuris suis (PRJNA208416 - female)	trsuisprjna208416	GO:MF, GO:CC, GO:BP
+Oscheius tipulae (PRJEB15512)	ostipuprjeb15512	GO:MF, GO:CC, GO:BP
+Meloidogyne arenaria (PRJNA340324)	mearenprjna340324	GO:MF, GO:CC, GO:BP
+Meloidogyne floridensis (PRJNA340324)	meflorprjna340324	GO:MF, GO:CC, GO:BP
+Rhabditophanes sp. KR3021 (PRJEB1297)	rhkr30prjeb1297	GO:MF, GO:CC, GO:BP
+Acrobeloides nanus (PRJEB26554)	acnanuprjeb26554	GO:MF, GO:CC, GO:BP
+Angiostrongylus costaricensis (PRJEB494)	ancostprjeb494	GO:MF, GO:CC, GO:BP
+Toxocara canis (PRJEB533)	tocaniprjeb533	GO:MF, GO:CC, GO:BP
+Macrostomum lignano (PRJNA371498)	malignprjna371498	GO:MF, GO:CC, GO:BP
+Pristionchus mayeri (PRJEB27334)	prmayeprjeb27334	GO:MF, GO:CC, GO:BP
+Trichinella murrelli (PRJNA257433)	trmurrprjna257433	GO:MF, GO:CC, GO:BP
+Trichuris suis (PRJNA208415 - male)	trsuisprjna208415	GO:MF, GO:CC, GO:BP
+Caenorhabditis remanei (PRJNA248911)	caremaprjna248911	GO:MF, GO:CC, GO:BP
+Parastrongyloides trichosuri (PRJEB515)	patricprjeb515	GO:MF, GO:CC, GO:BP
+Trichinella pseudospiralis (ISS176 PRJNA257433)	iss176prjna257433	GO:MF, GO:CC, GO:BP
+Dictyocaulus viviparus (PRJEB5116)	diviviprjeb5116	GO:MF, GO:CC, GO:BP
+Caenorhabditis becei (PRJEB28243)	cabeceprjeb28243	GO:MF, GO:CC, GO:BP
+Paragonimus westermani (PRJNA454344)	pawestprjna454344	GO:MF, GO:CC, GO:BP
+Thelazia callipaeda (PRJEB1205)	thcallprjeb1205	GO:MF, GO:CC, GO:BP
+Meloidogyne javanica (PRJEB8714)	mejavaprjeb8714	GO:MF, GO:CC, GO:BP
+Fasciola hepatica (PRJEB25283)	fahepaprjeb25283	GO:MF, GO:CC, GO:BP
+Caenorhabditis japonica (PRJNA12591) [WS276]	cajapoprjna12591	GO:MF, GO:CC, GO:BP
+Loa loa (PRJNA24608)	loloaprjna246086	GO:MF, GO:CC, GO:BP, KEGG
+Echinococcus oligarthrus (PRJEB31222)	ecoligprjeb31222	GO:MF, GO:CC, GO:BP
+Trichuris suis (PRJNA179528)	trsuisprjna179528	GO:MF, GO:CC, GO:BP
+Pristionchus fissidentatus (PRJEB27334)	prfissprjeb27334	GO:MF, GO:CC, GO:BP
+Meloidogyne enterolobii (PRJNA340324)	meenteprjna340324	GO:MF, GO:CC, GO:BP
+Clonorchis sinensis (PRJNA386618)	clsineprjna386618	GO:MF, GO:CC, GO:BP
+Pristionchus japonicus (PRJEB27334)	prjapoprjeb27334	GO:MF, GO:CC, GO:BP
+Bursaphelenchus xylophilus (PRJEA64437)	buxyloprjea64437	GO:MF, GO:CC, GO:BP
+Strongyloides papillosus (PRJEB525)	stpapiprjeb525	GO:MF, GO:CC, GO:BP
+Trichinella papuae (PRJNA257433)	trpapuprjna257433	GO:MF, GO:CC, GO:BP
+Strongyloides stercoralis (PRJEB528)	ststerprjeb528	GO:MF, GO:CC, GO:BP
+Schistosoma mansoni (PRJEA36577)	scmansprjea36577	GO:MF, GO:CC, GO:BP, KEGG
+Caenorhabditis zanzibari (PRJEB12596)	cazanzprjeb12596	GO:MF, GO:CC, GO:BP
+Taenia asiatica (PRJEB532)	taasiaprjeb532	GO:MF, GO:CC, GO:BP
+Macrostomum lignano (PRJNA284736)	malignprjna284736	GO:MF, GO:CC, GO:BP
+Caenorhabditis bovis (PRJEB34497)	caboviprjeb34497	GO:MF, GO:CC, GO:BP
+Opisthorchis felineus (PRJNA413383)	opfeliprjna413383	GO:MF, GO:CC, GO:BP
+Schistosoma mattheei (PRJEB523)	scmattprjeb523	GO:MF, GO:CC, GO:BP
+Panagrolaimus ps1159 (PRJEB32708)	paps11prjeb32708	GO:MF, GO:CC, GO:BP
+Caenorhabditis briggsae (PRJNA10731) [WS276]	cabrigprjna10731	GO:MF, GO:CC, GO:BP, KEGG
+Oryza sativa Indica Group	oindica	GO:MF, GO:CC, GO:BP
+Ananas comosus	acomosus	GO:MF, GO:CC, GO:BP
+Oryza rufipogon	orufipogon	GO:MF, GO:CC, GO:BP
+Chenopodium quinoa	cquinoa	GO:MF, GO:CC, GO:BP
+Oryza barthii	obarthii	GO:MF, GO:CC, GO:BP
+Cynara cardunculus	ccardunculus	GO:MF, GO:CC, GO:BP, KEGG
+Actinidia chinensis	achinensis	GO:MF, GO:CC, GO:BP
+Lupinus angustifolius	langustifolius	GO:MF, GO:CC, GO:BP, KEGG
+Kalanchoe fedtschenkoi	kfedtschenkoi	GO:MF, GO:CC, GO:BP
+Solanum tuberosum	stuberosum	GO:MF, GO:CC, GO:BP, KEGG
+Triticum aestivum Stanley	tastanley	GO:MF, GO:CC, GO:BP
+Triticum aestivum Weebill	taweebil	GO:MF, GO:CC, GO:BP
+Papaver somniferum	psomniferum	GO:MF, GO:CC, GO:BP
+Medicago truncatula	mtruncatula	GO:MF, GO:CC, GO:BP, KEGG
+Ipomoea triloba	itriloba	GO:MF, GO:CC, GO:BP
+Olea europaea var. sylvestris	oesylvestris	GO:MF, GO:CC, GO:BP, KEGG
+Chondrus crispus	ccrispus	GO:MF, GO:CC, GO:BP, KEGG
+Brassica napus	bnapus	GO:MF, GO:CC, GO:BP, KEGG
+Capsicum annuum	cannuum	GO:MF, GO:CC, GO:BP, KEGG
+Ostreococcus lucimarinus	olucimarinus	GO:MF, GO:CC, GO:BP, KEGG
+Juglans regia	jregia	GO:MF, GO:CC, GO:BP
+Vitis vinifera	vvinifera	GO:MF, GO:CC, GO:BP, KEGG
+Brassica oleracea	boleracea	GO:MF, GO:CC, GO:BP, KEGG
+Marchantia polymorpha	mpolymorpha	GO:MF, GO:CC, GO:BP
+Saccharum spontaneum	sspontaneum	GO:MF, GO:CC, GO:BP
+Cyanidioschyzon merolae	cmerolae	GO:MF, GO:CC, GO:BP, KEGG
+Oryza glaberrima	oglaberrima	GO:MF, GO:CC, GO:BP
+Gossypium raimondii	graimondii	GO:MF, GO:CC, GO:BP, KEGG
+Glycine max	gmax	GO:MF, GO:CC, GO:BP, KEGG
+Setaria viridis	sviridis	GO:MF, GO:CC, GO:BP
+Triticum urartu	turartu	GO:MF, GO:CC, GO:BP
+Triticum aestivum Cadenza	tacadenza	GO:MF, GO:CC, GO:BP
+Physcomitrium patens	ppatens	GO:MF, GO:CC, GO:BP, KEGG
+Sesamum indicum	sindicum	GO:MF, GO:CC, GO:BP
+Triticum aestivum Norin61	tanorin61	GO:MF, GO:CC, GO:BP
+Prunus avium	pavium	GO:MF, GO:CC, GO:BP, KEGG
+Triticum aestivum Arinalrfor	taarinalrfor	GO:MF, GO:CC, GO:BP
+Nymphaea colorata	ncolorata	GO:MF, GO:CC, GO:BP
+Triticum aestivum Claire	taclaire	GO:MF, GO:CC, GO:BP
+Daucus carota	dcarota	GO:MF, GO:CC, GO:BP, KEGG
+Cucumis sativus	csativus	GO:MF, GO:CC, GO:BP, KEGG
+Eucalyptus grandis	egrandis	GO:MF, GO:CC, GO:BP
+Oryza brachyantha	obrachyantha	GO:MF, GO:CC, GO:BP, KEGG
+Arabidopsis thaliana	athaliana	GO:MF, GO:CC, GO:BP, KEGG, MIRNA, WP
+Leersia perrieri	lperrieri	GO:MF, GO:CC, GO:BP
+Phaseolus vulgaris	pvulgaris	GO:MF, GO:CC, GO:BP, KEGG
+Populus trichocarpa	ptrichocarpa	GO:MF, GO:CC, GO:BP, KEGG, WP
+Oryza glumipatula	oglumipatula	GO:MF, GO:CC, GO:BP
+Oryza nivara	onivara	GO:MF, GO:CC, GO:BP
+Triticum aestivum Landmark	talandmark	GO:MF, GO:CC, GO:BP
+Triticum aestivum Lancer	talancer	GO:MF, GO:CC, GO:BP
+Oryza sativa Japonica Group	osativa	GO:MF, GO:CC, GO:BP, KEGG, MIRNA, WP
+Dioscorea rotundata	drotundata	GO:MF, GO:CC, GO:BP
+Hordeum vulgare TRITEX	hvtritex	GO:MF, GO:CC, GO:BP
+Triticum aestivum Robigus	tarobigus	GO:MF, GO:CC, GO:BP
+Triticum spelta	tspelta	GO:MF, GO:CC, GO:BP
+Zea mays	zmays	GO:MF, GO:CC, GO:BP, KEGG
+Triticum aestivum Mace	tamace	GO:MF, GO:CC, GO:BP
+Corchorus capsularis	ccapsularis	GO:MF, GO:CC, GO:BP
+Musa acuminata	macuminata	GO:MF, GO:CC, GO:BP, KEGG
+Triticum aestivum Sy Mattis	tamattis	GO:MF, GO:CC, GO:BP
+Triticum aestivum Paragon	taparagon	GO:MF, GO:CC, GO:BP
+Cucumis melo	cmelo	GO:MF, GO:CC, GO:BP, KEGG
+Manihot esculenta	mesculenta	GO:MF, GO:CC, GO:BP, KEGG
+Prunus persica	ppersica	GO:MF, GO:CC, GO:BP, KEGG
+Brachypodium distachyon	bdistachyon	GO:MF, GO:CC, GO:BP, KEGG
+Nicotiana attenuata	nattenuata	GO:MF, GO:CC, GO:BP, KEGG
+Oryza meridionalis	omeridionalis	GO:MF, GO:CC, GO:BP
+Trifolium pratense	tpratense	GO:MF, GO:CC, GO:BP
+Arabidopsis lyrata	alyrata	GO:MF, GO:CC, GO:BP, KEGG
+Camelina sativa	csativa	GO:MF, GO:CC, GO:BP, KEGG
+Cannabis sativa female	csfemale	GO:MF, GO:CC, GO:BP
+Selaginella moellendorffii	smoellendorffii	GO:MF, GO:CC, GO:BP, KEGG
+Eutrema salsugineum	esalsugineum	GO:MF, GO:CC, GO:BP
+Arabis alpina	aalpina	GO:MF, GO:CC, GO:BP
+Triticum turgidum	tturgidum	GO:MF, GO:CC, GO:BP
+Eragrostis tef	etef	GO:MF, GO:CC, GO:BP
+Triticum aestivum Jagger	tajagger	GO:MF, GO:CC, GO:BP
+Oryza longistaminata	olongistaminata	GO:MF, GO:CC, GO:BP
+Rosa chinensis	rchinensis	GO:MF, GO:CC, GO:BP, KEGG
+Helianthus annuus	hannuus	GO:MF, GO:CC, GO:BP, KEGG
+Citrullus lanatus	clanatus	GO:MF, GO:CC, GO:BP
+Triticum aestivum	taestivum	GO:MF, GO:CC, GO:BP
+Citrus clementina	cclementina	GO:MF, GO:CC, GO:BP, KEGG
+Sorghum bicolor	sbicolor	GO:MF, GO:CC, GO:BP, KEGG
+Theobroma cacao Belizian Criollo B97-61/B2	tccriollo	GO:MF, GO:CC, GO:BP, KEGG
+Aegilops tauschii	atauschii	GO:MF, GO:CC, GO:BP
+Chara braunii	cbraunii	GO:MF, GO:CC, GO:BP
+Asparagus officinalis	aofficinalis	GO:MF, GO:CC, GO:BP
+Pistacia vera	pvera	GO:MF, GO:CC, GO:BP
+Panicum hallii HAL2	phallii	GO:MF, GO:CC, GO:BP
+Panicum hallii FIL2	phfil2	GO:MF, GO:CC, GO:BP
+Vigna angularis	vangularis	GO:MF, GO:CC, GO:BP, KEGG
+Setaria italica	sitalica	GO:MF, GO:CC, GO:BP, KEGG
+Amborella trichopoda	atrichopoda	GO:MF, GO:CC, GO:BP, KEGG
+Triticum aestivum Julius	tajulius	GO:MF, GO:CC, GO:BP
+Triticum dicoccoides	tdicoccoides	GO:MF, GO:CC, GO:BP
+Arabidopsis halleri	ahalleri	GO:MF, GO:CC, GO:BP
+Oryza punctata	opunctata	GO:MF, GO:CC, GO:BP
+Hordeum vulgare GoldenPromise	hvgoldenpromise	GO:MF, GO:CC, GO:BP
+Eragrostis curvula	ecurvula	GO:MF, GO:CC, GO:BP
+Solanum lycopersicum	slycopersicum	GO:MF, GO:CC, GO:BP, KEGG
+Hordeum vulgare	hvulgare	GO:MF, GO:CC, GO:BP
+Brassica rapa	brapa	GO:MF, GO:CC, GO:BP, KEGG
+Coffea canephora	ccanephora	GO:MF, GO:CC, GO:BP
+Theobroma cacao Matina 1-6	tcacao	GO:MF, GO:CC, GO:BP
+Chlamydomonas reinhardtii	creinhardtii	GO:MF, GO:CC, GO:BP, KEGG
+Prunus dulcis	pdulcis	GO:MF, GO:CC, GO:BP
+Galdieria sulphuraria	gsulphuraria	GO:MF, GO:CC, GO:BP, KEGG
+Malus domestica Golden	mdgolden	GO:MF, GO:CC, GO:BP, KEGG
+Vigna radiata	vradiata	GO:MF, GO:CC, GO:BP, KEGG
+Beta vulgaris	bvulgaris	GO:MF, GO:CC, GO:BP, KEGG
+Quercus lobata	qlobata	GO:MF, GO:CC, GO:BP
+Trypanosoma brucei	tbrucei	GO:MF, GO:CC, GO:BP
+Plasmodium falciparum 3D7	pfalciparum	GO:MF, GO:CC, GO:BP, KEGG, REAC
+Plasmodium knowlesi	pknowlesi	GO:MF, GO:CC, GO:BP, KEGG
+Pythium irregulare	pirregulare	GO:MF, GO:CC, GO:BP
+Albugo laibachii	alaibachii	GO:MF, GO:CC, GO:BP
+Guillardia theta CCMP2712	gtheta	GO:MF, GO:CC, GO:BP, KEGG
+Phytophthora infestans	pinfestans	GO:MF, GO:CC, GO:BP, KEGG
+Pythium vexans	pvexans	GO:MF, GO:CC, GO:BP
+Pythium ultimum	pultimum	GO:MF, GO:CC, GO:BP
+Pseudo-nitzschia multistriata	pmultistriata	GO:MF, GO:CC, GO:BP
+Paramecium tetraurelia	ptetraurelia	GO:MF, GO:CC, GO:BP
+Plasmodium vivax	pvivax	GO:MF, GO:CC, GO:BP
+Hyaloperonospora arabidopsidis	harabidopsidis	GO:MF, GO:CC, GO:BP
+Tetrahymena thermophila	tthermophila	GO:MF, GO:CC, GO:BP, KEGG
+Phaeodactylum tricornutum	ptricornutum	GO:MF, GO:CC, GO:BP, KEGG
+Phytophthora kernoviae	pkernoviae	GO:MF, GO:CC, GO:BP
+Plasmodium chabaudi	pchabaudi	GO:MF, GO:CC, GO:BP, KEGG
+Bigelowiella natans	bnatans	GO:MF, GO:CC, GO:BP
+Pythium arrhenomanes	parrhenomanes	GO:MF, GO:CC, GO:BP
+Thalassiosira pseudonana	tpseudonana	GO:MF, GO:CC, GO:BP, KEGG
+Entamoeba histolytica	ehistolytica	GO:MF, GO:CC, GO:BP, KEGG
+Toxoplasma gondii ME49	tgondii	GO:MF, GO:CC, GO:BP, KEGG
+Phytophthora ramorum	pramorum	GO:MF, GO:CC, GO:BP
+Pythium aphanidermatum	paphanidermatum	GO:MF, GO:CC, GO:BP
+Phytophthora parasitica	pparasitica	GO:MF, GO:CC, GO:BP
+Pythium iwayamai	piwayamai	GO:MF, GO:CC, GO:BP
+Phytophthora sojae	psojae	GO:MF, GO:CC, GO:BP, KEGG
+Leishmania major	lmajor	GO:MF, GO:CC, GO:BP, KEGG
+Phytophthora lateralis	plateralis	GO:MF, GO:CC, GO:BP
+Plasmodium berghei	pberghei	GO:MF, GO:CC, GO:BP, KEGG
+Giardia lamblia	glamblia	GO:MF, GO:CC, GO:BP, KEGG
+Emiliania huxleyi	ehuxleyi	GO:MF, GO:CC, GO:BP, KEGG
+Dictyostelium discoideum	ddiscoideum	GO:MF, GO:CC, GO:BP, KEGG, REAC
