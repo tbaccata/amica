@@ -691,8 +691,9 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   }
   
   df.genes$Gene.names <- toupper(df.genes$Gene.names)
+  df.genes$key <- df.genes$Gene.names
   df.genes$Gene.names <- gsub(";.*", "", df.genes$Gene.names)
-  df.genes <- df.genes[, grep("Gene|logFC", colnames(df.genes), value = T)]
+  df.genes <- df.genes[, grep("Gene|logFC|key", colnames(df.genes), value = T)]
   df.genes <- df.genes[order(df.genes[[geneName]], decreasing=TRUE),]
   df.genes <- df.genes[!duplicated(df.genes[[geneName]]),]
   
@@ -710,7 +711,7 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   df$nodes <-
     merge(df$nodes, df.genes,
           by.x = "label", by.y = geneName)
-  colnames(df$nodes) <- c("label", "id", "log2FC")
+  colnames(df$nodes) <- c("label", "id", "log2FC", "key")
   colnames(df$edges) <- c("from", "to", "value")
   
   df$nodes <-
@@ -1126,6 +1127,7 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
                      row.names(dataComp),samples, drop = F]
   
   tmp$Gene.names <- dataComp[row.names(tmp), "Gene.names"]
+  key <- tmp$Gene.names
   tmp$Gene.names <- toupper(tmp$Gene.names)
   tmp$Gene.names <- gsub(";.*", "", tmp$Gene.names)
   
@@ -1135,6 +1137,7 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
     data.frame(
       id = 1:(ncol(tmp) - 1),
       label = names(tmp)[2:ncol(tmp)],
+      key = rep('', ncol(tmp) - 1),
       group = rep('Bait', ncol(tmp) - 1),
       shape = rep('diamond', ncol(tmp) - 1),
       color = rep(palette[1], ncol(tmp) - 1)
@@ -1143,6 +1146,7 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
     data.frame(
       id = 1:nrow(tmp),
       label = tmp$Gene.names,
+      key = key,
       group = rep('Prey', nrow(tmp)),
       #shape = rep('circle', nrow(tmp)),
       shape = rep(NA, nrow(tmp)),
@@ -1178,10 +1182,12 @@ dfs2gml <- function(nodes, edges) {
     
     for (elem in names(nodes)) {
       attribute <- elem
-      if (length(grep("MMF localization", elem))>0) {
-        attribute <- "CellMap_MMF"
+      if (length(grep("NMF localization", elem))>0) {
+        attribute <- "CellMap_NMF"
       } else if (length(grep("SAFE localization", elem))>0) {
         attribute <- "CellMap_SAFE"
+      } else if (length(grep("Subcell. localization", elem))>0) {
+        attribute <- "CellMap_NMF_SUMMARIZED"
       }
       
       if (is(t[[elem]] ,'character') | is.na(t[[elem]]) ) {
