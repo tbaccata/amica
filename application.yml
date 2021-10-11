@@ -30,10 +30,10 @@ proxy:
     port-range-start: 20000
   specs:
   - id: amica
-    display-name: amica Shiny App version 2021.04.07
+    display-name: amica Shiny App
     description: Analysis and visualization tool for quantitative MS
     container-cmd: ["R", "-e", "shiny::runApp('/root/amica')"]
-    container-image: amica-template
+    container-image: amica
     access-groups: [scientists, mathematicians]
 
 logging:
