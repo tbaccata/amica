@@ -2904,60 +2904,7 @@ server <- function(input, output, session) {
     req(reacValues$dataGprofiler)
     downloadButton("download1", "Download results")
   })
-  
-  # 
-  # 
-  # 
-  # output$download_heatmap <- downloadHandler(
-  #   filename = function() {
-  #     paste("heatmap.pdf")
-  #   },
-  #   content = function(file) {
-  #     
-  #     width <- ifelse(!is.null(input$heatmap_width),
-  #                     input$heatmap_width,
-  #                     7)
-  #     height <- ifelse(!is.null(input$heatmap_height),
-  #                      input$heatmap_height,
-  #                      7)
-  #     
-  #     pdf(file, width = width, height = height, onefile=F)
-  #     
-  #     fontsize = 12
-  #     if (nrow(reacValues$dataHeatmap) > 100) {
-  #       fontsize = 4
-  #     } else if (nrow(reacValues$dataHeatmap) > 74) {
-  #       fontsize = 6
-  #     } else if (nrow(reacValues$dataHeatmap) > 50) {
-  #       fontsize = 8
-  #     } else if (nrow(reacValues$dataHeatmap) > 30) {
-  #       fontsize = 10
-  #     }
-  #     
-  #     clRows <- ifelse(!is.null(reacValues$clusterRows),
-  #                      reacValues$clusterRows,
-  #                      TRUE)
-  #     clCols <- ifelse(!is.null(reacValues$clusterCols),
-  #                      reacValues$clusterCols,
-  #                      TRUE)
-  #     scaleRows <- ifelse(!is.null(reacValues$scaleHeatmap),
-  #                         reacValues$scaleHeatmap,
-  #                         "row")
-  #     print(
-  #       pheatmap(
-  #         reacValues$dataHeatmap,
-  #         cluster_rows = clRows,
-  #         cluster_cols = clCols,
-  #         scale = scaleRows,
-  #         color = heatColors(),
-  #         border_color = NA,
-  #         fontsize_row = fontsize
-  #       )
-  #     )
-  #     dev.off()
-  #   }
-  # )
-  
+
   output$download_amica <- renderUI({
     req(reacValues$analysisSuccess)
     if (reacValues$amicaInput) return(NULL)
@@ -4100,6 +4047,7 @@ server <- function(input, output, session) {
           group comparisons in Diff. Abundance tab.</li>
           <li>PPI Networks can be downloaded as HTML and opened in another tab 
           (right-click -> save images as ...) which improves the resolution.</li>
+          <li>Added a summarized subcell. localization prediction for PPI networks.</li>
           <li>Added 'About' tab that explains libraries that are used in the 
          analysis and that will act as a 'News' tab in the future.</li>
          </ul>
