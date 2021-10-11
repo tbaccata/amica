@@ -108,6 +108,8 @@ server <- function(input, output, session) {
   shinyjs::onclick("profileParams",
                    shinyjs::toggle(id = "toggle_profile_params"))
   
+  shinyjs::onclick("showNodeTable",
+                   shinyjs::toggle(id = "toggle_node_table"))
   
   shinyjs::onclick("oraBarParams",
                    shinyjs::toggle(id = "toggle_oraBar_params"))
@@ -3019,9 +3021,55 @@ server <- function(input, output, session) {
   })
   
   cellmap <- reactive({
-    cellmap <- read.table("data/preys-latest.txt", header = T, sep = "\t", stringsAsFactors = F)
-    cellmap <- cellmap[, c("symbol", "MMF.localization", "SAFE.localization")]
-    colnames(cellmap) <- c("label", "CellMap MMF localization", "CellMap SAFE localization")
+    cellmap <-
+      read.table(
+        "data/preys-latest.txt",
+        header = T,
+        sep = "\t",
+        stringsAsFactors = F
+      )
+    cellmap <-
+      cellmap[, c("symbol", "MMF.localization", "SAFE.localization")]
+    
+    cellmap$localization <- cellmap$MMF.localization
+
+    mito <-
+      c(
+        "mitochondrial matrix",
+        "mitochondrial inner membrane, mitochondrial intermembrane space",
+        "mitochondrial outer membrane, peroxisome"
+      )
+    
+    er <-
+      c("ER lumen",
+        "ER membrane")
+    
+    endoLyso <- c("early endosome, recycling endosome",
+                  "endosome, lysosome")
+    
+    nucleus <-
+      c(
+        "nuclear body",
+        "nucleolus",
+        "nucleoplasm"
+      )
+    
+    cytoskeleton <-
+      c("actin cytoskeleton, cytosol",
+        "microtubule cytoskeleton")
+    
+    cellmap[cellmap$localization %in% mito, 'localization'] <- "mitchondrion"
+    cellmap[cellmap$localization %in% nucleus, 'localization'] <- "nucleus"
+    cellmap[cellmap$localization %in% endoLyso, 'localization'] <-
+      "endosome, lysosome"
+    cellmap[cellmap$localization %in% er, 'localization'] <- "ER"
+    cellmap[cellmap$localization %in% cytoskeleton, 'localization'] <-
+      "cytoskeleton"
+    colnames(cellmap) <-
+      c("label",
+        "CellMap NMF localization",
+        "CellMap SAFE localization",
+        "Subcell. localization")
     cellmap
   })
 
@@ -3078,7 +3126,7 @@ server <- function(input, output, session) {
                height = "1200px",
                width = "2000px") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "CellMap SAFE localization",
+      visOptions(selectedBy = "Subcell. localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
       visEdges(smooth=F) %>%
@@ -3159,7 +3207,7 @@ server <- function(input, output, session) {
                height = "1200px",
                width = "2000px") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "CellMap SAFE localization",
+      visOptions(selectedBy = "Subcell. localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
       visEdges(smooth=F, color=list(color = "grey", highlight = "red")) %>%
@@ -3193,7 +3241,7 @@ server <- function(input, output, session) {
   output$networkDT <- renderDT({
     req(reacValues$nwNodes)
     datatable(
-      reacValues$nwNodes[, grep("id|color", names(reacValues$nwNodes), invert = T)],
+      reacValues$nwNodes[, grep("id|color|shape|key", names(reacValues$nwNodes), invert = T)],
       extensions = 'Buttons',
       filter = "top",
       rownames = F,
@@ -3663,13 +3711,27 @@ server <- function(input, output, session) {
   })
   
   output$NetworkHelpBox <- renderUI({
-    if (input$networkHelp %% 2){
-      HTML("<p>PPI (protein-protein interaction) Network from IntAct. All interactions are derived from literature curation or direct user submissions.  
-      Edge weights can be further filtered, more information \ can be found <a href='https://www.ebi.ac.uk/intact/' target='_blank'>here</a>.
-      When multiple group comparisons are selected two types of edges are created: edges from the group comparison to the proteins 
-      and PPI edges from IntAct between the proteins. Networks can be downloaded in GML format enabling the visualization in a network tool.</p>
-      <p>Fold changes are color coded onto the nodes, sub-cellular locations can are retrieved from <a href='https://cell-map.org/' target='_blank'>Human Cell Map</a>.</p>
-               ")
+    if (input$networkHelp %% 2) {
+      HTML("<p>PPI (protein-protein interaction) Network from IntAct (2021-10). 
+      All interactions are derived from literature curation or direct user 
+      submissions. Edge weights can be further filtered, more information can 
+      be found <a href='https://www.ebi.ac.uk/intact/' target='_blank'>here</a>.
+      When multiple group comparisons are selected two types of edges are 
+      created: edges from the group comparison to the proteins and PPI edges from
+      IntAct between the proteins. Networks can be downloaded in GML format 
+      enabling the visualization in a network tool.</p>
+      <p>For data from a single group comparison fold changes are color coded 
+      onto the nodes, for single and multiple group comparisons sub-cellular 
+      locations are retrieved from <a href='https://cell-map.org/' target='_blank'>
+      Human Cell Map</a> (Go, Christopher D., et al. A proximity-dependent 
+      biotinylation map of a human cell. Nature (2021): 1-5.). Human Cell Map 
+      provides two subcellular localization predictions, one resulting from 
+      Spatial analysis of functional enrichment (SAFE) and a different one 
+      resulting from non-negative matrix factorization (NMF). A summarized subcellular 
+      localization from NMF predictions can be mapped onto the nodes, predictions 
+      from SAFE and NMF can be seen in the node table below and are also 
+      included in the gml download.
+      </p>")
     } else {
       return()
     }
