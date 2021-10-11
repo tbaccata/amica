@@ -290,6 +290,9 @@ settings in a tab-separated  format that can be shared  with collaborators."
                    br(),
                    uiOutput("uploadSuccessMsg"),
                    uiOutput("analysisSuccessMsg"),
+                   br(), br(), br(),
+                   uiOutput("download_amica"),
+                   br(),br(),br(),
                    verbatimTextOutput("summaryText", placeholder = F),
                    verbatimTextOutput("inputParameterSummary", placeholder = F),
                    
@@ -396,13 +399,6 @@ settings in a tab-separated  format that can be shared  with collaborators."
                      )
                    )),
                    br(), br(), br(),
-                   #actionButton("showMemory", "Show memory"),
-                   # verbatimTextOutput("printMemory", placeholder = F),
-                   uiOutput("download_amica"),
-                   #p("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."),
-                   #verbatimTextOutput("uploadSummary", placeholder = F),
-                   
-                   br(),br(),br(),
                    h3(textOutput("designTitle")),
                    DTOutput("expDesignDT"),
                    footer()#p("This is footer"))
