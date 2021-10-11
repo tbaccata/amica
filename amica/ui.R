@@ -96,7 +96,7 @@ ui <- #secure_app(head_auth = tags$script(inactivity),
                      # "file" from the radio buttons
                      condition = "input.source == 'custom'",
                      h4("1) Custom input"),
-                     fileInput("customFile", "Upload custom tab delimited file."),
+                     fileInput("customFile", "Upload custom tab delimited file.", width = "60%"),
                      helpText(
                        "File needs to be tab-delimited and it needs to contain a proteinId, Gene.name, intensities and peptide counts."
                      )
@@ -1697,9 +1697,12 @@ settings in a tab-separated  format that can be shared  with collaborators."
                     width = '50%'
                   )
                 ),
-                inline(uiOutput("download_button_spec_network")),
                 visNetworkOutput("network", width = "100%", height = "800px"),
-                uiOutput('download_network_button')
+                inline(uiOutput("download_button_spec_network")),
+                inline(uiOutput('download_network_button')),
+                br(),br(),br(),
+                h4("Node table"),
+                DTOutput("networkDT")
               )
             ),
             
@@ -1711,24 +1714,68 @@ settings in a tab-separated  format that can be shared  with collaborators."
                 helpText("Only select this feature if your gene set isn't too large."),
                 checkboxInput("significantORA", "Only show significant terms?", value = TRUE),
                 helpText(
-                  "Only deselect this box if you are certain. The running time can increase dramatically if your gene list is too long."
+                  "Only deselect this box if you are certain. 
+                  The running time can increase dramatically if your gene list is too long."
                 ),
               ),
               column(width = 6,
-                     radioButtons(
-                       "species",
-                       "Organism",
+                     # radioButtons(
+                     #   "species",
+                     #   "Organism",
+                     #   choices = c(
+                     #     "hsapiens",
+                     #     "mmusculus",
+                     #     "scerevisiae",
+                     #     "athaliana",
+                     #     "celegans",
+                     #     "dmelanogaster"
+                     #   ),
+                     #   selected = "hsapiens"
+                     # ),
+                     
+                     inline(selectizeInput(
+                       inputId = "gprofilerOrganism",
+                       label = ("Select Organism"),
+                       choices = NULL,
+                       multiple = F,
+                       options = list(maxItems = 1,
+                                      placeholder =
+                                        "Please choose..."),
+                       width = '250px'
+                     )),
+                     
+                     verbatimTextOutput("organismSources", placeholder = F),
+                     checkboxGroupInput(
+                       "oraSources",
+                       "Selected sources",
                        choices = c(
-                         "hsapiens",
-                         "mmusculus",
-                         "scerevisiae",
-                         "athaliana",
-                         "celegans",
-                         "dmelanogaster"
+                         "GO:MF",
+                         "GO:CC",
+                         "GO:BP",
+                         "REAC",
+                         "KEGG",
+                         "CORUM",
+                         "WP",
+                         "TF",
+                         "MIRNA",
+                         "HP",
+                         "HPA"
                        ),
-                       selected = "hsapiens"
+                       selected = c(
+                         "GO:MF",
+                         "GO:CC",
+                         "GO:BP",
+                         "REAC",
+                         "KEGG",
+                         "CORUM",
+                         "WP"
+                       ),
+                       inline = T
                      ),
-                     actionButton("submitORA", strong("Submit"))),
+                     inline(actionButton("submitORA", strong("Submit"))),
+                     inline(actionButton('oraHelp', label = '', icon = icon("info"))),
+                     uiOutput("oraHelpBox")
+                     )
             )),
             shinyjs::hidden(
               div(
@@ -1752,12 +1799,17 @@ settings in a tab-separated  format that can be shared  with collaborators."
                         "GO:MF",
                         "GO:CC",
                         "GO:BP",
-                        "KEGG",
                         "REAC",
+                        "KEGG",
                         "CORUM",
-                        "WP"
+                        "WP",
+                        "TF",
+                        "MIRNA",
+                        "HP",
+                        "HPA"
                       ),
-                      selected = "GO:MF"
+                      selected = "GO:MF",
+                      inline = T
                     ),
                     inline(actionButton("oraBarParams", "", icon = icon("wrench"))),
                     shinyjs::hidden(
@@ -1999,15 +2051,18 @@ settings in a tab-separated  format that can be shared  with collaborators."
         title = 'About',
         value = 'abouttab',
         HTML('<p>
-    <h3>News</h3><br>
+    <h3>News</h3>
          <hr>
          <ul>
-         <li>21.10.10 - added Euler diagrams for multiple group comparisons</li>
+         <li>21.10.11 - Fixed error in CV plot (formula takes now raw intensities into account)</li>
+         <li>21.10.11 - added Euler diagrams for multiple group comparisons</li>
+         <li>21.10.11 - added support for ordering groups on x-axis in QC - and profile plots</li>
          <li>21.09.28 - amica made "public"</li>
          </ul>
          </p>
          <p>
-         <h3>Used libraries</h3>
+         <h3>Used libraries and ressources</h3>
+         <p>Please cite following publications (if you have used them):</p>
          <hr>
          <ul>
          <li>(Differential expression analysis) <b>limma:</b> Ritchie, Matthew E., et al. "limma powers 
@@ -2025,7 +2080,8 @@ settings in a tab-separated  format that can be shared  with collaborators."
          <li>(Subcell. localization) <b>Human CellMap: </b>Go, Christopher D., et al. 
          "A proximity-dependent biotinylation map of a human cell." Nature (2021): 1-5.</li>
          </ul>
-         </p>   
+         </p>
+         <br>
              '),
         footer()
       )
