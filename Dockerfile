@@ -17,16 +17,12 @@ RUN apt-get update && apt-get install -y \
 
 # basic shiny functionality
 RUN R -e "install.packages(c('shiny', 'rmarkdown', 'shinyjs', 'shinymanager', 'shinyBS', 'DT', 'shinycssloaders', 'bslib', 'profvis', 'colourpicker'), repos='https://cloud.r-project.org/')"
-
-RUN R -e "install.packages(c('reshape2', 'igraph', 'visNetwork', 'UpSetR', 'dplyr', 'pheatmap', 'DT', 'data.table', 'RColorBrewer', 'Rmisc'), repos='https://cloud.r-project.org/')"
-
-
-
-
-# install dependencies of the euler app
-RUN R -e "install.packages('BiocManager'); library('BiocManager'); BiocManager::install(c('limma', 'DEqMS', 'SummarizedExperiment', 'gprofiler2', 'vsn'))"
-
+RUN R -e "install.packages(c('reshape2', 'igraph', 'visNetwork', 'UpSetR', 'dplyr', 'pheatmap', 'DT', 'data.table', 'RColorBrewer', 'Rmisc', 'eulerr'), repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages(c('heatmaply', 'ggfortify', 'colourvalues', 'pryr'),  repos='https://cloud.r-project.org/')"
+
+
+# install dependencies from bioconductor
+RUN R -e "install.packages('BiocManager'); library('BiocManager'); BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn'))"
 
 
 # copy the app to the image
