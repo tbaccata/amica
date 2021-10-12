@@ -2989,7 +2989,8 @@ server <- function(input, output, session) {
     
     er <-
       c("ER lumen",
-        "ER membrane")
+        "ER membrane",
+        "nuclear outer membrane-ER membrane network")
     
     endoLyso <- c("early endosome, recycling endosome",
                   "endosome, lysosome")
@@ -3187,19 +3188,21 @@ server <- function(input, output, session) {
   
   output$networkDT <- renderDT({
     req(reacValues$nwNodes)
+    req(ppiNet())
+    
     datatable(
       reacValues$nwNodes[, grep("id|color|shape|key", names(reacValues$nwNodes), invert = T)],
       extensions = 'Buttons',
       filter = "top",
       rownames = F,
       options = list(
-        pageLength = 10
-        #autoWidth = TRUE
-        #dom = 'Bfrtip',
-        #buttons = c('csv')
+        pageLength = 10,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = c('csv')
       )
     )
-  })
+  }, server = F)
   
   output$download_network_button <- renderUI({
     downloadButton("downloadNetworkHtml", "Download html")
