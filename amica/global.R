@@ -68,3 +68,23 @@ t = setTimeout(logout, %s);  // time is in milliseconds (1000 is 1 second)
 }
 idleTimer();", timeoutSeconds*1000, timeoutSeconds, timeoutSeconds*1000)
 
+
+
+inline = function (x) {
+  tags$div(style="display:inline-block;", x)
+}
+
+footer = function(x) {
+  tags$div(
+    style="footer{position: absolute; bottom:5%; left: 33%; padding:5px;}",
+    HTML("<h5>How to cite us</h5>
+         <p>Please cite amica in your publications,
+         we will provide a PMID pointing to this site shortly.\n
+         </p>
+         <p>Many thanks to the MS facility and the Max Perutz Labs IT team.
+         If you have questions, feedback, suggestions, etc. please mail
+         them to sebastian.didusch@univie.ac.at.
+         </p>
+         <p>amica version 2020.09.28</p>")
+  )
+}
