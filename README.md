@@ -228,8 +228,8 @@ specs:
 
 ## Used libraries and ressources
 
-(Differential expression analysis) limma: Ritchie, Matthew E., et al. "limma powers differential expression analyses for RNA-sequencing and microarray studies." Nucleic acids research 43.7 (2015): e47-e47.
-(Differential expression analysis) DEqMS: Zhu, Yafeng, et al. "DEqMS: a method for accurate variance estimation in differential protein expression analysis." Molecular & Cellular Proteomics 19.6 (2020): 1047-1057.
-(ORA) gprofiler2: Raudvere, Uku, et al. "g: Profiler: a web server for functional enrichment analysis and conversions of gene lists (2019 update)." Nucleic acids research 47.W1 (2019): W191-W198.
-(PPI Networks) IntAct: Orchard, Sandra, et al. "The MIntAct project—IntAct as a common curation platform for 11 molecular interaction databases." Nucleic acids research 42.D1 (2014): D358-D363.
-(Subcell. localization) Human CellMap: Go, Christopher D., et al. "A proximity-dependent biotinylation map of a human cell." Nature (2021): 1-5.
+- (Differential expression analysis) limma: Ritchie, Matthew E., et al. "limma powers differential expression analyses for RNA-sequencing and microarray studies." Nucleic acids research 43.7 (2015): e47-e47.
+- (Differential expression analysis) DEqMS: Zhu, Yafeng, et al. "DEqMS: a method for accurate variance estimation in differential protein expression analysis." Molecular & Cellular Proteomics 19.6 (2020): 1047-1057.
+- (ORA) gprofiler2: Raudvere, Uku, et al. "g: Profiler: a web server for functional enrichment analysis and conversions of gene lists (2019 update)." Nucleic acids research 47.W1 (2019): W191-W198.
+- (PPI Networks) IntAct: Orchard, Sandra, et al. "The MIntAct project—IntAct as a common curation platform for 11 molecular interaction databases." Nucleic acids research 42.D1 (2014): D358-D363.
+- (Subcell. localization) Human CellMap: Go, Christopher D., et al. "A proximity-dependent biotinylation map of a human cell." Nature (2021): 1-5.
