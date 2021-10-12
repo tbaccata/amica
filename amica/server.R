@@ -434,10 +434,10 @@ server <- function(input, output, session) {
         )
       },
       error = function(cond) {
-        message(cond)
+        message(paste(cond))
       },
       warning = function(cond) {
-        message(cond)
+        message(paste(cond))
       }
       ,
       finally = {
@@ -467,10 +467,10 @@ server <- function(input, output, session) {
           renormalizeIntensities(normDf, input$renormalizationMethod)
         },
         error = function(cond) {
-          message(cond)
+          message(paste(cond))
         },
         warning = function(cond) {
-          message(cond)
+          message(paste(cond))
         }
         ,
         finally = {
@@ -492,10 +492,10 @@ server <- function(input, output, session) {
         )
       },
       error = function(cond) {
-        message(cond)
+        message(paste(cond))
       },
       warning = function(cond) {
-        message(cond)
+        message(paste(cond))
       }
       ,
       finally = {
@@ -548,12 +548,13 @@ server <- function(input, output, session) {
         showNotification(paste("error in", tool, cond), type = "error", duration = 100)
       },
       warning=function(cond) {
-        showNotification(
-          paste("warning in", tool, "\nResults may be invalid!\nPlease deselect DEqMS button to continue.\n", cond),
-          type = "warning",
-          duration = 100
-        )
-        shiny:::reactiveStop(conditionMessage(cond))
+        message(paste(cond))
+        # showNotification(
+        #   paste("warning in", tool, "\nResults may be invalid!\nPlease deselect DEqMS button to continue.\n", cond),
+        #   type = "warning",
+        #   duration = 100
+        # )
+        # shiny:::reactiveStop(conditionMessage(cond))
       },finally = invalidateLater(1)
       )
       
@@ -1887,17 +1888,13 @@ server <- function(input, output, session) {
   enrichedMatrixSet <- reactive({
     req(reacValues$dataLimma)
     
-    #enrichmentChoice <- isolate(input$enrichmentChoice)
-    #sigCutoffValue <- isolate(input$sigCutoffValue)
-    #fcCutoff <- isolate(input$fcCutoff)
-    
     matrixData <-
       generateEnrichedMatrix(
         reacValues$dataLimma,
-        #reacValues$dataLimma[rownames(reacValues$dataComp), ],
         input$enrichmentChoice,
         input$sigCutoffValue,
-        input$fcCutoff
+        input$fcCutoff,
+        input$pvalCutoff
       )
     as.data.frame(matrixData)
   })

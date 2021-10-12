@@ -374,8 +374,13 @@ plotMAPlot <- function(plt, colPalette, pointsize = 2) {
 }
 
 
-generateEnrichedMatrix <- function(data, enrichmentChoice, sigCutoffValue = padjPrefix, thresh = 1) {
-  if (sigCutoffValue == "p-value") {
+generateEnrichedMatrix <-
+  function(data,
+           enrichmentChoice,
+           sigCutoffValue = padjPrefix,
+           fcTreshold = 1,
+           pvalThresh = 0.05) {
+    if (sigCutoffValue == "p-value") {
     #pvalVar <- "P.Value"
     pvalVar <- pvalPrefix
   } else if (sigCutoffValue == "adj.p-value") {
@@ -385,7 +390,8 @@ generateEnrichedMatrix <- function(data, enrichmentChoice, sigCutoffValue = padj
     pvalVar <- 'none'
   }
   
-  # fcIdx <- grep("logFC", colnames(data) )
+    
+  pvalThresh <- ifelse(is.null(pvalThresh), 0.05, pvalThresh)
   fcIdx <- grep(logfcPrefix, colnames(data) )
   pvalIdx <- grep(pvalVar, colnames(data) )
   
@@ -407,25 +413,25 @@ generateEnrichedMatrix <- function(data, enrichmentChoice, sigCutoffValue = padj
 
     try(if (pilot) {
       if (enrichmentChoice == "enriched") {
-        data[data[fc] >= thresh & !is.na(data[fc]) ,]$tmp <- 1
+        data[data[fc] >= fcTreshold & !is.na(data[fc]) ,]$tmp <- 1
       } else if (enrichmentChoice == "absolute") {
-        data[abs(data[fc]) >= thresh & !is.na(data[fc]),]$tmp <- 1
+        data[abs(data[fc]) >= fcTreshold & !is.na(data[fc]),]$tmp <- 1
       } else if (enrichmentChoice == "reduced") {
-        data[data[fc] <= -thresh & !is.na(data[fc]),]$tmp <- 1
+        data[data[fc] <= -fcTreshold & !is.na(data[fc]),]$tmp <- 1
       }
     } else {
       if (enrichmentChoice == "enriched") {
-        data[data[fc] >= thresh &
+        data[data[fc] >= fcTreshold &
                !is.na(data[fc]) &
-               data[pval] <= 0.05 & !is.na(data[pval]), ]$tmp <- 1
+               data[pval] <= pvalThresh & !is.na(data[pval]), ]$tmp <- 1
       } else if (enrichmentChoice == "absolute") {
-        data[abs(data[fc]) >= thresh &
+        data[abs(data[fc]) >= fcTreshold &
                !is.na(data[fc]) &
-               data[pval] <= 0.05 & !is.na(data[pval]), ]$tmp <- 1
+               data[pval] <= pvalThresh & !is.na(data[pval]), ]$tmp <- 1
       } else if (enrichmentChoice == "reduced") {
-        data[data[fc] <= -thresh &
+        data[data[fc] <= -fcTreshold &
                !is.na(data[fc]) &
-               data[pval] <= 0.05 & !is.na(data[pval]), ]$tmp <- 1
+               data[pval] <= pvalThresh & !is.na(data[pval]), ]$tmp <- 1
       }
     }
     , silent = T
