@@ -91,7 +91,7 @@ observeEvent(input$runAnalysis, {
         "Minimum MS/MS counts:\t",
         input$minMSMS,
         "\n",
-        "Minimum razour/unique peptides:\t",
+        "Minimum razor/unique peptides:\t",
         input$minRazor,
         "\n"
       )
@@ -120,7 +120,7 @@ observeEvent(input$runAnalysis, {
       paste0(
         reacValues$inputParameterSummary,
         "Filter on groups:\t",
-        paste(input$filterValuesInput, collapse = ","),
+        paste(ifelse(is.null(input$filterValuesInput), "all", input$filterValuesInput),collapse = ","),
         "\n",
         "Filter on min. value in group:\t",
         input$minValidValue,
