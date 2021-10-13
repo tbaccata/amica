@@ -16,10 +16,10 @@ ui <-
         base_font = font_google("Fira Sans"),
         "font-size-base" = "0.9rem"
       ),
-      source('ui/uiInput.R', local = TRUE)$value,
-      source('ui/uiQC.R', local = TRUE)$value,
-      source('ui/uiDiffAbundance.R', local = TRUE)$value,
-      source('ui/uicompareAmica.R', local = TRUE)$value,
-      source('ui/uiAbout.R', local = TRUE)$value
+      source('R/ui/uiInput.R', local = TRUE)$value,
+      source('R/ui/uiQC.R', local = TRUE)$value,
+      source('R/ui/uiDiffAbundance.R', local = TRUE)$value,
+      source('R/ui/uicompareAmica.R', local = TRUE)$value,
+      source('R/ui/uiAbout.R', local = TRUE)$value
     )
   )

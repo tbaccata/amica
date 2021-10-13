@@ -5,13 +5,13 @@ server <- function(input, output, session) {
   # max 75MB file upload restriction
   options(shiny.maxRequestSize = 75 * 1024 ^ 2)
   
-  source('server/reactiveValues.R', local = TRUE)
-  source('server/shinyjs.R', local = TRUE)
-  source('server/colorsFactors.R', local = TRUE)
-  source('server/upload.R', local = TRUE)
-  source('server/runAnalysis.R', local = TRUE)
-  source('server/exampleData.R', local = TRUE)
-  source('server/modals.R', local = TRUE)
+  source('R/server/reactiveValues.R', local = TRUE)
+  source('R/server/shinyjs.R', local = TRUE)
+  source('R/server/colorsFactors.R', local = TRUE)
+  source('R/server/upload.R', local = TRUE)
+  source('R/server/runAnalysis.R', local = TRUE)
+  source('R/server/exampleData.R', local = TRUE)
+  source('R/server/modals.R', local = TRUE)
 
   
   
@@ -1490,7 +1490,7 @@ server <- function(input, output, session) {
       }
       
       calc_height <- min(15 * nrow(reacValues$dataHeatmap), 1200)
-      if (calc_height < 600) calc_height <- 600
+      if (calc_height < 600) calc_height <- 800
       
       p %>% layout(height=calc_height)
     })
