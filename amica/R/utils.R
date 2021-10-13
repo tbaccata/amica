@@ -898,16 +898,18 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
     assayIdx <- assayIdx + 1
   }
   
-  lfqs <- protData[,int_idx]
-  names(lfqs) <- gsub("LFQ.intensity.", "", names(lfqs))
-  lfqs[lfqs==0] <- NA
-  lfqs <- log2(lfqs)
-  
-  assayList[[assayIdx]] <- lfqs
-  names(assayList)[assayIdx] <- "LFQIntensity"
-  assayIdx <- assayIdx + 1
-  #assayList[[assayIdx]] <- lfqs
-  #names(assayList)[assayIdx] <- "ImputedIntensity"
+  if (length(int_idx) > 0) {
+    lfqs <- protData[, int_idx]
+    names(lfqs) <- gsub("LFQ.intensity.", "", names(lfqs))
+    lfqs[lfqs == 0] <- NA
+    lfqs <- log2(lfqs)
+    
+    assayList[[assayIdx]] <- lfqs
+    names(assayList)[assayIdx] <- "LFQIntensity"
+    assayIdx <- assayIdx + 1
+    #assayList[[assayIdx]] <- lfqs
+    #names(assayList)[assayIdx] <- "ImputedIntensity"
+  }
   
   dropIdx <-
     grep(
