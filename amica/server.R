@@ -1,5 +1,4 @@
 source("global.R")
-# library(pryr)
 
 server <- function(input, output, session) {
   # max 75MB file upload restriction
@@ -12,8 +11,6 @@ server <- function(input, output, session) {
   source('R/server/runAnalysis.R', local = TRUE)
   source('R/server/exampleData.R', local = TRUE)
   source('R/server/modals.R', local = TRUE)
-
-  
   
   ### INPUT LOGIC AND PLOTS
   output$mtcarsBar <- renderPlotly({
@@ -36,15 +33,7 @@ server <- function(input, output, session) {
       ),legend.title = element_blank()) + xlab("")
     ggplotly(p) %>% config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = "svg",
         width = 676,
@@ -65,15 +54,7 @@ server <- function(input, output, session) {
       colors = heatColors()
     ) %>%
       config(displaylogo = F,
-             modeBarButtonsToRemove = list(
-               'sendDataToCloud',
-               'autoScale2d',
-               'zoomIn2d',
-               'zoomOut2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             ),
+             modeBarButtonsToRemove = removePlotlyBars,
              toImageButtonOptions = list(format = "svg",
                                          width = 676,
                                          height = 676,
@@ -90,15 +71,7 @@ server <- function(input, output, session) {
     
     ggplotly(p) %>% config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = "svg",
         width = 676,
@@ -314,15 +287,7 @@ server <- function(input, output, session) {
     req(reacValues$uploadSuccess)
     pcaPlotly()  %>%  config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = input$pca_format,
         width = input$pca_width,
@@ -367,15 +332,7 @@ server <- function(input, output, session) {
       boxplotPlotly()  %>%
         config(
           displaylogo = F,
-          modeBarButtonsToRemove = list(
-            'sendDataToCloud',
-            'autoScale2d',
-            'zoomIn2d',
-            'zoomOut2d',
-            'toggleSpikelines',
-            'hoverClosestCartesian',
-            'hoverCompareCartesian'
-          ),
+          modeBarButtonsToRemove = removePlotlyBars,
           toImageButtonOptions = list(
             format = input$boxplot_format,
             width = input$boxplot_width,
@@ -416,15 +373,7 @@ server <- function(input, output, session) {
       densityPlotly() %>%
         config(
           displaylogo = F,
-          modeBarButtonsToRemove = list(
-            'sendDataToCloud',
-            'autoScale2d',
-            'zoomIn2d',
-            'zoomOut2d',
-            'toggleSpikelines',
-            'hoverClosestCartesian',
-            'hoverCompareCartesian'
-          ),
+          modeBarButtonsToRemove = removePlotlyBars,
           toImageButtonOptions = list(
             format = input$density_format,
             width = input$density_width,
@@ -618,18 +567,9 @@ server <- function(input, output, session) {
     )
     
     ggplotly(pu, margin = m) %>%
-      #ggplotly(pu, width = plot_width, height = plot_height, margin = m, autosize=T) %>%
       config(
         displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
+        modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
           format = scatter_format,
           width = plot_width,
@@ -714,15 +654,7 @@ server <- function(input, output, session) {
     })
     p %>%  config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = input$cor_format,
         width = input$cor_width,
@@ -789,15 +721,7 @@ server <- function(input, output, session) {
     withProgress(message = "Plotting barplot of contaminants", {
       contaminantsPlotly()  %>% config(
         displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
+        modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
           format = input$contaminants_format,
           width = input$contaminants_width,
@@ -851,15 +775,7 @@ server <- function(input, output, session) {
     
     ggplotly(p) %>% config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = input$abundant_format,
         width = 676,
@@ -926,15 +842,7 @@ server <- function(input, output, session) {
     withProgress(message = "Plotting Number of inferred protein groups", {
       numIdPlotly()  %>% config(
         displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
+        modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
           format = input$barplotId_format,
           width = input$barplotId_width,
@@ -1002,15 +910,7 @@ server <- function(input, output, session) {
     withProgress(message = "Plotting barplot of missing values ", {
       pctMvsPlotly() %>% config(
         displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
+        modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
           format = input$barplotMv_format,
           width = input$barplotMv_width,
@@ -1065,15 +965,7 @@ server <- function(input, output, session) {
     withProgress(message = "Plotting Coefficient of Variations ", {
       cvsPlotly() %>% config(
         displaylogo = F,
-        modeBarButtonsToRemove = list(
-          'sendDataToCloud',
-          'autoScale2d',
-          'zoomIn2d',
-          'zoomOut2d',
-          'toggleSpikelines',
-          'hoverClosestCartesian',
-          'hoverCompareCartesian'
-        ),
+        modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
           format = input$cv_format,
           width = input$cv_width,
@@ -1298,7 +1190,8 @@ server <- function(input, output, session) {
 
     cols <- myScatterColors()[1:length(comparisons)]
     if (!is.null(input$eulercol_1)) {
-      cols <- sapply(1:length(comparisons), function(i) {input[[paste0("eulercol_",i)]]})
+      tmp <- sapply(1:length(comparisons), function(i) {input[[paste0("eulercol_",i)]]})
+      if (all(!is.null(tmp))) cols <- tmp
     }
 
     fit <- euler(binMat[, comparisons])
@@ -1500,15 +1393,7 @@ server <- function(input, output, session) {
 
     compareHeatmapBase() %>%
       config(displaylogo = F,
-             modeBarButtonsToRemove = list(
-               'sendDataToCloud',
-               'autoScale2d',
-               'zoomIn2d',
-               'zoomOut2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             ),
+             modeBarButtonsToRemove = removePlotlyBars,
              toImageButtonOptions = list(format = input$heatmap_format,
                                          width = input$heatmap_width,
                                          height = input$heatmap_height,
@@ -1679,15 +1564,7 @@ server <- function(input, output, session) {
     
     p <- ggplotly(pu, source = "subset") %>% layout(dragmode = "select")
     p %>% config(displaylogo = F,
-             modeBarButtonsToRemove = list(
-               'sendDataToCloud',
-               'autoScale2d',
-               'zoomIn2d',
-               'zoomOut2d',
-               'toggleSpikelines',
-               'hoverClosestCartesian',
-               'hoverCompareCartesian'
-             ),
+             modeBarButtonsToRemove = removePlotlyBars,
              toImageButtonOptions = list(format = input$fc_format,
                                          width = input$fc_width,
                                          height = input$fc_height,
@@ -1755,7 +1632,7 @@ server <- function(input, output, session) {
     c1 <- isolate(input$volcanocol_1)
     c2 <- isolate(input$volcanocol_2)
     
-    pal <- brewer.pal(3, "Set2")
+    pal <- myScatterColors()[1:3]
     if (is.null(c1) | is.null(c2)) {
       c1 <- pal[1]
       c2 <- pal[2]
@@ -1806,15 +1683,7 @@ server <- function(input, output, session) {
     })
     print(p %>%
             config(displaylogo = F,
-                   modeBarButtonsToRemove = list(
-                     'sendDataToCloud',
-                     'autoScale2d',
-                     'zoomIn2d',
-                     'zoomOut2d',
-                     'toggleSpikelines',
-                     'hoverClosestCartesian',
-                     'hoverCompareCartesian'
-                   ),
+                   modeBarButtonsToRemove = removePlotlyBars,
                    toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
@@ -1898,15 +1767,7 @@ server <- function(input, output, session) {
     p <- ggplotly(p, source = "subset") %>% layout(dragmode = "select")
     print(p %>%
             config(displaylogo = F,
-                   modeBarButtonsToRemove = list(
-                     'sendDataToCloud',
-                     'autoScale2d',
-                     'zoomIn2d',
-                     'zoomOut2d',
-                     'toggleSpikelines',
-                     'hoverClosestCartesian',
-                     'hoverCompareCartesian'
-                   ),
+                   modeBarButtonsToRemove = removePlotlyBars,
                    toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
@@ -1967,15 +1828,7 @@ server <- function(input, output, session) {
     
     ggplotly(p) %>% config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = input$profile_format,
         width = input$profile_width,
@@ -2138,15 +1991,7 @@ server <- function(input, output, session) {
 
     oraBarBase() %>% config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = input$oraBar_format,
         width = input$oraBar_width,
@@ -2710,15 +2555,7 @@ server <- function(input, output, session) {
   output$scatterPlotsAmica <- renderPlotly({
     scatterPlotsAmicaBase() %>% config(
       displaylogo = F,
-      modeBarButtonsToRemove = list(
-        'sendDataToCloud',
-        'autoScale2d',
-        'zoomIn2d',
-        'zoomOut2d',
-        'toggleSpikelines',
-        'hoverClosestCartesian',
-        'hoverCompareCartesian'
-      ),
+      modeBarButtonsToRemove = removePlotlyBars,
       toImageButtonOptions = list(
         format = input$scatteramica_format,
         width = input$scatteramica_width,
@@ -2788,15 +2625,7 @@ server <- function(input, output, session) {
       p <- corrBaseAmicasPlot()
     })
     p %>%  config(displaylogo = F,
-                  modeBarButtonsToRemove = list(
-                    'sendDataToCloud',
-                    'autoScale2d',
-                    'zoomIn2d',
-                    'zoomOut2d',
-                    'toggleSpikelines',
-                    'hoverClosestCartesian',
-                    'hoverCompareCartesian'
-                  ),
+                  modeBarButtonsToRemove = removePlotlyBars,
                   toImageButtonOptions = list(format = input$corAmicas_format,
                                               width = input$corAmicas_width,
                                               height = input$corAmicas_height,
