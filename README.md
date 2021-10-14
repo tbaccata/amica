@@ -2,6 +2,7 @@
 ![R](https://img.shields.io/badge/R-4-blue) -->
 
 *version 1.0 will be released soon, some minor changes will still be made (code formatting etc.)*
+
 *Please cite amica in your publications, we will provide a PMID pointing to this site shortly.*
 
 
