@@ -2,26 +2,13 @@
 showModal(modalDialog(
   title = "Welcome to amica",
   HTML("<p>
-    Due to public requests and other observations, the following changes 
-    have been made (2021.10.11):<br>
+    News (2021.10.14):<br>
          <hr>
-         <h4>Features</h4>
          <ul>
-         <li>Added option to plot groups on the x-axis in an order for QC-plots 
-         and profile plots (e.g very useful for time series data). 
-         The feature can be set in 'Choose colors' in Input tab)</li>
-         <li>Added additional usage tutorial in Input tab.</li>
-          <li>Added Euler diagram next to UpSet plot when choosing multiple 
-          group comparisons in Diff. Abundance tab.</li>
-          <li>PPI Networks can be downloaded as HTML and opened in another tab 
-          (right-click -> save images as ...) which improves the resolution.</li>
-          <li>Added a summarized subcell. localization prediction for PPI networks.</li>
-          <li>Added 'About' tab that explains libraries that are used in the 
-         analysis and that will act as a 'News' tab in the future.</li>
-         </ul>
-         <h4>Bug fixes</h4>
-         <ul>
-          <li>Fixed bug in CV-plot in QC tab.</li>
+         <li>amica's github went public: code can be found 
+         <a href='https://github.com/tbaccata/amica' target='_blank'>here</a>.</li>
+         <li>Check out amica's documentation on  
+         <a href='https://github.com/tbaccata/amica/wiki' target='_blank'>github</a>.</li>
          </ul>
          </p>"),
   size = "l",

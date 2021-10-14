@@ -5,6 +5,7 @@ tabPanel(
     <h3>News</h3>
          <hr>
          <ul>
+         <li>21.10.14 - github went public</li>
          <li>21.10.12 - Fixed error in CV plot (formula takes now raw intensities into account)</li>
          <li>21.10.12 - added detailed descriptions for ORA and PPI networks</li>
          <li>21.10.12 - added Euler diagrams for multiple group comparisons</li>
