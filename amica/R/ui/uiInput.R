@@ -59,7 +59,8 @@ tabPanel('Input',
                h4("1) Custom input"),
                fileInput("customFile", "Upload custom tab delimited file.", width = "60%"),
                helpText(
-                 "File needs to be tab-delimited and it needs to contain a proteinId, Gene.name, intensities and peptide counts."
+                 "File needs to be tab-delimited and it needs to contain a unique
+                 ProteinId, Gene name and an intensity prefix."
                )
              ),
              
