@@ -238,3 +238,4 @@ specs:
 - (ORA) gprofiler2: Raudvere, Uku, et al. "g: Profiler: a web server for functional enrichment analysis and conversions of gene lists (2019 update)." Nucleic acids research 47.W1 (2019): W191-W198.
 - (PPI Networks) IntAct: Orchard, Sandra, et al. "The MIntAct project—IntAct as a common curation platform for 11 molecular interaction databases." Nucleic acids research 42.D1 (2014): D358-D363.
 - (Subcell. localization) Human CellMap: Go, Christopher D., et al. "A proximity-dependent biotinylation map of a human cell." Nature (2021): 1-5.
+- (Heatmaply) heatmaply: Galili, Tal, et al. "heatmaply: an R package for creating interactive cluster heatmaps for online publishing." Bioinformatics 34.9 (2018): 1600-1602.
