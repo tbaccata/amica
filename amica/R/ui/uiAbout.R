@@ -32,6 +32,9 @@ tabPanel(
          interaction databases." Nucleic acids research 42.D1 (2014): D358-D363.</li>
          <li>(Subcell. localization) <b>Human CellMap: </b>Go, Christopher D., et al. 
          "A proximity-dependent biotinylation map of a human cell." Nature (2021): 1-5.</li>
+         <li>(Heatmaply) <b>heatmaply: </b>Galili, Tal, et al. "heatmaply: an R 
+         package for creating interactive cluster heatmaps for online 
+         publishing." Bioinformatics 34.9 (2018): 1600-1602.</li>
          </ul>
          </p>
          <br>

@@ -5,10 +5,16 @@ showModal(modalDialog(
     News (2021.10.14):<br>
          <hr>
          <ul>
-         <li>amica's github went public: code can be found 
-         <a href='https://github.com/tbaccata/amica' target='_blank'>here</a>.</li>
+         <li>amica's github repository went public: code can be found 
+         <a href='https://github.com/tbaccata/amica' target='_blank'>here</a>
+         (will be updated a couple more times, stable version 1.0 should 
+         be released very soon).</li>
          <li>Check out amica's documentation on  
-         <a href='https://github.com/tbaccata/amica/wiki' target='_blank'>github</a>.</li>
+         <a href='https://github.com/tbaccata/amica/wiki' target='_blank'>github</a>
+         - in addition to the documentation provided in amica's help buttons 
+         you will find an informative tutorial on how to integrate amica's network 
+         output into Cytoscape to produce beautiful network visualizations. 
+         Other tutorials might also be included in the future, so stay tuned.</li>
          </ul>
          </p>"),
   size = "l",
