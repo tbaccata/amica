@@ -88,7 +88,7 @@ footer = function(x) {
     style="footer{position: absolute; bottom:5%; left: 33%; padding:5px;}",
     HTML("<h5>How to cite us</h5>
          <p>Please cite amica in your publications,
-         we will provide a PMID pointing to this site shortly.\n
+         we will provide a PMID pointing to this site shortly (like, for real!).\n
          </p>
          <p>All code and online documentation can be found on 
          <a href='www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
