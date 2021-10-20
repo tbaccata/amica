@@ -1323,7 +1323,8 @@ server <- function(input, output, session) {
     fontsize = isolate(input$heatmap_base)
     plot_width = isolate(input$heatmap_width)
     plot_height = isolate(input$heatmap_height)
-    show_labels <- isolate(input$heatmap_labels)
+    show_row_labels <- isolate(input$heatmap_row_labels)
+    show_col_labels <- isolate(input$heatmap_col_labels)
     show_annot <- isolate(input$heatmap_annot)
     format <- isolate(input$heatmap_format)
     
@@ -1357,7 +1358,7 @@ server <- function(input, output, session) {
           plot_method = "plotly",
           fontsize_row = fontsize,
           fontsize_col = fontsize,
-          showticklabels = c(TRUE, show_labels),
+          showticklabels = c(show_col_labels, show_row_labels),
           col_side_palette = myGroupColors(),
           col_side_colors = annot,
           row_dend_left = TRUE,
@@ -1374,7 +1375,7 @@ server <- function(input, output, session) {
           plot_method = "plotly",
           fontsize_row = fontsize,
           fontsize_col = fontsize,
-          showticklabels = c(TRUE, show_labels),
+          showticklabels = c(show_col_labels, show_row_labels),
           row_dend_left = TRUE,
           column_text_angle = 90,
           key.title = cbarTitle,
@@ -1448,6 +1449,7 @@ server <- function(input, output, session) {
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     
     fontsize <- isolate(input$fc_base)
+    legendFontSize <- isolate(input$fc_legend)
     plot_width <- isolate(input$fc_width)
     plot_height <- isolate(input$fc_height)
     pointsize <- isolate(input$fc_pointsize)
@@ -1528,7 +1530,10 @@ server <- function(input, output, session) {
                  key = key,
                  color = significant
                )) + geom_point(size = pointsize) + 
-        theme_minimal(base_size = fontsize) + scale_color_manual(values=colors) +
+        theme_minimal(base_size = fontsize) + theme(
+          legend.text = element_text(size = legendFontSize),
+          legend.title = element_text(size = legendFontSize)
+        ) + scale_color_manual(values=colors) +
         labs(x = labelNamesX, y = labelNamesY) #, title =  title) 
       
       intercept <- 0
@@ -1724,7 +1729,7 @@ server <- function(input, output, session) {
     c1 <- isolate(input$volcanocol_1)
     c2 <- isolate(input$volcanocol_2)
 
-    pal <- brewer.pal(3, "Set2")
+    pal <- myScatterColors()[1:3]
     if (is.null(c1) | is.null(c2)) {
       c1 <- pal[1]
       c2 <- pal[2]
@@ -1966,6 +1971,7 @@ server <- function(input, output, session) {
     orasource <- isolate(input$orasource)
     oracolor <- isolate(input$oraBar_color)
     oraMaxTerm <- isolate(input$oraBar_maxTerms)
+    baseSize <- isolate(input$oraBar_base)
     
     oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
     
@@ -1982,7 +1988,7 @@ server <- function(input, output, session) {
     p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
       geom_bar(stat = "identity", fill=oracolor, width = 0.9)  + xlab("") +
       ylab("-log10(p-value)") +
-      theme_minimal( base_size = 14) + coord_flip()
+      theme_minimal( base_size = baseSize) + coord_flip()
     
     ggplotly(p)
   })

@@ -423,8 +423,11 @@ tabPanel(
                 checkboxInput("clusterCols",
                               "Cluster columns (samples) of heatmap?",
                               value = TRUE),
-                checkboxInput("heatmap_labels",
+                checkboxInput("heatmap_row_labels",
                               "Show gene names of proteins?",
+                              value = TRUE),
+                checkboxInput("heatmap_col_labels",
+                              "Show samples names at the bottom?",
                               value = TRUE),
                 checkboxInput("heatmap_annot",
                               "Annotate samples in dendrogram?",
@@ -532,6 +535,14 @@ tabPanel(
                 value = 14,
                 min = 4,
                 max = 32,
+                step = 1
+              ),
+              numericInput(
+                "fc_legend",
+                "Legend font size in pt.",
+                value = 10,
+                min = 4,
+                max = 16,
                 step = 1
               ),
               numericInput(
@@ -773,6 +784,14 @@ tabPanel(
                     min = 338,
                     max = 1352,
                     step = 10
+                  ),
+                  numericInput(
+                    "oraBar_base",
+                    "Base font size in pt.",
+                    value = 12,
+                    min = 4,
+                    max = 32,
+                    step = 1
                   ),
                   radioButtons(
                     "oraBar_format",
