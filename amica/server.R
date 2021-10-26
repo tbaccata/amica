@@ -2397,6 +2397,7 @@ server <- function(input, output, session) {
   outputOptions(output, "multiAmicasInput", suspendWhenHidden = FALSE)
 
   output$download_merged_amica <- renderUI({
+    req(reacValues$combinedData)
     downloadButton("downloadMerged", h4("Download merged amica files"))
   })
   
@@ -2493,6 +2494,7 @@ server <- function(input, output, session) {
   })
 
   scatterPlotsAmicaBase <- eventReactive(input$submitScatterAmicas,{
+    req(reacValues$combinedData)
     req(input$selectScatterSamplesAmica)
     req(input$assayNamesAmicas)
     assayNameAmicas <- isolate(input$assayNamesAmicas)
@@ -2559,6 +2561,7 @@ server <- function(input, output, session) {
   })
   
   output$scatterPlotsAmica <- renderPlotly({
+    req(reacValues$combinedData)
     scatterPlotsAmicaBase() %>% config(
       displaylogo = F,
       modeBarButtonsToRemove = removePlotlyBars,
@@ -2573,6 +2576,7 @@ server <- function(input, output, session) {
   
   output$corrAmicasSamplesInput <- renderUI({
     req(input$assayNamesAmicas)
+    req(reacValues$combinedData)
     
     assayNameAmicas <- isolate(input$assayNamesAmicas)
     samples <- grep(paste0("^",assayNameAmicas),
@@ -2593,6 +2597,7 @@ server <- function(input, output, session) {
   })
   
   corrBaseAmicasPlot <- eventReactive(input$submitCorAmicas,{
+    req(reacValues$combinedData)
     assayName <- isolate(input$assayNamesAmicas)
 
     validate(need(assayName != "", "Please provide an intensity."))
@@ -2626,7 +2631,7 @@ server <- function(input, output, session) {
   })
   
   output$corrAmicasPlotly <- renderPlotly({
-    
+    req(reacValues$combinedData)
     withProgress(message = "Plotting correlation plot ", {
       p <- corrBaseAmicasPlot()
     })

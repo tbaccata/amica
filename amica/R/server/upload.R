@@ -1,6 +1,9 @@
 ### UPLOAD
 observeEvent(input$submitAnalysis, {
   reacValues$inputParameterSummary <- NULL
+  reacValues$combinedData = NULL
+  reacValues$dataCompAmica = NULL
+  
   ### EXAMPLE
   if (input$source == "example") {
     sourcePath <- "data/PXD0016455/"
