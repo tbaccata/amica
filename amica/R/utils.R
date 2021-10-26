@@ -801,10 +801,19 @@ readInAmicaSumm <- function(inFilePath, design) {
   }
   
   dropIdxs <- c(intIdxs, grep("__vs__", colnames(protData)))
+  
+  if ("quantified" %in% names(protData)) {
+    invisible()
+  } else {
+    rows <- which(complete.cases( protData[, grep("__vs__|^ImputedIntensity",
+                                                  colnames(protData))  ] ))
+    protData$quantified <- ""
+    protData[rows, 'quantified'] <- "+"
+  }
 
   se <- ProteomicsData(assays = assayList,
                        rowData = protData[,-dropIdxs],
-                       colData = design)  
+                       colData = design)
   
   comparisons <-
     protData[protData$quantified == "+",
