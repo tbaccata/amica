@@ -91,7 +91,7 @@ footer = function(x) {
          we will provide a PMID pointing to this site shortly (like, for real!).\n
          </p>
          <p>All code and online documentation can be found on 
-         <a href='www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
+         <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
          <p>Many thanks to the MS facility and the Max Perutz Labs IT team.
          If you have questions, feedback, suggestions, etc. please mail
          them to sebastian.didusch@univie.ac.at.
