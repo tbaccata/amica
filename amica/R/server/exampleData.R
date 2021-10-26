@@ -56,7 +56,7 @@ output$exampleAmicaFile <- renderDT({
   df <- data.frame(varName, colName, comment)
   names(df) <- c("Variable name",
                  "Column name or prefix",
-                 "Comment")
+                 "Description")
   
   datatable(
     df,
