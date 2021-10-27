@@ -1594,6 +1594,7 @@ server <- function(input, output, session) {
     choice <- isolate(input$enrichmentChoice)
     sigCutoffValue <- isolate(input$sigCutoffValue)
     padjY <- isolate(input$volcano_padj_y)
+    pvalThresh <- isolate(input$pvalCutoff)
     
     reacValues$selection <- sample
     reacValues$fcCutoff <- fcThresh
@@ -1610,7 +1611,8 @@ server <- function(input, output, session) {
       fcThresh,
       sigCutoffValue,
       choice,
-      padjYBoolean
+      padjYBoolean,
+      pvalThresh
     )
   })
   
