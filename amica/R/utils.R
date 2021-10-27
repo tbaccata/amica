@@ -199,7 +199,8 @@ getVolcanoPlotData <-
            fcCutoff,
            sigCutoffValue,
            selectionChoice = "absolute",
-           padjY = FALSE) {
+           padjY = FALSE,
+           pvalCutoff = NULL) {
     geneIdx <- which(colnames(data)==geneName)
   
   relIdx <-
@@ -230,7 +231,10 @@ getVolcanoPlotData <-
   comp$key <- row.names(data)
   comp$show_id <- FALSE
   
-  
+  pvalColumn <- "adj.P.Val"
+  if (sigCutoffValue!="none") {
+    pvalColumn <- ifelse(sigCutoffValue == "adj.p-value", pvalColumn, "P.Value") 
+  }
   
   if ("P.Value" %in% colnames(comp)) {
     
@@ -240,17 +244,18 @@ getVolcanoPlotData <-
       comp$nlog10_pval <- -log10(comp$P.Value)
     }
     
+    pvalThresh <- ifelse(!is.null(pvalCutoff), pvalCutoff, 0.05)
     
     comp$significant <- "no"
     
     if (selectionChoice=="absolute") {
-      comp$significant[comp$adj.P.Val < 0.05 & abs(comp$logFC) >= fcCutoff] <-
+      comp$significant[comp[[pvalColumn]] <= pvalThresh & abs(comp$logFC) >= fcCutoff] <-
         "yes"
     } else if (selectionChoice=="enriched") {
-      comp$significant[comp$adj.P.Val < 0.05 & comp$logFC >= fcCutoff] <-
+      comp$significant[comp[[pvalColumn]] <= pvalThresh & comp$logFC >= fcCutoff] <-
         "yes"
     } else if (selectionChoice=="reduced") {
-      comp$significant[comp$adj.P.Val < 0.05 & comp$logFC <= -fcCutoff] <-
+      comp$significant[comp[[pvalColumn]] <= pvalThresh & comp$logFC <= -fcCutoff] <-
         "yes"
     }
     
