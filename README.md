@@ -5,8 +5,7 @@
 
 *Please cite amica in your publications, we will provide a PMID pointing to this site shortly.*
 
-Check out our wiki for extensive online documentation:
-[wiki](wiki)
+Check out our [wiki](../../wiki) for extensive online documentation.
 
 # amica
 amica is an interactive and user-friendly web-based platform that accepts proteomic input files from different sources and provides automatically generated quality control, set comparisons, differential expression, biological network and over-representation analysis on the basis of minimal user input. 
