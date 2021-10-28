@@ -234,16 +234,12 @@ tabPanel('Input',
              br(),
              br(),
              p(
-               " Quantitative  proteomics has become an  increasingly prominent tool  in the study of life sciences.  
-                     A substantial hurdle for  many biologists is,  however, the intricacies involved in the associated 
-                     high troughput data  analysis.
- In order to  facilitate this task for users  with any background  knowledge in proteomics, 
- we have developed amica, a freely available open-source web-based software that accepts proteomic input 
- files from different sources and provides automatically generated quality control, 
- differential espression, biological network and over-representation analysis on the basis of minimal user input.
-Researchers can use amica interactively to compare specific and shared proteins in multiple group comparisons,
-create  customized output graphics,  and ultimately export the  results and the  corresponding analysis 
-settings in a tab-separated  format that can be shared  with collaborators."
+               "
+amica is an interactive and user-friendly web-based platform that accepts proteomic 
+               input files from different sources and provides automatically 
+               generated quality control, set comparisons, differential expression,
+               biological network and over-representation analysis on the basis 
+               of minimal user input."
              ),
              p(
                "Upload the required input files (explained on the sidebar) and the full functionality will be revealed."
