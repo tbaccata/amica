@@ -2036,7 +2036,7 @@ server <- function(input, output, session) {
   
   output$download2 <- downloadHandler(
     filename = function() {
-      "amica_proteinGroups.tsv"
+      "amica_protein_groups.tsv"
     },
     content = function(file) {
       outDf <- amicaOutput(reacValues$proteinData, reacValues$dataLimmaOriginal )
@@ -2361,6 +2361,15 @@ server <- function(input, output, session) {
     }
     if ("iBAQ.peptides" %in% names(amicaData2)) {
       amicaData2$iBAQ.peptides <- NULL
+    }
+    
+    if ("quantified" %in% names(amicaData2)) {
+      invisible()
+    } else {
+      rows <- which(complete.cases( amicaData2[, grep("__vs__|^ImputedIntensity",
+                                                    colnames(amicaData2))  ] ))
+      amicaData2$quantified <- ""
+      amicaData2[rows, 'quantified'] <- "+"
     }
     
     amicaData2 <- amicaData2[amicaData2$quantified=="+",]
