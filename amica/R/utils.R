@@ -53,7 +53,6 @@ imputeIntensities <- function(df_int,
   set.seed(seed)
 
   if (method == "normal") {
-    # THIS IS IT    
     df_int[] <-
       lapply(df_int, function(x)
         replace(x, is.na(x), rnorm(
@@ -64,7 +63,7 @@ imputeIntensities <- function(df_int,
         )
   }
   if (method == "min") {
-    const <- floor(min(df_int, na.rm = T))
+    const <- min(df_int, na.rm = T)
     df_int[is.na(df_int)] <- const
   }
   if (method == "global") {
