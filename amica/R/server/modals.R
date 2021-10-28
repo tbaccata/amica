@@ -2,7 +2,7 @@
 showModal(modalDialog(
   title = "Welcome to amica",
   HTML("<p>
-    News (2021.10.14):<br>
+    News (2021.10.28):<br>
          <hr>
          <ul>
          <li>amica's github repository went public: code can be found 
@@ -12,9 +12,9 @@ showModal(modalDialog(
          <li>Check out amica's documentation on  
          <a href='https://github.com/tbaccata/amica/wiki' target='_blank'>github</a>
          - in addition to the documentation provided in amica's help buttons 
-         you will find an informative tutorial on how to integrate amica's network 
-         output into Cytoscape to produce beautiful network visualizations. 
-         Other tutorials might also be included in the future, so stay tuned.</li>
+         you will find an informative tutorial on how to convert tab-separated 
+         files into amica's format and a tutorial on how to integrate amica's 
+         network output into Cytoscape to produce beautiful network visualizations.</li>
          </ul>
          </p>"),
   size = "l",
