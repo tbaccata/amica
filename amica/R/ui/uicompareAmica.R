@@ -1,6 +1,9 @@
 tabPanel(
   title = 'Compare amica datasets',
   value = 'comparemicatab',
+  br(),br(),br(),
+  actionButton("showAmicasTutorial", "Tutorial", icon = icon("info") ),
+  br(),br(),br(),
   fluidRow(
     column(
       width = 6,
@@ -56,24 +59,25 @@ tabPanel(
       id = "compareAmicaInput",
       fluidRow(column(width = 6,
                       uiOutput('download_merged_amica'),),
-               column(
-                 width = 6,
-                 HTML(
-                   '
-            <p>
-            <h3>Usage:</h3>
-            On this tab you can correlate samples of both data sets. <br>
-            If you go back to the "Differential Abundance" tab you see a select
-            bar at the of the page:</p> <br>
-                 <img src="compare_amicas_tutorial/multi_amica_data.png"><br>
-                 <p>Select "multiple_amica_input" and press the Submit button.
-                 The merged data set is now selected and you can compare multiple
-                 group comparisons across experiment etc. Almost the full 
-                 functionality from the Differential Abundance tab is available 
-                 for the merged data sets.</p>
-                 '
-                 )
-               )), 
+            #    column(
+            #      width = 6,
+            #      HTML(
+            #        '
+            # <p>
+            # <h3>Usage:</h3>
+            # On this tab you can correlate samples of both data sets. <br>
+            # If you go back to the "Differential Abundance" tab you see a select
+            # bar at the of the page:</p> <br>
+            #      <img src="compare_amicas_tutorial/multi_amica_data.png"><br>
+            #      <p>Select "multiple_amica_input" and press the Submit button.
+            #      The merged data set is now selected and you can compare multiple
+            #      group comparisons across experiment etc. Almost the full 
+            #      functionality from the Differential Abundance tab is available 
+            #      for the merged data sets.</p>
+            #      '
+            #      )
+            #    )
+               ), 
       br(),br(),br(),
       inline(uiOutput("assayNamesAmicas")),
       
