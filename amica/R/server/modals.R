@@ -225,7 +225,46 @@ observeEvent(input$showTutorial, {
   ))
 })
 
-
+observeEvent(input$showAmicasTutorial, {
+  showModal(modalDialog(
+    title = "How to compare a previously analyzed dataset with the current input data",
+    
+    HTML('
+      <p>
+      This demonstration example was produced using the example dataset from the 
+      Input tab, as well as the "amica_protein_groups.tsv" file from the FragPipe 
+      directory in the examples.zip archive. Parameters for parsing and merging 
+      both amica files can also be set here:
+      </p>
+      <p><br><br>
+      <center><img src="compare_amicas_tutorial/multi_amicas.png" width="100%"></center>
+      </p>
+      <br><br><br>
+      
+      <p>
+      After you have pressed the "Submit" button a small summary becomes visible, 
+      together with two QC plot options for the combined dataset (scatter plot 
+      and correlation plot). If you visit the "Differential abundance" tab a new 
+      selection input appears at the top of the page:
+      </p>
+      <br><br>
+      <p>
+      <center><img src="compare_amicas_tutorial/multi_amica_data.png" width="100%"></center>
+      </p>
+      <br><br><br>
+      <p>
+      You can now use the "Differential abundance" tab select "multiple_amica_input" 
+      and press the Submit button. Now you can inspect proteins across different 
+      groups and conditions for the combined dataset. Almost the full functionality 
+      from the Differential Abundance tab is available for the merged data sets.
+      </p>
+           
+           '),
+    size = "l",
+    easyClose = TRUE,
+    footer = NULL
+  ))
+})
 
 
 observeEvent(input$showQueryTutorial, {
