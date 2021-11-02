@@ -258,7 +258,6 @@ observeEvent(input$showAmicasTutorial, {
       groups and conditions for the combined dataset. Almost the full functionality 
       from the Differential Abundance tab is available for the merged data sets.
       </p>
-           
            '),
     size = "l",
     easyClose = TRUE,
