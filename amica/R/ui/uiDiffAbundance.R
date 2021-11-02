@@ -12,7 +12,7 @@ tabPanel(
   conditionalPanel(
     "output.multiAmicasInput",
     selectInput("selectedDataset", 
-                "Which data set to analzye?",
+                "Which data set to analyze?",
                 choices = c("original_data",
                             "multiple_amica_data"),
                 selected = "original_data",
