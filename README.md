@@ -1,5 +1,7 @@
-<!--- [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![R](https://img.shields.io/badge/R-4-blue) -->
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+![R](https://img.shields.io/badge/R-4-blue)
+[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+
 
 *version 1.0 will be released soon, some minor changes will still be made (code formatting etc.)*
 
@@ -82,36 +84,7 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 
 ## Dependencies
 
-### Loaded packages
-
-```
-
-shiny
-shinyjs
-shinyBS
-ggplot2
-ggfortify
-plotly
-heatmaply
-DT
-tools
-DEqMS
-gprofiler2
-bslib
-reshape2
-igraph
-visNetwork
-UpSetR
-colourvalues
-pheatmap
-Rmisc
-data.table
-dplyr
-RColorBrewer
-colourpicker
-eulerr
-
-```
+All dependencies can be installed by executing the `install_dependencies.R` script.
 
 ### Session info
 
@@ -164,6 +137,9 @@ git clone https://github.com/tbaccta/amica.git
 
 ## Move to the folder
 cd amica
+
+## execute install_dependencies.R
+
 
 ## Inside R console or R studio
 > library("shiny")
