@@ -92,10 +92,6 @@ footer = function(x) {
          </p>
          <p>All code and online documentation can be found on 
          <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
-         <p>Many thanks to the MS facility and the Max Perutz Labs IT team.
-         If you have questions, feedback, suggestions, etc. please mail
-         them to sebastian.didusch@univie.ac.at.
-         </p>
-         <p>amica version 2020.10.28</p>")
+         <p>amica version 2021.11.03</p>")
   )
 }
