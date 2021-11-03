@@ -3,7 +3,7 @@
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 
-*version 1.0 will be released soon, some minor changes will still be made (code formatting etc.)*
+*version 1.0.0 will be released very soon*
 
 *Please cite amica in your publications, we will provide a PMID pointing to this site shortly.*
 
