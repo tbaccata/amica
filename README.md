@@ -1,5 +1,6 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![R](https://img.shields.io/badge/R-4-blue)
+<!--- ![R](https://img.shields.io/badge/R-4-blue) --!>
+[![minimal R version](https://img.shields.io/badge/R%3E%3D-4-6666ff.svg)](https://cran.r-project.org/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 
