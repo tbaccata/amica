@@ -1,27 +1,3 @@
-### MODALS
-showModal(modalDialog(
-  title = "Welcome to amica",
-  HTML("<p>
-    News (2021.10.28):<br>
-         <hr>
-         <ul>
-         <li>amica's github repository went public: code can be found 
-         <a href='https://github.com/tbaccata/amica' target='_blank'>here</a>
-         (will be updated a couple more times, stable version 1.0 should 
-         be released very soon).</li>
-         <li>Check out amica's documentation on  
-         <a href='https://github.com/tbaccata/amica/wiki' target='_blank'>github</a>
-         - in addition to the documentation provided in amica's help buttons 
-         you will find an informative tutorial on how to convert tab-separated 
-         files into amica's format and a tutorial on how to integrate amica's 
-         network output into Cytoscape to produce beautiful network visualizations.</li>
-         </ul>
-         </p>"),
-  size = "l",
-  easyClose = TRUE,
-  footer = NULL
-))
-
 observeEvent(input$showFileInput, {
   showModal(modalDialog(
     title = "Accepted File input",

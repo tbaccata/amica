@@ -6,11 +6,6 @@ tabPanel(
          <hr>
          <ul>
          <li>21.10.14 - github went public</li>
-         <li>21.10.12 - Fixed error in CV plot (formula takes now raw intensities into account)</li>
-         <li>21.10.12 - added detailed descriptions for ORA and PPI networks</li>
-         <li>21.10.12 - added Euler diagrams for multiple group comparisons</li>
-         <li>21.10.12 - added support for ordering groups on x-axis in QC - and profile plots</li>
-         <li>21.09.28 - amica made "public"</li>
          </ul>
          </p>
          <p>
