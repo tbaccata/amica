@@ -1,3 +1,16 @@
+showModal(modalDialog(
+  title = "Welcome to amica",
+  HTML("<p>
+       This is a public server with limited capacity. Its purpose is to demonstrate 
+       amica's functionality for easy and quick access. 
+       You can install amica locally, instructions on how to 
+       do that are on <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.
+       </p>"),
+  easyClose = TRUE,
+  footer = NULL
+  )
+)
+
 observeEvent(input$showFileInput, {
   showModal(modalDialog(
     title = "Accepted File input",

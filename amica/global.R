@@ -86,12 +86,16 @@ inline = function (x) {
 footer = function(x) {
   tags$div(
     style="footer{position: absolute; bottom:5%; left: 33%; padding:5px;}",
-    HTML("<h5>How to cite us</h5>
+    HTML("
+    <h5>How to cite us</h5>
          <p>Please cite amica in your publications,
          we will provide a PMID pointing to this site shortly.\n
          </p>
          <p>All code and online documentation can be found on 
          <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
-         <p>amica version 2021.11.03</p>")
+         <p>amica version 2021.11.04
+         <img src='maxperutzlabs.jpg' width='100px'>
+         </p>
+         ")
   )
 }
