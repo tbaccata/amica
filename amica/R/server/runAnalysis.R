@@ -19,10 +19,15 @@ output$intensitySelection <- renderUI({
     intensities <- assayNames(reacValues$proteinData)
   } else {
     intensities <- assayNames(reacValues$proteinData)
-    selected <-
-      ifelse("RazorIntensity" %in% intensities,
-             "RazorIntensity",
-             "Intensity")
+    
+    if ("LFQIntensity" %in% intensities) {
+      selected <-  "LFQIntensity"
+    } else {
+      selected <-
+        ifelse("RazorIntensity" %in% intensities,
+               "RazorIntensity",
+               "Intensity")
+    }
   }
   
   selectizeInput(
