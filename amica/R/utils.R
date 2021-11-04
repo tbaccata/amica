@@ -980,6 +980,9 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   tot_idx <- grep(paste0(design$samples, ".Total.Intensity", collapse = "|"), colnames(protData))
   razor_idx <- grep(paste0(design$samples, ".Razor.Intensity", collapse = "|"), names(protData))
   ints_idx <- grep(paste0(design$samples, ".Intensity", collapse = "|"), names(protData))
+  lfq_idx <- grep(paste0(design$samples, ".MaxLFQ.Intensity", collapse = "|"), names(protData))
+  lfq_unique_idx <- grep(paste0(design$samples, ".MaxLFQ.Unique.Intensity", collapse = "|"), names(protData))
+  lfq_unique_tot_idx <- grep(paste0(design$samples, ".MaxLFQ.Total.Intensity", collapse = "|"), names(protData))
   
   tots <- protData[,tot_idx]
   names(tots) <- gsub(".Total.Intensity", "", names(tots))
@@ -993,6 +996,9 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   
   razor <- NULL
   ints <- NULL
+  lfqInts <- NULL
+  lfqUniqueInts <- NULL
+  lfqTotalInts <- NULL
   
   if (length(razor_idx) > 0) {
     razor <- protData[,razor_idx]
@@ -1008,21 +1014,59 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     ints <- log2(ints)
   }
   
+  # MaxLFQ intensities
+  if (length(lfq_idx) > 0) {
+    lfqInts <- protData[,lfq_idx]
+    names(lfqInts) <- gsub(".MaxLFQ.Intensity", "", names(lfqInts))
+    lfqInts[lfqInts==0] <- NA
+    lfqInts <- log2(lfqInts)
+  }
   
-  dropIdx <- c(unique_idx, razor_idx, tot_idx, ints_idx)
+  if (length(lfq_unique_idx) > 0) {
+    lfqUniqueInts <- protData[,lfq_unique_idx]
+    names(lfqUniqueInts) <- gsub(".MaxLFQ.Unique.Intensity", "", names(lfqUniqueInts))
+    lfqUniqueInts[lfqUniqueInts==0] <- NA
+    lfqUniqueInts <- log2(lfqUniqueInts)
+  }
+  
+  if (length(lfq_unique_tot_idx) > 0) {
+    lfqTotalInts <- protData[,lfq_unique_tot_idx]
+    names(lfqTotalInts) <- gsub(".MaxLFQ.Total.Intensity", "", names(lfqTotalInts))
+    lfqTotalInts[lfqTotalInts==0] <- NA
+    lfqTotalInts <- log2(lfqTotalInts)
+  }
+  
+  dropIdx <-
+    c(
+      unique_idx,
+      razor_idx,
+      tot_idx,
+      ints_idx,
+      lfq_idx,
+      lfq_unique_idx,
+      lfq_unique_tot_idx
+    )
   dropIdx <- c(dropIdx, grep("Spectral.Count", names(protData)) )
   
   assayList <- list(
     TotalIntensity = tots,
     UniqueIntensity = uniqs
   )
-  
 
   if (!is.null(razor)) {
     assayList[["RazorIntensity"]] <- razor
   }
   if (!is.null(ints)) {
     assayList[["Intensity"]] <- ints
+  }
+  if (!is.null(lfqInts)) {
+    assayList[["LFQIntensity"]] <- lfqInts
+  }
+  if (!is.null(lfqUniqueInts)) {
+    assayList[["LFQUniqueIntensity"]] <- lfqUniqueInts
+  }
+  if (!is.null(lfqTotalInts)) {
+    assayList[["LFQTotalIntensity"]] <- lfqTotalInts
   }
   
   se <- ProteomicsData(
