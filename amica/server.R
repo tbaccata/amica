@@ -2518,8 +2518,8 @@ server <- function(input, output, session) {
     xvar <- input$selectScatterSamplesAmica[1]
     yvar <- input$selectScatterSamplesAmica[2]
 
-    sampleX <- grep(xvar, grep(assayNameAmicas, names(reacValues$combinedData), value = T ), value = T)
-    sampleY <- grep(yvar, grep(assayNameAmicas, names(reacValues$combinedData), value = T ), value = T)
+    sampleX <- grep(xvar, grep(paste0("^", assayNameAmicas), names(reacValues$combinedData), value = T ), value = T)
+    sampleY <- grep(yvar, grep(paste0("^", assayNameAmicas), names(reacValues$combinedData), value = T ), value = T)
     
     formula <- as.formula(paste0(sampleY, ' ~ ', sampleX))
     fit1 <- lm(formula, data=reacValues$combinedData)
@@ -2594,7 +2594,7 @@ server <- function(input, output, session) {
                     names(reacValues$combinedData),
                     value = T
     )
-    samples <- gsub(paste0(assayNameAmicas, "."), "", samples)
+    samples <- gsub(paste0("^", assayNameAmicas, "."), "", samples)
     
     selectizeInput(
       "corrAmicasSamplesInput",
@@ -2623,10 +2623,10 @@ server <- function(input, output, session) {
                       names(reacValues$combinedData),
                       value = T
       )
-      groupInputs <- gsub(paste0(assayName, "."), "", samples)
+      groupInputs <- gsub(paste0("^", assayName, "."), "", samples)
     }
 
-    df <- reacValues$combinedData[, grep(assayName, names(reacValues$combinedData))]
+    df <- reacValues$combinedData[, grep(paste0("^", assayName), names(reacValues$combinedData))]
     df <- df[, grep(paste0(groupInputs, collapse = "|"), names(df))]
     names(df) <- gsub(paste0(assayName, "."), "", names(df))
     corDf <- cor(df, method = "pearson", use = "complete.obs")
