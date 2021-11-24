@@ -1,6 +1,7 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![minimal R version](https://img.shields.io/badge/R%3E%3D-4-6666ff.svg)](https://cran.r-project.org/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![bioRxiv](https://img.shields.io/badge/bioRxiv-2021.11.23.466958-b31b1b.svg)](https://biorxiv.org/content/10.1101/2021.11.23.466958)
 
 *Please cite amica in your publications, [https://doi.org/10.1101/2021.11.23.466958](https://doi.org/10.1101/2021.11.23.466958).*
 
