@@ -2344,6 +2344,11 @@ server <- function(input, output, session) {
     
     suffix1 <- isolate(input$suffix1)
     suffix2 <- isolate(input$suffix2)
+    
+    tmpSuffixes <- make.names(c(suffix1, suffix2), unique = T)
+    suffix1 <- tmpSuffixes[1]
+    suffix2 <- tmpSuffixes[2]
+    
     delim <- isolate(input$subPattern)
     mergeKey <- isolate(input$mergeKey)
     
