@@ -6,6 +6,14 @@ output$exampleFiles <- downloadHandler(
   }
 )
 
+output$downloadManual <- downloadHandler(
+  filename = "amica_manual.pdf",
+  # desired file name on client
+  content = function(con) {
+    file.copy("www/amica_manual.pdf", con)
+  }
+)
+
 output$exampleAmicaFile <- renderDT({
   varName <-
     c(

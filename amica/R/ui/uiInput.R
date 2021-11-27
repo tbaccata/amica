@@ -1,7 +1,13 @@
 tabPanel('Input',
          sidebarLayout(
            sidebarPanel(
-             actionButton("showFileInput", "Tutorial", icon = icon("info") ),
+             inline(actionButton("showFileInput", "Tutorial", icon = icon("info") )),
+             inline(
+               downloadButton(
+                 "downloadManual",
+                 "User manual"
+                 )
+               ),
              br(),
              h4("File input"),
              radioButtons(
