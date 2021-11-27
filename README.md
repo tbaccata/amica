@@ -1,10 +1,10 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![minimal R version](https://img.shields.io/badge/R%3E%3D-4-6666ff.svg)](https://cran.r-project.org/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
-[![bioRxiv](https://img.shields.io/badge/bioRxiv-2021.11.23.466958-b31b1b.svg)](https://biorxiv.org/content/10.1101/2021.11.23.466958)
+[![bioRxiv](https://img.shields.io/badge/bioRxiv-10.1101/2021.11.23.466958-b31b1b.svg)](https://biorxiv.org/content/10.1101/2021.11.23.466958)
 
-*Please cite amica in your publications, [https://doi.org/10.1101/2021.11.23.466958](https://doi.org/10.1101/2021.11.23.466958).*
 
+amica is freely available at [https://bioapps.maxperutzlabs.ac.at/app/amica](https://bioapps.maxperutzlabs.ac.at/app/amica)
 Check out our [wiki](../../wiki) for extensive online documentation.
 
 # amica
@@ -27,23 +27,23 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 - Processed data can be downloaded in a developed **amica format** which can also be used as input
 - Experimental design mapping samples to conditions
 - Contrast matrix file for group comparisons in case of MaxQuant, FragPipe or custom upload
-- specification file for mapping relevant columns in case of custom file upload
+- Specification file for mapping relevant columns in case of custom file upload
 
 
 ### Outputs
 
 - Analyzed data downloadable as **amica format**
 - Almost all plots prduced by plotly (hover over plot and download plot as svg or png with the camera icon)
-- All plots have customizable plot parameters (width, height, file format) 
-- Data tables
+- All plots have customizable plot parameters (width, height, file format, etc.) 
+- Downloadable data tables
 
 ### Analysis options
 
 - Remove decoys and proteins only identified by site (MaxQuant)
 - Filter on minimum peptide count and spectral count values
 - Filter on minimum valid values per group
-- Select intensities to
-- (Re-)normalize intensities (VSN, Quantile, Median)
+- Select intensities to:
+- (Re-)normalize intensities (VSN, Quantile, Median centering)
 - Imputate missing values from normal distribution or replace them by constant value (useful for pilots)
 
 
@@ -61,9 +61,9 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 ### Differential abundance analysis
 
 - Primary filter options (log2FC thresholds, multiple-testing correction, select enriched or reduced proteins)
-- Analyze single or multiple group comparison
+- Analyze single - or multiple selected group comparisons
 - Volcano - and MA - plots
-- Set comparisons (UpSet plot)
+- Set comparisons (UpSet plots and Euler diagrams)
 - Customizable output data table (can be further filtered)
 - Heatmap
 - Fold change plot
@@ -74,10 +74,10 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 
 ### Compare multiple amica files
 
-- Upload a second amica file from another experiment/analysis to combine data sets
-- Download combined data set
-- Correlate intensities from combined data set
-- Differential abundance analysis for combined amica data set
+- Upload a second amica file from another experiment/analysis to combine datasets
+- Download combined dataset
+- Correlate intensities from combined dataset (scatter - and correlation plots)
+- Differential abundance analysis for combined amica dataset
 
 
 ## Dependencies
