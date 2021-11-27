@@ -5,7 +5,8 @@
 
 
 amica is freely available at [https://bioapps.maxperutzlabs.ac.at/app/amica](https://bioapps.maxperutzlabs.ac.at/app/amica)
-Check out our [wiki](../../wiki) for extensive online documentation.
+
+Check out our [wiki](../../wiki) and [user manual](/amica/www/amica_manual.pdf) for extensive online documentation.
 
 # amica
 amica is an interactive and user-friendly web-based platform that accepts proteomic input files from different sources and provides automatically generated quality control, set comparisons, differential expression, biological network and over-representation analysis on the basis of minimal user input. 
