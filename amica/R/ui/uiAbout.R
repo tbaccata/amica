@@ -5,6 +5,8 @@ tabPanel(
     <h3>News</h3>
          <hr>
          <ul>
+         <li>21.11.23 - amica posted on <a href="https://www.biorxiv.org/content/10.1101/2021.11.23.466958" 
+         target="_blank">bioRxiv</a></li>
          <li>21.10.14 - github went public</li>
          </ul>
          </p>
