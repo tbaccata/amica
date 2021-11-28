@@ -236,10 +236,18 @@ server <- function(input, output, session) {
     
     if (is.null(groupInputs))
       groupInputs <- unique(colData(reacValues$proteinData)$groups)
+
+    tmpCols <- colData(reacValues$proteinData)
+    if (!is.null(reacValues$groupFactors) &&
+        all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
+      tmpCols$groups <-
+        factor(tmpCols$groups, levels = c(reacValues$groupFactors, 
+                                          setdiff(groupInputs, reacValues$groupFactors)))
+    }
     
     shinyjs::show('hide_before_submit_pca')
     plotData <- 0
-    tmpCols <- colData(reacValues$proteinData)
+    
     if (assayNames == "ImputedIntensity") {
       plotData <-
         assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),
@@ -256,7 +264,7 @@ server <- function(input, output, session) {
       p <-
         plotPCA(
           plotData,
-          reacValues$expDesign,
+          tmpCols,
           myGroupColors(),
           input$pca_base,
           input$pca_legend,
@@ -612,6 +620,13 @@ server <- function(input, output, session) {
     
     if (is.null(groupInputs))
       groupInputs <- unique(colData(reacValues$proteinData)$groups)
+    
+    if (!is.null(reacValues$groupFactors) &&
+        all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
+      tmpCols$groups <-
+        factor(tmpCols$groups, levels = c(reacValues$groupFactors, 
+                                          setdiff(groupInputs, reacValues$groupFactors)))
+    }
     
     df <- assay(reacValues$proteinData, assayName)
     df <- df[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
