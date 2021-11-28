@@ -50,6 +50,7 @@ observeEvent(input$submitAnalysis, {
       !is.null(input$groupSpecification))  {
     inFile <- input$groupSpecification
     tmpData <- validateFile(inFile, c("groups", "samples"))
+    tmpData$samples <- make.names(tmpData$samples)
     reacValues$expDesign <- tmpData
   }
   
