@@ -132,7 +132,7 @@ loaded via a namespace (and not attached):
 - Using git and Rstudio
 ```
 ## Clone the repository
-git clone https://github.com/tbaccta/amica.git
+git clone https://github.com/tbaccata/amica.git
 
 ## Move to the folder
 cd amica
