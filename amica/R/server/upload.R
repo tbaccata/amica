@@ -61,8 +61,27 @@ observeEvent(input$submitAnalysis, {
     }
     
     withProgress(message = "Reading in amica file", {
-      outData <-
-        readInAmicaSumm(input$amicaFile$datapath, reacValues$expDesign)
+      #
+      tryCatch({
+        outData <-
+          readInAmicaSumm(input$amicaFile$datapath, reacValues$expDesign)
+      },
+      error = function(cond) {
+        message('amica upload failed. ', cond)
+        showNotification(
+          paste(cond),
+          duration = 100,
+          closeButton = T,
+          type = "error"
+        )
+      },
+      warning = function(cond) {
+        message(paste(cond))
+      }, finally = {
+        showNotification(paste("Reading in amica ..."), type = "message")
+      }
+      )
+      #
       reacValues$proteinData <- outData$protData
       reacValues$contrastMatrix = outData$contrasts
       reacValues$dataLimma = outData$comparisons
@@ -94,9 +113,26 @@ observeEvent(input$submitAnalysis, {
     }
     
     specs <- validateFile(input$specFile, c("Variable", "Pattern"))
-    reacValues$proteinData <-
-      readInCustomSumm(input$customFile$datapath, specs, reacValues$expDesign)
-    showNotification(paste("Reading in custom file format ..."), type = "message")
+    
+    tryCatch({
+      reacValues$proteinData <-
+        readInCustomSumm(input$customFile$datapath, specs, reacValues$expDesign)
+    },
+    error = function(cond) {
+      message('Custom upload failed. ', cond)
+      showNotification(
+        paste(cond),
+        duration = 100,
+        closeButton = T,
+        type = "error"
+      )
+      },
+    warning = function(cond) {
+      message(paste(cond))
+    }, finally = {
+      showNotification(paste("Reading in custom file format ..."), type = "message")
+    }
+    )
   }
   
   if (input$source == "maxquant") {
@@ -120,17 +156,52 @@ observeEvent(input$submitAnalysis, {
         "Protein.Probability")
     
     if (all(mqNames %in% header)) {
-      reacValues$proteinData <-
-        readInMQproteinGroupsSumm(input$maxquantFile$datapath,
-                                  reacValues$expDesign)
+      tryCatch({
+        reacValues$proteinData <-
+          readInMQproteinGroupsSumm(input$maxquantFile$datapath,
+                                    reacValues$expDesign)
+      },
+      error = function(cond) {
+        message('MaxQuant upload failed. ', cond)
+        showNotification(
+          paste(cond),
+          duration = 100,
+          closeButton = T,
+          type = "error"
+        )
+      },
+      warning = function(cond) {
+        message(paste(cond))
+      }, finally = {
+        showNotification(paste("Reading in MaxQuant ..."), type = "message")
+      }
+      )
       reacValues$dbTool <- "maxquant"
-      showNotification(paste("Reading in MaxQuant ..."), type = "message")
+      
     } else if (all(fragNames %in% header)) {
-      reacValues$proteinData <-
-        readInFragPipeProteinGroupsSumm(input$maxquantFile$datapath,
-                                        reacValues$expDesign)
+      #
+      tryCatch({
+        reacValues$proteinData <-
+          readInFragPipeProteinGroupsSumm(input$maxquantFile$datapath,
+                                          reacValues$expDesign)
+      },
+      error = function(cond) {
+        message('FragPipe upload failed. ', cond)
+        showNotification(
+          paste(cond),
+          duration = 100,
+          closeButton = T,
+          type = "error"
+        )
+      },
+      warning = function(cond) {
+        message(paste(cond))
+      }, finally = {
+        showNotification(paste("Reading in FragPipe ..."), type = "message")
+      }
+      )
+      #
       reacValues$dbTool <- "fragpipe"
-      showNotification(paste("Reading in FragPipe ..."), type = "message")
     } else {
       showNotification(
         paste0(
