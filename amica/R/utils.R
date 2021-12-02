@@ -757,8 +757,28 @@ readInAmicaSumm <- function(inFilePath, design) {
   } 
   if ("iBAQ.peptides" %in% names(protData)) {
     protData$iBAQ.peptides <- NULL
-  } 
-    
+  }
+  if (!(proteinId %in% names(protData))) {
+    stop(paste0("Error: ", 
+                proteinId, " is not a column name of the uploaded input data."))
+  }
+  if (!(geneName %in% names(protData))) {
+    stop(paste0("Error: ", 
+                geneName, " is not a column name of the uploaded input data."))
+  }
+  if (length(grep("ImputedIntensity", names(protData)) ) < 1 ) {
+    stop(paste0("Error: There are no ImputedIntensity columns ", 
+                " in the uploaded input data."))
+  }
+  if (length(grep("__vs__", names(protData)) ) < 1 ) {
+    stop(paste0("Error: There are no '__vs__' - infix columns ", 
+                " in the uploaded input data."))
+  }
+  if (length(grep("logFC", names(protData)) ) < 1 ) {
+    stop(paste0("Error: There are no 'logFC' - columns ", 
+                " in the uploaded input data."))
+  }
+  
   rownames(protData) <- protData[[proteinId]]
   
   comps <- grep("logFC", colnames(protData), value=T)
@@ -836,9 +856,24 @@ readInAmicaSumm <- function(inFilePath, design) {
 readInMQproteinGroupsSumm <- function(mqFile, design) {
   protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
   
+  if ("Intensity" %in% names(protData)) {
+    protData$Intensity <- NULL
+  } 
+  if ("iBAQ" %in% names(protData)) {
+    protData$iBAQ <- NULL
+  } 
+  if ("iBAQ.peptides" %in% names(protData)) {
+    protData$iBAQ.peptides <- NULL
+  }
+  if (!("Majority.protein.IDs" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "Majority.protein.IDs", " is not a column name of the uploaded input data."))
+  }
+  if (!(geneName %in% names(protData))) {
+    stop(paste0("Error: ", 
+                geneName, " is not a column name of the uploaded input data."))
+  }
 
-  
-  
   row.names(protData) <- protData$Majority.protein.IDs
   
   if ("iBAQ.peptides" %in% names(protData)) protData$iBAQ.peptides <- NULL
@@ -959,6 +994,11 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
 
   protData[[contaminantCol]] <- ""
   
+  if (!("Protein" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "Protein", " is not a column name of the uploaded input data."))
+  }
+  
   names(protData)[which(names(protData)=="Protein")] <- "Majority.protein.IDs"
   names(protData)[which(names(protData)==gName)] <- "Gene.names"
   names(protData)[which(names(protData)==spCount)] <- "spectraCount"
@@ -983,6 +1023,15 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   lfq_idx <- grep(paste0(design$samples, ".MaxLFQ.Intensity", collapse = "|"), names(protData))
   lfq_unique_idx <- grep(paste0(design$samples, ".MaxLFQ.Unique.Intensity", collapse = "|"), names(protData))
   lfq_unique_tot_idx <- grep(paste0(design$samples, ".MaxLFQ.Total.Intensity", collapse = "|"), names(protData))
+  
+  if (length(tot_idx ) < 1 ) {
+    stop(paste0("Error: There are no .Total.Intensity columns ", 
+                " in the uploaded input data."))
+  }
+  if (length(unique_idx ) < 1 ) {
+    stop(paste0("Error: There are no .Unique.Intensity columns ", 
+                " in the uploaded input data."))
+  }
   
   tots <- protData[,tot_idx]
   names(tots) <- gsub(".Total.Intensity", "", names(tots))
@@ -1083,7 +1132,7 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
 readInCustomSumm <- function(mqFile, specs, design) {
   protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
   
-  specs$Variable <- make.names(specs$Variable, unique = FALSE)
+  specs$Pattern <- make.names(specs$Pattern, unique = FALSE)
   
   proteinId <- specs$Pattern[specs$Variable=="proteinId"]
   geneName <- specs$Pattern[specs$Variable=="geneName"]
@@ -1094,6 +1143,20 @@ readInCustomSumm <- function(mqFile, specs, design) {
   spectraCount <- specs$Pattern[specs$Variable=="spectraCount"]
   pot.contaminant <- specs$Pattern[specs$Variable=="contaminantCol"]
   
+  if (!isTruthy(proteinId) || !(proteinId %in% names(protData))) {
+    stop(paste0("Error: Provided proteinId in specification file = ", 
+                geneName, " is not a column name of the uploaded input data."))
+  }
+  
+  if (!isTruthy(geneName) || !(geneName %in% names(protData))) {
+    stop(paste0("Error: Provided geneName in specification file = ", 
+                geneName, " is not a column name of the uploaded input data."))
+  }
+  
+  if (!isTruthy(intensityPrefix) || length(grep(intensityPrefix, names(protData))) < 1 ) {
+    stop(paste0("Error: Provided intensityPrefix in specification file = 
+                ", intensityPrefix, " is not a column name of the uploaded input data."))
+  }
   
   names(protData)[which(names(protData)==proteinId)] <- "Majority.protein.IDs"
   names(protData)[which(names(protData)==geneName)] <- "Gene.names"
@@ -1122,8 +1185,10 @@ readInCustomSumm <- function(mqFile, specs, design) {
   
   idx <-  grep(razorUniqueCountPrefix, names(protData))
   
+  if (length(idx) > 1) {
   names(protData)[idx] <- gsub(razorUniqueCountPrefix, "", names(protData)[idx])
   names(protData)[idx] <- paste0("razorUniqueCount.", names(protData)[idx])
+  }
   
   int_idx <- grep(intensityPrefix, names(protData))
   razor <- protData[,int_idx]
