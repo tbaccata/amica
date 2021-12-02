@@ -612,6 +612,25 @@ tabPanel(
                 max = 1352,
                 step = 10
               ),
+              radioButtons("profile_plot_type",
+                           "Plot type",
+                           choices = c("error_bars",
+                                       "violin",
+                                       "data_points"),
+                           selected = "error_bars"),
+              checkboxInput(
+                "profile_add_points",
+                "Add individual data points to plot?",
+                value = T
+              ),
+              numericInput(
+                "profile_jittersize",
+                "Jitter Point size.",
+                value = 2,
+                min = 1,
+                max = 8,
+                step = 1
+              ),
               radioButtons(
                 "profile_format",
                 "Save image",
@@ -628,9 +647,9 @@ tabPanel(
               ) ,
               numericInput(
                 "profile_pointsize",
-                "Point size.",
-                value = 3,
-                min = 1,
+                "Error bar mean point size.",
+                value = 0,
+                min = 0,
                 max = 8,
                 step = 1
               )
