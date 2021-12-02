@@ -1810,6 +1810,7 @@ server <- function(input, output, session) {
   output$profilePlot <- renderPlotly({
     req(reacValues$dataLimma)
     req(input$selectProfilePlotGene)
+    plot_type <- input$profile_plot_type
     
     validate(need(reacValues$compareAmicaSelected==FALSE,
                   paste0("Cannot output profile plot for 'multiple_amica_upload'\n
@@ -1831,22 +1832,70 @@ server <- function(input, output, session) {
       object <- object[object$group %in% reacValues$groupFactors,]
       object$group <- factor(object$group, levels = reacValues$groupFactors)
     }
+    names(object)[which(names(object)=="rowname")] <- "Protein.IDs"
     
-    stats <- Rmisc::summarySE(object, measurevar="value", groupvars=c("rowname","group"))
-    stats <- stats[!is.na(stats$value),]
-    names(stats)[which(names(stats)=="rowname")] <- "Protein.IDs"
+    isPilot <- ifelse(any(duplicated(colData(reacValues$proteinData)$groups )), FALSE, TRUE)
+    if(isPilot) plot_type <- "data_points"
     
-    p <- ggplot(stats, aes(x = group, y = value, color = Protein.IDs)) +
-      geom_point(size = input$profile_pointsize) + 
-      geom_errorbar(aes(ymin = value - se, ymax = value + se), width = .2) +
-      xlab("") + ylab("Intensity (log2)") + theme_minimal(base_size = input$profile_base) + ggtitle(input$selectProfilePlotGene) + 
-      scale_color_manual(values=myScatterColors() ) +
+    p <- 0
+    if (plot_type == "error_bars") {
+      stats <- Rmisc::summarySE(object, measurevar="value", groupvars=c("Protein.IDs","group"))
+      stats <- stats[!is.na(stats$value),]
+      
+      p <- ggplot(stats, aes(x = group, y = value, color = Protein.IDs)) +
+        geom_point(size = input$profile_pointsize) + 
+        geom_errorbar(aes(ymin = value - se, ymax = value + se), width = .2)
+    } else if (plot_type == "violin") {
+      
+      p <- ggplot(object, aes(x = group, y = value, fill = Protein.IDs)) + 
+        geom_violin(width = 0.5, fill = 'white', trim = T) + 
+        stat_summary(fun = mean, fun.min = mean, fun.max = mean,
+                     geom = "crossbar", 
+                     width = 0.25
+                     )
+    } else if (plot_type == "data_points") {
+      p <- ggplot(object, aes(x = group, y = value, color = Protein.IDs)) + 
+        geom_jitter(
+        data = object,
+        mapping = aes(x = group, y = value, color = Protein.IDs),
+        width = 0.1,
+        height = 0,
+        size = input$profile_jittersize
+      )
+    }
+  
+    p <- p +
+      xlab("") + ylab("Intensity (log2)") + 
+      theme_minimal(base_size = input$profile_base) + 
+      ggtitle(input$selectProfilePlotGene) + 
       theme(axis.text.x = element_text(
         angle = 90,
         hjust = 1,
         vjust = 0.5,
         size = input$profile_base
       ),legend.title = element_blank())
+    
+    if (input$profile_add_points && plot_type != "data_points") {
+      if (input$profile_plot_type == " violin") {
+        p <- p + geom_jitter(
+          width = 0.1,
+          height = 0,
+          shape=23,
+          size = input$profile_jittersize
+        )
+      } else {
+        p <- p + geom_jitter(
+          data = object,
+          mapping = aes(x = group, y = value, color = Protein.IDs),
+          width = 0.1,
+          height = 0,
+          size = input$profile_jittersize
+        )
+      }
+      
+    }
+    p <- p + scale_color_manual(values=myScatterColors()) +
+      scale_fill_manual(values=myScatterColors())
     
     ggplotly(p) %>% config(
       displaylogo = F,
