@@ -644,7 +644,7 @@ server <- function(input, output, session) {
         xlab = "",
         ylab = "",
         limits = c(min(corDf) - 0.003, 1),
-        #row_side_palette = mapping,
+        colors = heatColors(),
         row_side_palette = myGroupColors(),
         row_side_colors = annot,
         plot_method = "plotly",
@@ -655,6 +655,7 @@ server <- function(input, output, session) {
         round(corDf, 3),
         xlab = "",
         ylab = "",
+        colors = heatColors(),
         limits = c(min(corDf) - 0.003, 1),
         plot_method = "plotly",
         key.title = "Pearson Correlation"
@@ -679,6 +680,127 @@ server <- function(input, output, session) {
     )
   })
   
+  
+  ### OVERLAP HEATMAP
+  overlapBasePlot <- eventReactive(input$submitOverlapHeatmap, {
+    req(reacValues$uploadSuccess)
+    tmpCols <- colData(reacValues$proteinData)
+    
+    annotSamples <- isolate(input$overlapHeatmap_annot)
+    metric <- isolate(input$overlapHeatmap_metric)
+    
+    if (!is.null(reacValues$groupFactors) &&
+        all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
+      tmpCols <- tmpCols[tmpCols$groups %in% reacValues$groupFactors, ]
+      tmpCols$groups <-
+        factor(tmpCols$groups, levels = c(reacValues$groupFactors))
+    }
+    groupInputs <- unique(tmpCols$groups)
+    
+    aname <-
+      ifelse(
+        "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        'LFQIntensity',
+        'Intensity'
+      )
+    
+    lfqs <- assay(reacValues$proteinData, aname)
+    lfqs <- lfqs[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
+    
+    annot <- tmpCols
+    row.names(annot) <- annot$samples
+    annot$samples <- NULL
+    
+    idProts <- list()
+    for (col in names(lfqs)) {
+      tmp <- row.names(lfqs)[!is.na(lfqs[, col])]
+      idProts[[col]] <- tmp
+    }
+    
+    reacValues$overlapDf <- calc_pairwise_overlaps(idProts)
+    idProts <- NULL
+    
+    limits <- c(0, 1)
+    title <- "Overlap Coefficient"
+    df <- head(reacValues$overlapDf)
+    df1 <- head(reacValues$overlapDf)
+    
+    if (metric == 'num_shared') {
+      df <- reacValues$overlapDf[, c("sample1", "sample2", "num_shared")]
+      df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$num_shared)
+      limits <- c(min(df[,3], na.rm = T) - 0.05, max(df[,3], na.rm = T))
+      title <- "#shared proteins"
+    } else if (metric == 'overlap_coefficient') {
+      df <- reacValues$overlapDf[, c("sample1", "sample2", "overlap")]
+      df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$overlap)
+      limits <- c(min(df[,3], na.rm = T) - 0.05, 1)
+    } else if (metric == 'jaccard_coefficient') {
+      df <- reacValues$overlapDf[, c("sample1", "sample2", "jaccard")]
+      df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$jaccard)
+      limits <- c(min(df[,3], na.rm = T) - 0.05, 1)
+      title <- "Jaccard Coefficient"
+    }
+    names(df) <- c("sample1", "sample2", "overlap")
+    df <- rbind(df, df1)
+    overlap_matrix <- acast(df, sample1 ~ sample2, value.var = "overlap")
+
+    if (annotSamples) {
+      p <- heatmaply_cor(
+        overlap_matrix,
+        xlab = "",
+        ylab = "",
+        limits = limits,
+        row_side_palette = myGroupColors(),
+        row_side_colors = annot,
+        plot_method = "plotly",
+        key.title = title,
+        colors = heatColors()
+      )
+    } else {
+      p <- heatmaply_cor(
+        overlap_matrix,
+        xlab = "",
+        ylab = "",
+        limits = limits,
+        plot_method = "plotly",
+        key.title = title,
+        colors = heatColors()
+      )
+    }
+    p
+  })
+  
+  output$overlapHeatmapPlotly <- renderPlotly({
+    withProgress(message = "Plotting overlap plot ", {
+      p <- overlapBasePlot()
+    })
+    p %>%  config(
+      displaylogo = F,
+      modeBarButtonsToRemove = removePlotlyBars,
+      toImageButtonOptions = list(
+        format = input$overlapHeatmap_format,
+        width = input$overlapHeatmap_width,
+        height = input$overlapHeatmap_height,
+        filename = "overlap_heatmap"
+      )
+    )
+  })
+  
+  output$overlapSummaryDT <- renderDT({
+    req(reacValues$overlapDf )
+    datatable(
+      reacValues$overlapDf,
+      extensions = 'Buttons',
+      filter = "top",
+      rownames = F,
+      options = list(
+        pageLength = 10,
+        autoWidth = TRUE
+        #dom = 'Bfrtip',
+        #buttons = c('csv')
+      )
+    )
+  })
   
   
   ### ------------------------------------------- CONTAMINANTS plots
@@ -2705,6 +2827,7 @@ server <- function(input, output, session) {
         xlab = "", 
         ylab = "",
         limits = c(min(corDf)-0.003, 1),
+        colors = heatColors(),
         plot_method = "plotly",
         key.title = "Pearson Correlation"
       )
