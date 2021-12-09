@@ -512,6 +512,18 @@ output$mvHelpBox <- renderUI({
   }
 })
 
+output$overlapHeatmapHelpBox <- renderUI({
+  if (input$overlapHeatmapHelp %% 2) {
+    HTML(
+      "
+      Overlap coefficient: <br>
+      Jaccard coefficient: <br>
+      Number of shared proteins: <br>
+      "
+    )
+  }
+})
+
 output$oraHelpBox <- renderUI({
   if (input$oraHelp %% 2) {
     HTML(
