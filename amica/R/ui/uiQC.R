@@ -505,7 +505,7 @@ tabPanel(
         column(
           width = 6,
           
-          inline( actionButton("submitNumMVs", "Plot barplot", icon = icon("cog"))),
+          inline(actionButton("submitNumMVs", "Plot barplot", icon = icon("cog"))),
           inline(actionButton("mvHelp", icon = icon("info") , label = NULL)),
           inline(uiOutput("mvHelpBox")),
           ###
@@ -560,6 +560,65 @@ tabPanel(
           ###
           plotlyOutput("barplotMissingValues", height = 600),
         )
+      )
+    ),
+    tabPanel(
+    h3("Protein Overlap"),
+    inline(actionButton("submitOverlapHeatmap", "Plot barplot", icon = icon("cog"))),
+    inline(actionButton("overlapHeatmapHelp", icon = icon("info") , label = NULL)),
+    inline(uiOutput("overlapHeatmapHelpBox")),
+    ###
+    inline(actionButton("overlapHeatmapParams", "", icon = icon("wrench"))),
+    shinyjs::hidden(
+      div(
+        style = "display: grid;
+          grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
+          grid-gap: 30px;",
+
+        id = 'toggle_overlapHeatmap_params',
+        numericInput(
+          "overlapHeatmap_width",
+          "Width in pixel.",
+          value = 768,
+          min = 338,
+          max = 1352,
+          step = 10
+        ),
+        numericInput(
+          "overlapHeatmap_height",
+          "Height in pixel.",
+          value = 676,
+          min = 338,
+          max = 1352,
+          step = 10
+        ),
+        radioButtons(
+          "overlapHeatmap_format",
+          "Save image",
+          choices = c("svg", "png"),
+          selected = "svg"
+        ),
+        radioButtons(
+          "overlapHeatmap_metric",
+          "Which metric to plot?",
+          choices = c("overlap_coefficient",
+                      "jaccard_coefficient",
+                      "num_shared")
+        ),
+        checkboxInput("overlapHeatmap_annot",
+                      "Annotate samples in dendrogram?",
+                      value = FALSE)
+      )
+     )
+    ),
+    ###
+    fluidRow(
+      column(width = 6,
+             plotlyOutput("overlapHeatmapPlotly", height = 600)
+             ),
+      column(
+        width = 6,
+        DTOutput("overlapSummaryDT")
       )
     )
     
