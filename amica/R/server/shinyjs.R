@@ -42,6 +42,9 @@ shinyjs::onclick("barplotIdParams",
 shinyjs::onclick("barplotMvParams",
                  shinyjs::toggle(id = "toggle_barplotMv_params"))
 
+shinyjs::onclick("overlapHeatmapParams",
+                 shinyjs::toggle(id = "toggle_overlapHeatmap_params"))
+
 shinyjs::onclick("scatterParams",
                  shinyjs::toggle(id = "toggle_scatter_params"))
 

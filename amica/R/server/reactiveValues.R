@@ -7,6 +7,7 @@ reacValues <-
     inputParameterSummary=NULL,
     filtData = NULL,
     dataLimma = NULL,
+    overlapDf = NULL,
     dataLimmaOriginal = NULL,
     dataComp = NULL,
     geneNames = NULL,
@@ -57,6 +58,7 @@ observeEvent(input$resetAnalysis,{
   reacValues$uploadSuccess <- NULL
   reacValues$analysisSuccess <- NULL
   reacValues$filtData <- NULL
+  reacValues$overlapDf <- NULL
   reacValues$dataLimma <- NULL
   reacValues$dataLimmaOriginal <- NULL
   reacValues$dataComp <- NULL
