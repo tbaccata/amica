@@ -637,13 +637,15 @@ server <- function(input, output, session) {
     annot$samples <- NULL
     
     corDf <- cor(df, method = "pearson", use = "complete.obs")
+    limits <- c(min(corDf) - 0.003, 1)
+    diag(corDf) <- NA
     
     if (annotSamples) {
       p <- heatmaply_cor(
         round(corDf, 3),
         xlab = "",
         ylab = "",
-        limits = c(min(corDf) - 0.003, 1),
+        limits = limits,
         colors = heatColors(),
         row_side_palette = myGroupColors(),
         row_side_colors = annot,
@@ -656,7 +658,7 @@ server <- function(input, output, session) {
         xlab = "",
         ylab = "",
         colors = heatColors(),
-        limits = c(min(corDf) - 0.003, 1),
+        limits = limits,
         plot_method = "plotly",
         key.title = "Pearson Correlation"
       )
@@ -734,7 +736,7 @@ server <- function(input, output, session) {
       df <- reacValues$overlapDf[, c("sample1", "sample2", "overlap")]
       df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$overlap)
       limits <- c(min(df[,3], na.rm = T) - 0.05, 1)
-    } else if (metric == 'jaccard_coefficient') {
+    } else if (metric == 'jaccard_index') {
       df <- reacValues$overlapDf[, c("sample1", "sample2", "jaccard")]
       df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$jaccard)
       limits <- c(min(df[,3], na.rm = T) - 0.05, 1)
@@ -788,8 +790,18 @@ server <- function(input, output, session) {
   
   output$overlapSummaryDT <- renderDT({
     req(reacValues$overlapDf )
+    df <- reacValues$overlapDf
+    names(df) <- c(
+      "Sample 1",
+      "Sample 2",
+      "# Sample 1",
+      "# Sample 2",
+      "# shared",
+      "Overlap Coeff.",
+      "Jaccard index"
+    )
     datatable(
-      reacValues$overlapDf,
+      df,
       extensions = 'Buttons',
       filter = "top",
       rownames = F,
@@ -2821,12 +2833,14 @@ server <- function(input, output, session) {
     df <- df[, grep(paste0(groupInputs, collapse = "|"), names(df))]
     names(df) <- gsub(paste0(assayName, "."), "", names(df))
     corDf <- cor(df, method = "pearson", use = "complete.obs")
+    limits <- c(min(corDf) - 0.003, 1)
+    diag(corDf) <- NA
 
     heatmaply_cor(
         round(corDf, 3),
         xlab = "", 
         ylab = "",
-        limits = c(min(corDf)-0.003, 1),
+        limits = limits,
         colors = heatColors(),
         plot_method = "plotly",
         key.title = "Pearson Correlation"
