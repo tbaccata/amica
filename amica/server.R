@@ -742,6 +742,8 @@ server <- function(input, output, session) {
     reacValues$overlapDf <- calc_pairwise_overlaps(idProts)
     idProts <- NULL
     
+    validate(need(ncol(lfqs)>2, "Need more than 2 samples."))
+    
     limits <- c(0, 1)
     title <- "Overlap Coefficient"
     df <- head(reacValues$overlapDf)
