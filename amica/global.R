@@ -95,7 +95,7 @@ footer = function(x) {
          </p>
          <p>All code and online documentation can be found on 
          <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
-         <p>amica version 2021.11.27
+         <p>amica version 2021.12.10
          <img src='maxperutzlabs.jpg' width='100px'>
          </p>
          ")
