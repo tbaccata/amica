@@ -1347,9 +1347,9 @@ server <- function(input, output, session) {
     lty <- ifelse(bool, 1, 0)
     
     validate(need(!is.null(comparisons), "Please select at least two comparisons."))
+    validate(need(length(comparisons) > 1, 
+                  "Need at least two comparisons to render UpSet plot."))
     validate(need(length(comparisons) < 6, "Cannot output Euler plot for more than 5 sets."))
-    validate(need(length(colnames(binMat) ) > 1,
-                  "Need at least two comparisons to render UpSet plot. Only one provided.") )
     
     if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "") &&
         length(reacValues$newMultiNames$new) == length(comparisons)) {
@@ -2371,6 +2371,7 @@ server <- function(input, output, session) {
     
     ridx <- input$groupComparisonsDT_rows_all
     rnames <- rownames(reacValues$dataComp[ridx,])
+    validate(need(length(rnames) > 1,"Not enough data to display."))
 
     nw.data <-
       getBait2PreyNetwork(reacValues$dataComp[rnames,],
@@ -2459,9 +2460,11 @@ server <- function(input, output, session) {
     if (is.na(thresh) || is.null(thresh)) thresh <- 0
     
     req(reacValues$dataComp)
+    validate(need(nrow(reacValues$dataComp) > 1,"Not enough data to display."))
     
     ridx <- input$groupComparisonsDT_rows_all
     rnames <- rownames(reacValues$dataComp[ridx,])
+    validate(need(length(rnames) > 1,"Not enough data to display."))
     
     networkData <- toNetworkData(reacValues$dataComp[rnames,], ppi(), cellmap())
     networkData$edges <- networkData$edges[networkData$edges$value >= thresh, ]
