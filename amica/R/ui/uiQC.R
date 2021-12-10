@@ -564,7 +564,7 @@ tabPanel(
     ),
     tabPanel(
     h3("Protein Overlap"),
-    inline(actionButton("submitOverlapHeatmap", "Plot barplot", icon = icon("cog"))),
+    inline(actionButton("submitOverlapHeatmap", "Plot overlap", icon = icon("cog"))),
     inline(actionButton("overlapHeatmapHelp", icon = icon("info") , label = NULL)),
     inline(uiOutput("overlapHeatmapHelpBox")),
     ###
@@ -602,26 +602,27 @@ tabPanel(
           "overlapHeatmap_metric",
           "Which metric to plot?",
           choices = c("overlap_coefficient",
-                      "jaccard_coefficient",
+                      "jaccard_index",
                       "num_shared")
         ),
         checkboxInput("overlapHeatmap_annot",
                       "Annotate samples in dendrogram?",
                       value = FALSE)
       )
-     )
-    ),
+     ),
     ###
     fluidRow(
       column(width = 6,
+             h4("Overlap Heatmap"),
              plotlyOutput("overlapHeatmapPlotly", height = 600)
-             ),
+      ),
       column(
         width = 6,
+        h4("Overlap table"),
         DTOutput("overlapSummaryDT")
       )
     )
-    
+    )
   ),
   
   br(),
