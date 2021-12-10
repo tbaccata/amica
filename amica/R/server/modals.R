@@ -516,9 +516,13 @@ output$overlapHeatmapHelpBox <- renderUI({
   if (input$overlapHeatmapHelp %% 2) {
     HTML(
       "
-      Overlap coefficient: <br>
-      Jaccard coefficient: <br>
-      Number of shared proteins: <br>
+      <strong>Jaccard index</strong>: The Jaccard index for two sets is defined 
+      as the the size of the intersection divided by the size of the union: 
+      J(X,Y) = |X∩Y| / |X∪Y|.<br>
+      <strong>Overlap coefficient</strong>: Related to the Jaccard index, 
+      defined as the size of the intersection divided by he smaller of the size 
+      of the two sets: J(X,Y) = |X∩Y| / min(|X|,|Y|)<br>
+      <strong>Number of shared proteins</strong>: The size of the intersection.<br>
       "
     )
   }
