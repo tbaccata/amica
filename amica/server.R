@@ -2204,7 +2204,7 @@ server <- function(input, output, session) {
     plotDf$minusLog10p_value <- -log10(plotDf$p_value)
     plotDf <- plotDf[!duplicated(plotDf$term_name),]
     plotDf <- plotDf[order(plotDf$minusLog10p_value),]
-    plotDf <- head(plotDf, min(nrow(plotDf), oraMaxTerm))
+    plotDf <- tail(plotDf, min(nrow(plotDf), oraMaxTerm))
     plotDf$term_name <- factor(plotDf$term_name, levels = plotDf$term_name)
     
     p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
@@ -2420,6 +2420,7 @@ server <- function(input, output, session) {
       visOptions(selectedBy = "Subcell. localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
+      visNodes(font = list(size = 20, strokeWidth = 2)) %>%
       visEdges(smooth=F) %>%
       visLegend(
         main = "Legend",
@@ -2490,7 +2491,8 @@ server <- function(input, output, session) {
         id = 1:length(colLegend$summary_values),
         color = colLegend$summary_colours,
         label = colLegend$summary_values,
-        shape = "circle"
+        shape = "circle",
+        font = list(size = 16, color = "white")
       )
 
     visNetwork(networkData$nodes,
@@ -2503,6 +2505,7 @@ server <- function(input, output, session) {
       visOptions(selectedBy = "Subcell. localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
+      visNodes(font = list(size = 20, strokeWidth = 2)) %>%
       visEdges(smooth=F, color=list(color = "grey", highlight = "red")) %>%
 
       visLegend(
