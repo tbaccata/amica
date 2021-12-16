@@ -67,13 +67,7 @@ tabPanel(
           min = 1,
           max = 8,
           step = 1
-        ),
-        checkboxInput(
-          "pca_show_label",
-          "Show labels of samples?",
-          value = FALSE
-        ),
-        
+        )
       )),
       fluidRow(
         column(width = 2),
