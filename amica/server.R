@@ -221,11 +221,21 @@ server <- function(input, output, session) {
   
   # ------------------------------------------- PCA
   
-  pcaPlotly <- eventReactive(input$submitPCA, {
+  get_pca_data <- reactive({
+    event_data("plotly_selected", source = "subset")
+  })
+  
+  #pcaPlotly <- eventReactive(input$submitPCA, {
+  output$pca <- renderPlotly({
+    input$submitPCA
     assayNames <- isolate(input$assayNames)
     groupInputs <- isolate(input$pcaSamplesInput)
+    pca_legend <- isolate(input$pca_legend)
+    pca_base <- isolate(input$pca_base)
+    pca_pointsize <- isolate(input$pca_pointsize)
+    pca_show_label <- isolate(input$pca_show_label)
     
-    validate(need(assayNames != "", "Please provide an intensity."))
+    validate(need(assayNames != "", "Please press submit or provide an intensity prefix."))
     validate(
       need(
         length(groupInputs) > 1 |
@@ -245,7 +255,6 @@ server <- function(input, output, session) {
                                           setdiff(groupInputs, reacValues$groupFactors)))
     }
     
-    shinyjs::show('hide_before_submit_pca')
     plotData <- 0
     
     if (assayNames == "ImputedIntensity") {
@@ -261,18 +270,57 @@ server <- function(input, output, session) {
     }
     
     withProgress(message = "Plotting PCA ", {
-      p <-
-        plotPCA(
-          plotData,
-          tmpCols,
-          myGroupColors(),
-          input$pca_base,
-          input$pca_legend,
-          input$pca_pointsize,
-          input$pca_show_label
-        )
+
+      # idxs <-
+      #   grep(paste0(colnames(plotData), collapse = "|"), tmpCols$samples)
+      # groups <- tmpCols$groups[idxs]
+      
+      pca <- prcomp(as.data.frame(t(plotData)))
+      df_out <- as.data.frame(pca$x)
+      
+      df_out$group <- tmpCols$groups[tmpCols$samples==row.names(df_out)]
+      df_out$sample <- rownames(df_out)
+      df_out$key <- df_out$sample
+      
+      df_out$show_id <- FALSE
+      if (!is.null(get_pca_data() )) {
+        df_out[df_out$key %in% get_pca_data()$key, "show_id"] <- TRUE
+      }
+
+      tmp <- summary(pca)
+      percentage <- round(100 * tmp$importance['Proportion of Variance', 1:2], 2)
+      percentage <- paste( colnames(df_out), "(", paste( as.character(percentage), "%", ")", sep="") )
+      
+      p <- ggplot(df_out,aes(x=PC1,y=PC2,color=group, label=sample,  key=key ))
+      p <- p + geom_point(size=pca_pointsize) + xlab(percentage[1]) + ylab(percentage[2])
+      p <- p + scale_color_manual(values=myGroupColors()) + theme_minimal(base_size = pca_base) +
+          theme(legend.text = element_text(size = pca_legend))
+      
+      # if (pca_show_label) {
+      #   p <- p + geom_text(data=df_out,
+      #                      aes(x=PC1,y=PC2, label=sample, key=key),
+      #                      position=position_jitter(width=0.25,height=0.25)
+      #                      )
+      # }
+      # 
+      p <- p + geom_text(
+        data = subset(df_out, show_id),
+        aes(PC1, PC2, label = sample),
+        position=position_jitter(width=0.25,height=0.5)
+      )
     })
-    p
+    ggplotly(p, source = "subset") %>% 
+      layout(dragmode = "select") %>%
+      config(
+            displaylogo = F,
+            modeBarButtonsToRemove = removePlotlyBars,
+            toImageButtonOptions = list(
+              format = input$pca_format,
+              width = input$pca_width,
+              height = input$pca_height,
+              filename = "pca"
+            )
+          )
   })
   
   
@@ -290,22 +338,22 @@ server <- function(input, output, session) {
   })
   
   
-  output$pca <- renderPlotly({
-    req(input$assayNames)
-    req(reacValues$uploadSuccess)
-    pcaPlotly()  %>%  config(
-      displaylogo = F,
-      modeBarButtonsToRemove = removePlotlyBars,
-      toImageButtonOptions = list(
-        format = input$pca_format,
-        width = input$pca_width,
-        height = input$pca_height,
-        #width = 768,
-        #height = 676,
-        filename = "pca"
-      )
-    )
-  })
+  # output$pca <- renderPlotly({
+  #   req(input$assayNames)
+  #   req(reacValues$uploadSuccess)
+  #   pcaPlotly()  %>%  config(
+  #     displaylogo = F,
+  #     modeBarButtonsToRemove = removePlotlyBars,
+  #     toImageButtonOptions = list(
+  #       format = input$pca_format,
+  #       width = input$pca_width,
+  #       height = input$pca_height,
+  #       #width = 768,
+  #       #height = 676,
+  #       filename = "pca"
+  #     )
+  #   )
+  # })
   
   ### ------------------------------------------- BOX PLOT
   
