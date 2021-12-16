@@ -37,7 +37,7 @@ output$exampleAmicaFile <- renderDT({
     "LFQIntensity_",
     "ImputedIntensity_",
     "razorUniqueCount",
-    "razorUniqueCount",
+    "razorUniqueCount_",
     "P.Value_",
     "adj.P.Val_",
     "logFC_",
