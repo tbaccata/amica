@@ -501,49 +501,6 @@ getComparisonsData2 <-
                           colnames(dataLimma))])
   }
 
-
-plotPCA <-
-  function(dataHeatmap,
-           mappings,
-           colorPalette = "Accent",
-           basesize = 14,
-           legend_size = 10,
-           point_size = 3,
-           input_label = F) {
-    idxs <-
-    grep(paste0(colnames(dataHeatmap), collapse = "|"), mappings$samples)
-  groups <- mappings$groups[idxs]
-  
-  
-  
-  tmp <- as.data.frame(t(dataHeatmap))
-  
-  if (length(groups) == nrow(tmp)) {
-    tmp$group <- groups
-  } else {
-    tmp$group <- ""
-  }
-
-  pca <- prcomp(tmp[, 1:ncol(tmp) - 1])
-
-  p <-
-    ggplotly(autoplot(
-      pca,
-      data = tmp,
-      label = input_label,
-      colour = "group",
-      #shape = "group",
-      size = point_size
-    ) + scale_color_manual(values=colorPalette) + theme_minimal(base_size = basesize) +
-      theme(legend.text = element_text(size = legend_size)),  tooltip = rownames(tmp))
-
-  return(p)
-}
-
-
-
-
-
 validateFile <- function(inFile, columns) {
   if (is.null(inFile))
     return(NULL)
