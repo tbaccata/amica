@@ -666,7 +666,7 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   
   #idxs <- match(df.genes[[geneName]], V(ppi)$label)
   idxs <- match(df.genes[[geneName]], V(ppi)$name)
-
+  
   idxs <- idxs[!is.na(idxs)]
   
   if(length(idxs) < 1) {
@@ -683,31 +683,26 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   
   df$nodes <-
     merge(df$nodes, cellmap, by="label", all.x = T)
-
+  
   # convert id to integer for cytoscape  
   df$nodes$id <- 1:nrow(df$nodes)
   tmpFrom <- c()
   tmpTo <- c()
-  
-  print(df$edges)
-  print(nrow(df$edges))
-  
-  for (idx in seq_along(df$edges)) {
+  for (idx in 1:nrow(df$edges)) {
     from <- df$edges[idx, 'from']
     to <- df$edges[idx, 'to']
-    if (from %in% df$nodes$label) {
-      fromId <- df$nodes[df$nodes$label == from, 'id']
-      toId <- df$nodes[df$nodes$label == to, 'id']
-      tmpFrom[idx] <- fromId
-      tmpTo[idx] <- toId
-    }
+    fromId <- df$nodes[df$nodes$label == from, 'id']
+    toId <- df$nodes[df$nodes$label == to, 'id']
+    
+    tmpFrom[idx] <- fromId
+    tmpTo[idx] <- toId
   }
   
-  
-  if (isTruthy(tmpFrom) && nrow(df$edges) > 0) {
+  if (!is.na(tmpFrom)) {
     df$edges$from <- tmpFrom
     df$edges$to <- tmpTo
   }
+  
   return(df)
 }
 
