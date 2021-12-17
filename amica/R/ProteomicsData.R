@@ -12,7 +12,7 @@ setClass(
   )
 
 .valid.assays_nrow <- function(x, y) {
-  if (length(x) == 0L)
+  if (length(x) < 2 )
     return(NULL)
   
   lens <- unlist(lapply(x, nrow))
@@ -38,7 +38,7 @@ setClass(
 }
 
 .valid.assays_ncol <- function(x, y) {
-  if (length(x) == 0L)
+  if (length(x) < 2)
     return(NULL)
   
   lens <- unlist(lapply(x, ncol))
