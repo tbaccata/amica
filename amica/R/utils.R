@@ -688,18 +688,26 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
   df$nodes$id <- 1:nrow(df$nodes)
   tmpFrom <- c()
   tmpTo <- c()
-  for (idx in 1:nrow(df$edges)) {
+  
+  print(df$edges)
+  print(nrow(df$edges))
+  
+  for (idx in seq_along(df$edges)) {
     from <- df$edges[idx, 'from']
     to <- df$edges[idx, 'to']
-    fromId <- df$nodes[df$nodes$label == from, 'id']
-    toId <- df$nodes[df$nodes$label == to, 'id']
-    
-    tmpFrom[idx] <- fromId
-    tmpTo[idx] <- toId
+    if (from %in% df$nodes$label) {
+      fromId <- df$nodes[df$nodes$label == from, 'id']
+      toId <- df$nodes[df$nodes$label == to, 'id']
+      tmpFrom[idx] <- fromId
+      tmpTo[idx] <- toId
+    }
   }
-
-  df$edges$from <- tmpFrom
-  df$edges$to <- tmpTo
+  
+  
+  if (isTruthy(tmpFrom) && nrow(df$edges) > 0) {
+    df$edges$from <- tmpFrom
+    df$edges$to <- tmpTo
+  }
   return(df)
 }
 
