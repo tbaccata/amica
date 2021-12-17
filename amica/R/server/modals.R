@@ -110,9 +110,9 @@ moment not considered when uploaded.
 
 observeEvent(input$showDesign, {
   showModal(modalDialog(
-    title = "Example experimental design",
+    title = "Example tab-separated experimental design",
     HTML("<p>
-           The design file has two columns: <b>samples</b> and <b>groups</b>. The sample names in the samples column need to match 
+           The tab-separated design file has two columns: <b>samples</b> and <b>groups</b>. The sample names in the samples column need to match 
            the column names of the input file in the order of the input file.</p>"),
     DTOutput("exampleDesign"),
     easyClose = TRUE,
@@ -122,10 +122,10 @@ observeEvent(input$showDesign, {
 
 observeEvent(input$showContrasts, {
   showModal(modalDialog(
-    title = "Example contrast matrix",
+    title = "Example tab-separated contrast matrix",
     
     HTML("<p>
-           The contrast matrix tells amica which group comparisons to perform. The column names of
+           The tab-separated contrast matrix tells amica which group comparisons to perform. The column names of
 this file can be freely chosen, but column names must be provided. For each row in this file the
 comparison group1-group2 is performed. If one wants to change the sign of the fold changes the
 position of the groups needs to be switched in the file (e.g group2-group1 instead of group1-group2)</p>"),
