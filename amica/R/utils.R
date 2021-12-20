@@ -1105,7 +1105,7 @@ readInCustomSumm <- function(mqFile, specs, design) {
   
   if (!isTruthy(proteinId) || !(proteinId %in% names(protData))) {
     stop(paste0("Error: Provided proteinId in specification file = ", 
-                geneName, " is not a column name of the uploaded input data."))
+                proteinId, " is not a column name of the uploaded input data."))
   }
   
   if (!isTruthy(geneName) || !(geneName %in% names(protData))) {
@@ -1128,6 +1128,12 @@ readInCustomSumm <- function(mqFile, specs, design) {
     names(protData)[which(names(protData)==razorUniqueCount)] <- "razorUniqueCount"
   }
   
+  if (isTruthy(razorUniqueCountPrefix) && length(grep(razorUniqueCountPrefix, names(protData))) > 1) {
+    idx <-  grep(razorUniqueCountPrefix, names(protData))
+    
+    names(protData)[idx] <- gsub(razorUniqueCountPrefix, "", names(protData)[idx])
+    names(protData)[idx] <- paste0("razorUniqueCount.", names(protData)[idx])
+  }
   
   if (isTruthy(pot.contaminant) && pot.contaminant  %in% names(protData)) {
     names(protData)[which(names(protData)==pot.contaminant)] <- "Potential.contaminant"
@@ -1142,13 +1148,6 @@ readInCustomSumm <- function(mqFile, specs, design) {
     protData$Majority.protein.IDs,
     protData$Gene.names
   )
-  
-  idx <-  grep(razorUniqueCountPrefix, names(protData))
-  
-  if (length(idx) > 1) {
-  names(protData)[idx] <- gsub(razorUniqueCountPrefix, "", names(protData)[idx])
-  names(protData)[idx] <- paste0("razorUniqueCount.", names(protData)[idx])
-  }
   
   int_idx <- grep(intensityPrefix, names(protData))
   razor <- protData[,int_idx]
