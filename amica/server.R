@@ -278,7 +278,7 @@ server <- function(input, output, session) {
       pca <- prcomp(as.data.frame(t(plotData)))
       df_out <- as.data.frame(pca$x)
       
-      df_out$group <- tmpCols$groups[tmpCols$samples==row.names(df_out)]
+      df_out$group <- tmpCols$groups[tmpCols$samples %in% row.names(df_out)]
       df_out$sample <- rownames(df_out)
       df_out$key <- df_out$sample
       
