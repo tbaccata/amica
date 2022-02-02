@@ -487,6 +487,22 @@ tabPanel(
                                 column(width = 2)
                               )))
         ),
+        tabPanel(
+          h3("Dotplot"),
+          uiOutput("dotplotGroupComparisons"),
+          inline(actionButton("dotplotSelection", label = "Select Groups")),
+          uiOutput("dotplotGroups"),
+          # uiOutput("dotplotControl"),
+          # uiOutput("dotplotComparisons"),
+          inline(actionButton("submitDotplot", label = "Plot Dotplot")),
+          div(
+            style = "position:relative",
+            uiOutput('plot.ui'),
+            # plotOutput('dotplot',
+            #            hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce") ),
+            uiOutput("hover_info")
+          )
+        ),
         
         tabPanel(
           h3("Fold change plot"),
