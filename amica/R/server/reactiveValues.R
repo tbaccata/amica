@@ -16,6 +16,8 @@ reacValues <-
     uniqueGroups = NULL,
     selectHeatmapGroups = NULL,
     dataHeatmap = NULL,
+    dataDotplot = NULL,
+    dotplotGroupsDf = NULL,
     GostPlot = NULL,
     clusterRows = NULL,
     clusterCols = NULL,
@@ -52,6 +54,8 @@ observeEvent(input$resetAnalysis,{
   reacValues$dbTool <- NULL
   reacValues$inputParameterSummary <- NULL
   reacValues$dataHeatmap <- NULL
+  reacValues$dotplotGroupsDf <- NULL
+  reacValues$dataDotplot <- NULL
   reacValues$GostPlot <- NULL
   reacValues$expDesign <- NULL
   reacValues$contrastMatrix <- NULL
