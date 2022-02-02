@@ -1256,6 +1256,255 @@ server <- function(input, output, session) {
     }
   })
   
+  output$dotplotGroupComparisons <- renderUI({
+    req(reacValues$dataLimma)
+
+    comps <- gsub(logfcPrefix, "", grep(logfcPrefix, names(reacValues$dataLimma), value = T))
+
+    selectInput(
+      "dotplotGroupComparisons",
+      "Choose log2FC and padj statistics from group comparisons:",
+      comps,
+      multiple = T
+    )
+  })
+  
+  output$dotplotGroups <- renderUI({
+    input$dotplotSelection
+    req(input$dotplotGroupComparisons)
+    selected <- isolate(input$dotplotGroupComparisons)
+    numVars <- length(selected)
+
+    C = sapply(1:numVars, function(i){paste0("dotplot_comp_",i)})
+    L = sapply(1:numVars, function(i){paste0("dotplot_group_",i)})
+
+    output = tagList()
+
+    for(i in seq_along(1:numVars)){
+      output[[i]] = tagList()
+      output[[i]][[1]] = selectInput(C[i], "Variable to summarize:", selected[i])
+      groups <- unlist(strsplit(selected[i], '__vs__'))
+      output[[i]][[2]] = selectInput(L[i], label = "Which group to show?", groups)
+    } ## for loop
+    output
+  })
+
+  observeEvent(input$dotplotSelection, {
+    req(input$dotplotGroupComparisons)
+    selected <- isolate(input$dotplotGroupComparisons)
+    comparison <- sapply(1:length(selected), function(i) {input[[paste0("dotplot_comp_",i)]]})
+    group <- sapply(1:length(selected), function(i) {input[[paste0("dotplot_group_",i)]]})
+    reacValues$dotplotGroupsDf <- data.frame(comparison, group)
+  })
+  
+  observeEvent(input$submitDotplot,{
+    req(reacValues$dotplotGroupsDf)
+    req(reacValues$dataComp)
+
+    group2comps <- reacValues$dotplotGroupsDf
+    ridx <- isolate(input$groupComparisonsDT_rows_all)
+    ridx <- rownames(reacValues$dataComp[ridx,])
+
+    aname <-
+      ifelse(
+        "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        'LFQIntensity',
+        'Intensity'
+      )
+    df <- assay(reacValues$proteinData, aname)
+    df <- df[ridx,]
+
+    longData <- stats::reshape(df, idvar = "rowname",
+                                ids = rownames(df), times = names(df),
+                                timevar = "colname", varying = list(names(df)),
+                                direction = "long", v.names = "value")
+    midx <- match(longData$colname, reacValues$expDesign$samples)
+    longData$group <- reacValues$expDesign$groups[midx]
+
+
+    longData <- longData[longData$group %in% group2comps$group,]
+    longData <-
+      aggregate(value ~ rowname + group, longData, mean)
+    names(longData) <- c('ProteinID', 'Group', 'AvgIntensity')
+
+
+    selection <- grep(padjPrefix, names(reacValues$dataLimma), value = T)
+    widestats <- reacValues$dataLimma[ridx, selection]
+
+    longStats <- stats::reshape(widestats, idvar = "rowname",
+                                ids = rownames(widestats), times = names(widestats),
+                                timevar = "colname", varying = list(names(widestats)),
+                                direction = "long", v.names = "value")
+
+    longStats$colname <- gsub("adj.P.Val_", "", longStats$colname)
+    names(longStats) <- c('Comparison', 'padj', 'ProteinID')
+
+    longStats <- longStats[longStats$Comparison %in% group2comps$comparison, ]
+    midx <- match(longStats$Comparison, group2comps$comparison)
+    longStats$Group <- group2comps$group[midx]
+
+    longStats$Comparison <- NULL
+
+    longData <- merge(longData, longStats, by = c('ProteinID', 'Group'))
+
+    selection <- grep(logfcPrefix, names(reacValues$dataLimma), value = T)
+    widefcs <- reacValues$dataLimma[ridx, selection]
+
+    longFCs <- stats::reshape(widefcs, idvar = "rowname",
+                              ids = rownames(widefcs), times = names(widefcs),
+                              timevar = "colname", varying = list(names(widefcs)),
+                              direction = "long", v.names = "value")
+
+    longFCs$colname <- gsub("logFC_", "", longFCs$colname)
+    names(longFCs) <- c('Comparison', 'log2FC', 'ProteinID')
+
+    longFCs <- longFCs[longFCs$Comparison %in% group2comps$comparison, ]
+    midx <- match(longFCs$Comparison, group2comps$comparison)
+    longFCs$Group <- group2comps$group[midx]
+
+    longData <- merge(longData, longFCs, by = c('ProteinID', 'Group'))
+
+    longData$Gene <- reacValues$filtData[longData$ProteinID, "Gene.names"]
+    # scCount
+    # sCount <- grep("razorUniqueCount.", names(reacValues$filtData))
+    # if (length(sCount) > 1) {
+    #   df <- reacValues$filtData[ridx, sCount]
+    #   names(df) <- gsub('razorUniqueCount.', '', names(df))
+    #   longSpecs <- stats::reshape(df, idvar = "rowname",
+    #                              ids = rownames(df), times = names(df),
+    #                              timevar = "colname", varying = list(names(df)),
+    #                              direction = "long", v.names = "value")
+    #   midx <- match(longSpecs$colname, reacValues$expDesign$samples)
+    #   longSpecs$group <- reacValues$expDesign$groups[midx]
+    #
+    #
+    #   longSpecs <- longSpecs[longSpecs$group %in% group2comps$group,]
+    #   longSpecs <-
+    #     aggregate(value ~ rowname + group, longSpecs, mean)
+    #   names(longSpecs) <- c('ProteinID', 'Group', 'AvgSpec')
+    #   print(head(longSpecs))
+    #   longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
+    #   print(head(longData))
+    # }
+    longData$significant <- (ifelse(longData$padj <= 0.05, 1.5, 0))
+
+    longData$RelIntensity <-  longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
+    reacValues$dataDotplot <- longData
+  })
+  
+  numberOfDotplotPoints <- reactive({
+    req(reacValues$dataDotplot)
+    max(600, 20 * length(unique(reacValues$dataDotplot$Gene)))
+  } )
+  
+  numberOfDotplotBaits <- reactive({
+    req(reacValues$dataDotplot)
+    max(400, 60 * length(unique(reacValues$dataDotplot$Group)))
+  } )
+  
+  output$dotplot <- renderPlot({
+    req(reacValues$dataDotplot)
+    # reacValues$dataDotplot$tpadj <- -log10(reacValues$dataDotplot$padj)
+    
+    mat <- reacValues$dataDotplot %>% 
+      select(Gene, Group, AvgIntensity) %>%  # drop unused columns to faciliate widening
+      # reshape(data = df, direction = "wide",
+      #                  timevar = "Group",
+      #                  idvar = "Gene",
+      #                  v.names = "AvgIntensity", sep='__') %>%
+      pivot_wider(names_from = Group, values_from = AvgIntensity) %>% 
+      data.frame() # make df as tibbles -> matrix annoying
+    
+    # names(mat) <- gsub('.*__', '', names(mat))
+    row.names(mat) <- mat$Gene  # put gene in `row`
+    mat$Gene <- NULL #drop gene column as now in rows
+    
+    tmat <- mat %>% as.matrix()
+    tmat[is.na(tmat)] <- 0
+    
+    rclust <- hclust(dist(tmat ) ) # hclust with distance matrix
+    cclust <- hclust(dist(t(tmat) ) ) # hclust with distance matrix
+    rddr <- reorder(as.dendrogram(rclust),rowMeans(mat))
+    cddr <- reorder(as.dendrogram(cclust),colMeans(mat))
+    
+    reacValues$dataDotplot$Gene <-
+      factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rddr)$order])
+    reacValues$dataDotplot$Group <-
+      factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
+    
+    
+    p <- reacValues$dataDotplot %>% filter(AvgIntensity > 0) %>% 
+      ggplot(aes(
+        x = Group,
+        y = Gene,
+        fill = log2FC, 
+        size = RelIntensity,
+        stroke=significant
+        )) +
+      geom_point(shape = 21, aes(color = factor(significant))) + 
+      cowplot::theme_cowplot(16) + 
+      theme(axis.line  = element_blank()) +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+      ylab('') + xlab('') +
+      theme(axis.ticks = element_blank()) + 
+      scale_size_continuous(range = c(1,6), name = 'Abundance',
+                            breaks = c(min(reacValues$dataDotplot$RelIntensity)+0.01,
+                                       max(reacValues$dataDotplot$RelIntensity)),
+                            labels = c('Less', 'More'),
+                            guide="legend"
+      ) +
+      scale_fill_gradientn(
+        colours = viridis::viridis(20),
+        limits = c(min(reacValues$dataDotplot$log2FC),
+                   max(reacValues$dataDotplot$log2FC)),#limits = c(min(fgtid$logFC), 4),
+        oob = scales::squish,
+        name = 'log2FC'
+      ) + 
+    scale_color_manual('significant', values=c('black'),
+                             limits = c('1.5'),
+                             labels = c('<= 0.05'),
+                       guide="legend"
+                       )
+    p
+  })
+  
+  output$plot.ui <- renderUI({
+    plotOutput("dotplot", height = numberOfDotplotPoints(),
+               width = numberOfDotplotBaits(),
+               hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce")
+               )
+  })
+
+  
+  output$hover_info <- renderUI({
+    req(reacValues$dataDotplot)
+    hover <- input$plot_hover
+    point <- nearPoints(reacValues$dataDotplot, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+    if (nrow(point) == 0) return(NULL)
+    
+    left_px <- hover$coords_css$x
+    top_px <- hover$coords_css$y
+    # create style property fot tooltip
+    # background color is set so tooltip is a bit transparent
+    # z-index is set so we are sure are tooltip will be on top
+    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+                    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+    
+    # actual tooltip created as wellPanel
+    wellPanel(
+      style = style,
+      p(HTML(paste0("<b> Gene: </b>", point$Gene, "<br/>",
+                    "<b> logFC: </b>", round(point$log2FC,2), "<br/>",
+                    "<b> padj: </b>", round(point$padj,4), "<br/>",
+                    "<b> padj: </b>", scales::scientific(point$padj, digits = 3), "<br/>",
+                    "<b> Comparison: </b>", point$Comparison, "<br/>",
+                    "<b> Group: </b>", point$Group, "<br/>",
+                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>"
+                    )))
+    )
+  })
+  
+  
   output$groupComparisonsDT <- renderDT({
     req(reacValues$dataComp)
     matSet <- isolate(enrichedMatrixSet())
