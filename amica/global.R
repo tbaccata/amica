@@ -24,6 +24,7 @@ require(colourpicker)
 require(eulerr)
 require(cowplot)
 require(tidyr)
+require(Cairo)
 ###
 source("R/utils.R")
 source("R/ProteomicsData.R")
