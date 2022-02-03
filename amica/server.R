@@ -1386,10 +1386,23 @@ server <- function(input, output, session) {
     #   longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
     #   print(head(longData))
     # }
-    longData$significant <- (ifelse(longData$padj <= 0.05, 1.5, 0))
+    longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
 
     longData$RelIntensity <-  longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
     reacValues$dataDotplot <- longData
+  })
+  
+  output$dotplot_color_gradient <- renderUI({
+    req(reacValues$dataDotplot)
+    minVal <- round(min(reacValues$dataDotplot$log2FC), 3)
+    maxVal <- round(max(reacValues$dataDotplot$log2FC), 3)
+    sliderInput(
+      'dotplot_color_gradient',
+      'Define Dotplot color gradient',
+      minVal,
+      maxVal,
+      value = c(minVal, maxVal)
+    )
   })
   
   numberOfDotplotPoints <- reactive({
@@ -1402,30 +1415,31 @@ server <- function(input, output, session) {
     max(400, 60 * length(unique(reacValues$dataDotplot$Group)))
   } )
   
-  output$dotplot <- renderPlot({
+  dotplot <- function() {
     req(reacValues$dataDotplot)
+    
+    minColorGradient <- input$dotplot_color_gradient[1]
+    maxColorGradient <- input$dotplot_color_gradient[2]
+    
+    minSizeGradient <- input$dotplot_size_gradient[1]
+    maxSizeGradient <- input$dotplot_size_gradient[2]
     # reacValues$dataDotplot$tpadj <- -log10(reacValues$dataDotplot$padj)
     
-    mat <- reacValues$dataDotplot %>% 
-      select(Gene, Group, AvgIntensity) %>%  # drop unused columns to faciliate widening
-      # reshape(data = df, direction = "wide",
-      #                  timevar = "Group",
-      #                  idvar = "Gene",
-      #                  v.names = "AvgIntensity", sep='__') %>%
-      pivot_wider(names_from = Group, values_from = AvgIntensity) %>% 
+    mat <- reacValues$dataDotplot %>%
+      select(Gene, Group, log2FC) %>%  # drop unused columns to faciliate widening
+      pivot_wider(names_from = Group, values_from = log2FC) %>%
       data.frame() # make df as tibbles -> matrix annoying
     
-    # names(mat) <- gsub('.*__', '', names(mat))
     row.names(mat) <- mat$Gene  # put gene in `row`
     mat$Gene <- NULL #drop gene column as now in rows
     
     tmat <- mat %>% as.matrix()
     tmat[is.na(tmat)] <- 0
     
-    rclust <- hclust(dist(tmat ) ) # hclust with distance matrix
-    cclust <- hclust(dist(t(tmat) ) ) # hclust with distance matrix
-    rddr <- reorder(as.dendrogram(rclust),rowMeans(mat))
-    cddr <- reorder(as.dendrogram(cclust),colMeans(mat))
+    rclust <- hclust(dist(tmat)) # hclust with distance matrix
+    cclust <- hclust(dist(t(tmat))) # hclust with distance matrix
+    rddr <- reorder(as.dendrogram(rclust), rowMeans(mat))
+    cddr <- reorder(as.dendrogram(cclust), colMeans(mat))
     
     reacValues$dataDotplot$Gene <-
       factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rddr)$order])
@@ -1433,48 +1447,79 @@ server <- function(input, output, session) {
       factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
     
     
-    p <- reacValues$dataDotplot %>% filter(AvgIntensity > 0) %>% 
+    p <- reacValues$dataDotplot %>% filter(AvgIntensity > 0) %>%
       ggplot(aes(
         x = Group,
         y = Gene,
-        fill = log2FC, 
+        fill = log2FC,
+        color = significant,
         size = RelIntensity,
-        stroke=significant
-        )) +
-      geom_point(shape = 21, aes(color = factor(significant))) + 
-      cowplot::theme_cowplot(16) + 
+        stroke = 1
+      )) +
+      geom_point(shape = 21) +
+      cowplot::theme_cowplot() +
       theme(axis.line  = element_blank()) +
-      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+      theme(axis.text.x = element_text(
+        angle = 90,
+        vjust = 0.5,
+        hjust = 1
+      )) +
       ylab('') + xlab('') +
-      theme(axis.ticks = element_blank()) + 
-      scale_size_continuous(range = c(1,6), name = 'Abundance',
-                            breaks = c(min(reacValues$dataDotplot$RelIntensity)+0.01,
-                                       max(reacValues$dataDotplot$RelIntensity)),
-                            labels = c('Less', 'More'),
-                            guide="legend"
+      theme(axis.ticks = element_blank()) +
+      scale_size_continuous(
+        range = c(minSizeGradient, maxSizeGradient),
+        name = 'Relative Abundance',
+        breaks = c(
+          min(reacValues$dataDotplot$RelIntensity) + 0.01,
+          max(reacValues$dataDotplot$RelIntensity)
+        ),
+        labels = c('Less', 'More')
       ) +
       scale_fill_gradientn(
         colours = viridis::viridis(20),
-        limits = c(min(reacValues$dataDotplot$log2FC),
-                   max(reacValues$dataDotplot$log2FC)),#limits = c(min(fgtid$logFC), 4),
+        limits = c(minColorGradient,
+                   maxColorGradient),
         oob = scales::squish,
         name = 'log2FC'
-      ) + 
-    scale_color_manual('significant', values=c('black'),
-                             limits = c('1.5'),
-                             labels = c('<= 0.05'),
-                       guide="legend"
-                       )
+      ) +
+      scale_color_manual(
+        'significant',
+        values = c('skyblue', 'black'),
+        limits = c('0', '1.5'),
+        labels = c('> 0.05', '<= 0.05'),
+        guide = "legend"
+      )
     p
+  }
+  
+  output$dotplot <- renderPlot({
+    dotplot()
   })
   
   output$plot.ui <- renderUI({
-    plotOutput("dotplot", height = numberOfDotplotPoints(),
+    plotOutput('dotplot', height = numberOfDotplotPoints(),
                width = numberOfDotplotBaits(),
                hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce")
                )
   })
+  
+  output$downloadDotPlot <- downloadHandler(
+    filename = function(){paste("dotplot",'.pdf',sep='')},
+    content = function(file){
+      cowplot::ggsave2(file,plot=dotplot(), device = cairo_pdf)
+    })
 
+  # output$downloadDotPlot <- downloadHandler(
+  #   filename = function() {
+  #     paste("dotplot.pdf")
+  #   },
+  #   content = function(file) {
+  #     pdf(file, width = 8, 
+  #         height = 6, onefile = F)
+  #     print(dotplot())
+  #     dev.off()
+  #   }
+  # )
   
   output$hover_info <- renderUI({
     req(reacValues$dataDotplot)
