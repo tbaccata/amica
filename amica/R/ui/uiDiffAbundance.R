@@ -492,9 +492,17 @@ tabPanel(
           uiOutput("dotplotGroupComparisons"),
           inline(actionButton("dotplotSelection", label = "Select Groups")),
           uiOutput("dotplotGroups"),
-          # uiOutput("dotplotControl"),
+          uiOutput("dotplot_color_gradient"),
+          sliderInput(
+            'dotplot_size_gradient',
+            'Define Dotplot size gradient',
+            1,
+            10,
+            value = c(2, 6)
+          ),
           # uiOutput("dotplotComparisons"),
           inline(actionButton("submitDotplot", label = "Plot Dotplot")),
+          inline(downloadButton('downloadDotPlot','Download Plot')),
           div(
             style = "position:relative",
             uiOutput('plot.ui'),
