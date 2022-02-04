@@ -1365,30 +1365,31 @@ server <- function(input, output, session) {
     longData <- merge(longData, longFCs, by = c('ProteinID', 'Group'))
 
     longData$Gene <- reacValues$filtData[longData$ProteinID, "Gene.names"]
-    # scCount
-    # sCount <- grep("razorUniqueCount.", names(reacValues$filtData))
-    # if (length(sCount) > 1) {
-    #   df <- reacValues$filtData[ridx, sCount]
-    #   names(df) <- gsub('razorUniqueCount.', '', names(df))
-    #   longSpecs <- stats::reshape(df, idvar = "rowname",
-    #                              ids = rownames(df), times = names(df),
-    #                              timevar = "colname", varying = list(names(df)),
-    #                              direction = "long", v.names = "value")
-    #   midx <- match(longSpecs$colname, reacValues$expDesign$samples)
-    #   longSpecs$group <- reacValues$expDesign$groups[midx]
-    #
-    #
-    #   longSpecs <- longSpecs[longSpecs$group %in% group2comps$group,]
-    #   longSpecs <-
-    #     aggregate(value ~ rowname + group, longSpecs, mean)
-    #   names(longSpecs) <- c('ProteinID', 'Group', 'AvgSpec')
-    #   print(head(longSpecs))
-    #   longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
-    #   print(head(longData))
-    # }
-    longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
+    sCount <- grep("spectraCount.", names(reacValues$filtData))
+    if (length(sCount) > 1) {
+      df <- reacValues$filtData[ridx, sCount]
+      names(df) <- gsub('spectraCount.', '', names(df))
+      longSpecs <- stats::reshape(df, idvar = "rowname",
+                                 ids = rownames(df), times = names(df),
+                                 timevar = "colname", varying = list(names(df)),
+                                 direction = "long", v.names = "value")
+      midx <- match(longSpecs$colname, reacValues$expDesign$samples)
+      longSpecs$group <- reacValues$expDesign$groups[midx]
 
-    longData$RelIntensity <-  longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
+
+      longSpecs <- longSpecs[longSpecs$group %in% group2comps$group,]
+      longSpecs <-
+        aggregate(value ~ rowname + group, longSpecs, mean)
+      names(longSpecs) <- c('ProteinID', 'Group', 'AvgSpec')
+      longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
+      
+      longData$RelSpecs <- longData$AvgSpec/max(longData$AvgSpec, na.rm = T)
+      longData[longData$AvgSpec > 50, 'RelSpecs'] <- 1
+    }
+    longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
+    
+    longData$RelIntensity <- longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
+    print(head(longData))
     reacValues$dataDotplot <- longData
   })
   
@@ -1413,7 +1414,7 @@ server <- function(input, output, session) {
   numberOfDotplotBaits <- reactive({
     req(reacValues$dataDotplot)
     max(400, 60 * length(unique(reacValues$dataDotplot$Group)))
-  } )
+  })
   
   dotplot <- function() {
     req(reacValues$dataDotplot)
@@ -1446,14 +1447,15 @@ server <- function(input, output, session) {
     reacValues$dataDotplot$Group <-
       factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
     
-    
-    p <- reacValues$dataDotplot %>% filter(AvgIntensity > 0) %>%
+    #p <- reacValues$dataDotplot %>% filter(AvgIntensity > 0) %>%
+    p <- reacValues$dataDotplot %>% filter(AvgSpec > 0) %>%
       ggplot(aes(
         x = Group,
         y = Gene,
         fill = log2FC,
         color = significant,
-        size = RelIntensity,
+        size = RelSpecs,
+        # size = RelIntensity,
         stroke = 1
       )) +
       geom_point(shape = 21) +
@@ -1470,13 +1472,16 @@ server <- function(input, output, session) {
         range = c(minSizeGradient, maxSizeGradient),
         name = 'Relative Abundance',
         breaks = c(
-          min(reacValues$dataDotplot$RelIntensity) + 0.01,
-          max(reacValues$dataDotplot$RelIntensity)
+          min(reacValues$dataDotplot$RelSpecs) + 0.01,
+          max(reacValues$dataDotplot$RelSpecs)
+          # min(reacValues$dataDotplot$RelIntensity) + 0.01,
+          # max(reacValues$dataDotplot$RelIntensity)
         ),
         labels = c('Less', 'More')
       ) +
       scale_fill_gradientn(
-        colours = viridis::viridis(20),
+        colours = heatColors(),
+        # colours = viridis::viridis(20),
         limits = c(minColorGradient,
                    maxColorGradient),
         oob = scales::squish,
@@ -1509,18 +1514,6 @@ server <- function(input, output, session) {
       cowplot::ggsave2(file,plot=dotplot(), device = cairo_pdf)
     })
 
-  # output$downloadDotPlot <- downloadHandler(
-  #   filename = function() {
-  #     paste("dotplot.pdf")
-  #   },
-  #   content = function(file) {
-  #     pdf(file, width = 8, 
-  #         height = 6, onefile = F)
-  #     print(dotplot())
-  #     dev.off()
-  #   }
-  # )
-  
   output$hover_info <- renderUI({
     req(reacValues$dataDotplot)
     hover <- input$plot_hover
@@ -1540,11 +1533,11 @@ server <- function(input, output, session) {
       style = style,
       p(HTML(paste0("<b> Gene: </b>", point$Gene, "<br/>",
                     "<b> logFC: </b>", round(point$log2FC,2), "<br/>",
-                    "<b> padj: </b>", round(point$padj,4), "<br/>",
                     "<b> padj: </b>", scales::scientific(point$padj, digits = 3), "<br/>",
                     "<b> Comparison: </b>", point$Comparison, "<br/>",
                     "<b> Group: </b>", point$Group, "<br/>",
-                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>"
+                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>",
+                    "<b> AvgSpec: </b>", round(point$AvgSpec, 2), "<br/>"
                     )))
     )
   })
