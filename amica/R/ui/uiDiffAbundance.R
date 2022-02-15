@@ -489,26 +489,31 @@ tabPanel(
         ),
         tabPanel(
           h3("Dotplot"),
-          uiOutput("dotplotGroupComparisons"),
-          inline(actionButton("dotplotSelection", label = "Select Groups")),
-          uiOutput("dotplotGroups"),
-          uiOutput("dotplot_color_gradient"),
-          sliderInput(
-            'dotplot_size_gradient',
-            'Define Dotplot size gradient',
-            1,
-            10,
-            value = c(2, 6)
-          ),
-          # uiOutput("dotplotComparisons"),
-          inline(actionButton("submitDotplot", label = "Plot Dotplot")),
-          inline(downloadButton('downloadDotPlot','Download Plot')),
-          div(
-            style = "position:relative",
-            uiOutput('plot.ui'),
-            # plotOutput('dotplot',
-            #            hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce") ),
-            uiOutput("hover_info")
+          fluidRow(
+            column(width = 4,
+                   uiOutput("dotplotGroupComparisons"),
+                   uiOutput("dotplotGroups"),
+                   inline(actionButton("dotplotSelection", label = "Select Groups")),
+                   uiOutput("boolUniqueGroups"),
+                   uiOutput("selectedDotplotGroups")
+                   ),
+            column(width = 4,
+                   actionButton("submitDotplot", label = "Plot Dotplot"),
+                   
+                   div(
+                     style = "position:relative",
+                     uiOutput('plot.ui'),
+                     # plotOutput('dotplot',
+                     #            hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce") ),
+                     uiOutput("hover_info")
+                   )
+                   ),
+            column(width = 4,
+                   uiOutput("dotplot_color_gradient"),
+                   uiOutput("dotplot_size_gradient"),
+                   uiOutput("dotplot_clustering_option"),
+                   downloadButton('downloadDotPlot','Download Plot'),
+                   )
           )
         ),
         
