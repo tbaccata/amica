@@ -1258,9 +1258,33 @@ server <- function(input, output, session) {
   
   output$dotplotGroupComparisons <- renderUI({
     req(reacValues$dataLimma)
-
-    comps <- gsub(logfcPrefix, "", grep(logfcPrefix, names(reacValues$dataLimma), value = T))
-
+    
+    isNotPilot <-
+      ifelse(length(grep(
+        paste0(padjPrefix, collapse = '|'),
+        names(reacValues$dataLimma),
+        value = T
+      )) > 0,
+      TRUE,
+      FALSE)
+    
+    validate(need(
+      isNotPilot==TRUE,
+      "Error! Cannot output Dotplot for pilots, Dotplot needs p-values."
+    ))
+    
+    validate(need(
+      reacValues$compareAmicaSelected == FALSE,
+      paste0(
+        "Cannot output Dotplot for 'multiple_amica_upload'\n
+                         Change the data set back to the original data to
+                         plot a Dotplot"
+      )
+    ))
+    
+    comps <-
+      gsub(logfcPrefix, "", grep(logfcPrefix, names(reacValues$dataLimma), value = T))
+    
     selectInput(
       "dotplotGroupComparisons",
       "Choose log2FC and padj statistics from group comparisons:",
@@ -1274,6 +1298,11 @@ server <- function(input, output, session) {
     req(input$dotplotGroupComparisons)
     selected <- isolate(input$dotplotGroupComparisons)
     numVars <- length(selected)
+    
+    validate(need(
+      numVars > 1,
+      "Need at least two groups for the Dotplot."
+    ))
 
     C = sapply(1:numVars, function(i){paste0("dotplot_comp_",i)})
     L = sapply(1:numVars, function(i){paste0("dotplot_group_",i)})
@@ -1282,11 +1311,25 @@ server <- function(input, output, session) {
 
     for(i in seq_along(1:numVars)){
       output[[i]] = tagList()
-      output[[i]][[1]] = selectInput(C[i], "Variable to summarize:", selected[i])
+      output[[i]][[1]] = selectInput(C[i], "Group comparison:", selected[i])
       groups <- unlist(strsplit(selected[i], '__vs__'))
-      output[[i]][[2]] = selectInput(L[i], label = "Which group to show?", groups)
+      output[[i]][[2]] = selectInput(L[i], label = "Which group to show?", groups, multiple = F)
     } ## for loop
     output
+  })
+  
+  output$boolUniqueGroups <- renderUI({
+    req(reacValues$dotplotGroupsDf)
+    group <- reacValues$dotplotGroupsDf$group
+    
+    if (any(duplicated(group))) {
+      HTML('<h4 style="color:red;">Error!</h4><p style="color:red;">
+         Cannot plot Dotplot with duplicated groups.<br>
+         Please select unique groups.
+         </p>')
+    } else {
+      return(NULL)
+    }
   })
 
   observeEvent(input$dotplotSelection, {
@@ -1297,9 +1340,19 @@ server <- function(input, output, session) {
     reacValues$dotplotGroupsDf <- data.frame(comparison, group)
   })
   
+  output$selectedDotplotGroups <- renderUI({
+    req(reacValues$dotplotGroupsDf)
+    DT::renderDataTable({reacValues$dotplotGroupsDf},
+                        options = list(scrollX = TRUE))
+  })
+  
   observeEvent(input$submitDotplot,{
+    
     req(reacValues$dotplotGroupsDf)
     req(reacValues$dataComp)
+    
+    validate(need(!any(duplicated(reacValues$dotplotGroupsDf$group)), "Error! Please provide 
+                  unique groups"  )  )
 
     group2comps <- reacValues$dotplotGroupsDf
     ridx <- isolate(input$groupComparisonsDT_rows_all)
@@ -1327,8 +1380,13 @@ server <- function(input, output, session) {
       aggregate(value ~ rowname + group, longData, mean)
     names(longData) <- c('ProteinID', 'Group', 'AvgIntensity')
 
-
-    selection <- grep(padjPrefix, names(reacValues$dataLimma), value = T)
+    
+    
+    pattern <- padjPrefix
+    if (reacValues$sigCutoffValue == "p-value") pattern <- pvalPrefix
+    
+    selection <- grep(pattern, names(reacValues$dataLimma), value = T)
+    
     widestats <- reacValues$dataLimma[ridx, selection]
 
     longStats <- stats::reshape(widestats, idvar = "rowname",
@@ -1336,7 +1394,7 @@ server <- function(input, output, session) {
                                 timevar = "colname", varying = list(names(widestats)),
                                 direction = "long", v.names = "value")
 
-    longStats$colname <- gsub("adj.P.Val_", "", longStats$colname)
+    longStats$colname <- gsub(pattern, "", longStats$colname)
     names(longStats) <- c('Comparison', 'padj', 'ProteinID')
 
     longStats <- longStats[longStats$Comparison %in% group2comps$comparison, ]
@@ -1365,6 +1423,8 @@ server <- function(input, output, session) {
     longData <- merge(longData, longFCs, by = c('ProteinID', 'Group'))
 
     longData$Gene <- reacValues$filtData[longData$ProteinID, "Gene.names"]
+    longData$Gene <- gsub("^([^;]*;[^;]*);.*", "\\1", longData$Gene)
+    
     sCount <- grep("spectraCount.", names(reacValues$filtData))
     if (length(sCount) > 1) {
       df <- reacValues$filtData[ridx, sCount]
@@ -1383,13 +1443,17 @@ server <- function(input, output, session) {
       names(longSpecs) <- c('ProteinID', 'Group', 'AvgSpec')
       longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
       
-      longData$RelSpecs <- longData$AvgSpec/max(longData$AvgSpec, na.rm = T)
-      longData[longData$AvgSpec > 50, 'RelSpecs'] <- 1
+      longData$RelSpecs <- longData$AvgSpec/40 # max(longData$AvgSpec, na.rm = T)
+      longData$RelSpecs[longData$RelSpecs>1] <- 1
+      # longData[longData$AvgSpec > 50, 'RelSpecs'] <- 1
     }
+    longData$pvalLfc <- -log10(longData$padj) * longData$log2FC
     longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
     
-    longData$RelIntensity <- longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
-    print(head(longData))
+    # normalized = (x-min(x))/(max(x)-min(x))
+    x <- longData$AvgIntensity
+    longData$RelIntensity <- (x-min(x,na.rm = T))/(max(x, na.rm = T)-min(x, na.rm = T))
+    #longData$RelIntensity <- longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
     reacValues$dataDotplot <- longData
   })
   
@@ -1406,14 +1470,53 @@ server <- function(input, output, session) {
     )
   })
   
+  output$dotplot_size_gradient <- renderUI({
+    req(reacValues$dataDotplot)
+    sliderInput(
+      'dotplot_size_gradient',
+      'Define Dotplot size gradient',
+      1,
+      8,
+      value = c(2, 6)
+    )
+  })
+  
+  output$dotplot_clustering_option <- renderUI({
+    req(reacValues$dataDotplot)
+    
+    options <- c("AvgIntensity")
+    
+    if ("AvgSpec" %in% names(reacValues$dataDotplot))
+      options <- c(options, "AvgSpec")
+    options <- c(options, "stats")
+    
+    selectInput("dotplot_clustering_option", 
+                "How to cluster data in Dotplot?",
+                choices = options,
+                selected = input$dotplot_clustering_option,
+                # selectize = F,
+                multiple = F)
+  })
+    
+  
   numberOfDotplotPoints <- reactive({
     req(reacValues$dataDotplot)
-    max(600, 20 * length(unique(reacValues$dataDotplot$Gene)))
+    max(600, 22 * length(unique(reacValues$dataDotplot$Gene)))
   } )
   
   numberOfDotplotBaits <- reactive({
     req(reacValues$dataDotplot)
-    max(400, 60 * length(unique(reacValues$dataDotplot$Group)))
+    maxNamelength <- max(nchar(as.character(reacValues$dataDotplot$Gene)))
+    numCols <- length(unique(reacValues$dataDotplot$Group))
+    value <- 60 * numCols + 60
+    if (numCols < 3) {
+      if (maxNamelength >= 60) {
+        value <- value + 500
+      } else if (maxNamelength >= 20) {
+        value <- value + max(300, 6*maxNamelength)
+      }
+    }
+    max(400, value)
   })
   
   dotplot <- function() {
@@ -1424,11 +1527,20 @@ server <- function(input, output, session) {
     
     minSizeGradient <- input$dotplot_size_gradient[1]
     maxSizeGradient <- input$dotplot_size_gradient[2]
-    # reacValues$dataDotplot$tpadj <- -log10(reacValues$dataDotplot$padj)
+    
+    clusteringMetric <- "AvgIntensity"
+    if (!is.null(input$dotplot_clustering_option)) {
+      clusteringMetric <-
+        ifelse(
+          input$dotplot_clustering_option == "stats",
+          "pvalLfc",
+          input$dotplot_clustering_option
+        )
+    }
     
     mat <- reacValues$dataDotplot %>%
-      select(Gene, Group, log2FC) %>%  # drop unused columns to faciliate widening
-      pivot_wider(names_from = Group, values_from = log2FC) %>%
+      select(Gene, Group, clusteringMetric) %>%  # drop unused columns to faciliate widening
+      pivot_wider(names_from = Group, values_from = clusteringMetric) %>%
       data.frame() # make df as tibbles -> matrix annoying
     
     row.names(mat) <- mat$Gene  # put gene in `row`
@@ -1447,14 +1559,27 @@ server <- function(input, output, session) {
     reacValues$dataDotplot$Group <-
       factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
     
-    #p <- reacValues$dataDotplot %>% filter(AvgIntensity > 0) %>%
-    p <- reacValues$dataDotplot %>% filter(AvgSpec > 0) %>%
+    signficantTitle <- "adj.p-value"
+    if (reacValues$sigCutoffValue == "p-value")
+      signficantTitle <- "p-value"
+    
+    abundance <- "AvgIntensity"
+    relativeAbund <- "RelIntensity"
+    if (clusteringMetric != "stats") {
+      abundance <- clusteringMetric
+      relativeAbund <- ifelse(abundance == "AvgIntensity", "RelIntensity", "RelSpecs")
+    } else {
+      relativeAbund <- "RelIntensity"
+    }
+    preFiltered <- reacValues$dataDotplot %>% filter(clusteringMetric > 0)
+    p <- preFiltered %>%
+      #p <- reacValues$dataDotplot %>% filter(AvgSpec > 0) %>%
       ggplot(aes(
         x = Group,
         y = Gene,
         fill = log2FC,
         color = significant,
-        size = RelSpecs,
+        size = !!sym(relativeAbund),
         # size = RelIntensity,
         stroke = 1
       )) +
@@ -1472,28 +1597,28 @@ server <- function(input, output, session) {
         range = c(minSizeGradient, maxSizeGradient),
         name = 'Relative Abundance',
         breaks = c(
-          min(reacValues$dataDotplot$RelSpecs) + 0.01,
-          max(reacValues$dataDotplot$RelSpecs)
-          # min(reacValues$dataDotplot$RelIntensity) + 0.01,
-          # max(reacValues$dataDotplot$RelIntensity)
+          #min(reacValues$dataDotplot$RelSpecs) + 0.01,
+          #max(reacValues$dataDotplot$RelSpecs)
+          min(reacValues$dataDotplot[[relativeAbund]] ) + 0.01,
+          max(reacValues$dataDotplot[[relativeAbund]] )
         ),
         labels = c('Less', 'More')
       ) +
       scale_fill_gradientn(
-        colours = heatColors(),
-        # colours = viridis::viridis(20),
+        # colours = heatColors(),
+        colours = viridis::viridis(20),
         limits = c(minColorGradient,
                    maxColorGradient),
         oob = scales::squish,
         name = 'log2FC'
       ) +
       scale_color_manual(
-        'significant',
+        signficantTitle,
         values = c('skyblue', 'black'),
         limits = c('0', '1.5'),
         labels = c('> 0.05', '<= 0.05'),
         guide = "legend"
-      )
+      ) #+ scale_y_discrete(labels= reacValues$dataDotplot$Label[reacValues$dataDotplot$ProteinID])
     p
   }
   
@@ -1511,7 +1636,10 @@ server <- function(input, output, session) {
   output$downloadDotPlot <- downloadHandler(
     filename = function(){paste("dotplot",'.pdf',sep='')},
     content = function(file){
-      cowplot::ggsave2(file,plot=dotplot(), device = cairo_pdf)
+      cowplot::ggsave2(file,plot=dotplot(),
+                       width = numberOfDotplotBaits() * 1/80, 
+                       height = numberOfDotplotPoints() * 1/80,
+                       device = cairo_pdf)
     })
 
   output$hover_info <- renderUI({
@@ -1536,8 +1664,8 @@ server <- function(input, output, session) {
                     "<b> padj: </b>", scales::scientific(point$padj, digits = 3), "<br/>",
                     "<b> Comparison: </b>", point$Comparison, "<br/>",
                     "<b> Group: </b>", point$Group, "<br/>",
-                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>",
-                    "<b> AvgSpec: </b>", round(point$AvgSpec, 2), "<br/>"
+                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>"
+                    #"<b> AvgSpec: </b>", round(point$AvgSpec, 2), "<br/>"
                     )))
     )
   })
@@ -3032,7 +3160,6 @@ server <- function(input, output, session) {
     }
     out
   })
-
   
   output$assayNamesAmicas <- renderUI({
     req(reacValues$combinedData)
@@ -3073,91 +3200,6 @@ server <- function(input, output, session) {
   get_scatter_amicas_data <- reactive({
     event_data("plotly_selected", source = "subset")
   })
-
-  # scatterPlotsAmicaBase <- eventReactive(input$submitScatterAmicas,{
-  #   req(reacValues$combinedData)
-  #   req(input$selectScatterSamplesAmica)
-  #   req(input$assayNamesAmicas)
-  #   assayNameAmicas <- isolate(input$assayNamesAmicas)
-  #   fontsize <- isolate(input$scatteramica_base)
-  #   
-  #   validate(need(length(input$selectScatterSamplesAmica)==2, ""))
-  #   colors <- isolate(myScatterColors())
-  # 
-  #   clrs <- colors[1]
-  #   xvar <- input$selectScatterSamplesAmica[1]
-  #   yvar <- input$selectScatterSamplesAmica[2]
-  # 
-  #   sampleX <- grep(xvar, grep(paste0("^", assayNameAmicas), names(reacValues$combinedData), value = T ), value = T)
-  #   sampleY <- grep(yvar, grep(paste0("^", assayNameAmicas), names(reacValues$combinedData), value = T ), value = T)
-  #   
-  #   plotData <- reacValues$combinedData[, c("Gene.names", sampleX, sampleY)]
-  #   plotData$key <- plotData$Gene.names
-  #   
-  #   plotData$show_id <- FALSE
-  #   if (!is.null(get_scatter_amicas_data() )) {
-  #     plotData[plotData$key %in% get_scatter_amicas_data()$key, "show_id"] <- TRUE
-  #     print(head(plotData))
-  #   }
-  # 
-  #   formula <- as.formula(paste0(sampleY, ' ~ ', sampleX))
-  #   fit1 <- lm(formula, data=plotData)
-  #   fit1.intercept <- fit1$coefficients[[1]]
-  #   fit1.slope <- fit1$coefficients[[2]]
-  #   
-  #   title <-
-  #     paste0(signif(fit1$coef[[1]], 5), 
-  #            "x + ", 
-  #            signif(fit1$coef[[2]], 5),
-  #            ", r2 = ",
-  #            signif(summary(fit1)$r.squared, 5)
-  #     )
-  # 
-  #   pu <-
-  #     ggplot(plotData,
-  #            aes(
-  #              x = !!sym(paste0(sampleX)),
-  #              y = !!sym(paste0(sampleY)),
-  #              label = Gene.names,
-  #              key = key
-  #            )) + geom_point(color = clrs) +
-  #     labs(
-  #       x = paste0(assayNameAmicas, ' ', xvar, ' (log2)'),
-  #       y = paste0(assayNameAmicas, ' ', yvar, ' (log2)')
-  #     ) +
-  #     scale_color_manual(values = colors) + theme_minimal(base_size = fontsize)
-  #     
-  #   intercept <- 0
-  #   slope <- 1
-  #   if (input$scatteramica_showLine == "linear regression") {
-  #     intercept <- fit1.intercept
-  #     slope <- fit1.slope
-  #     pu <- pu + ggtitle(title)
-  #   } else if (input$scatteramica_showLine == "straight line") {
-  #     intercept <- 0
-  #     slope <- 1
-  #   }
-  #   
-  #   if (input$scatteramica_showLine != "none") {
-  #     pu <- pu + geom_abline(
-  #       intercept = intercept,
-  #       slope = slope,
-  #       size = 1,
-  #       alpha = 0.5,
-  #       color = colors[5]
-  #     )
-  #   }
-  #   
-  #   pu <- pu + geom_text(
-  #     data = subset(plotData, show_id),
-  #     aes(!!sym(paste0(sampleX)),
-  #         !!sym(paste0(sampleY)),
-  #         label = Gene.names)
-  #     ,position = position_jitter(width=0.25,height=0.25)
-  #   )
-  #   ggplotly(pu, source = "subset") %>% 
-  #     layout(dragmode = "select")
-  # })
 
   output$scatterPlotsAmica <- renderPlotly({
     input$submitScatterAmicas
