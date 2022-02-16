@@ -1318,6 +1318,42 @@ server <- function(input, output, session) {
     output
   })
   
+  
+  # output$ExampleTable <- renderRHandsontable({
+  #   #########################################
+  #   input$dotplotSelection
+  #   req(input$dotplotGroupComparisons)
+  #   selected <- isolate(input$dotplotGroupComparisons)
+  #   numVars <- length(selected)
+  #   
+  #   validate(need(
+  #     numVars > 1,
+  #     "Need at least two groups for the Dotplot."
+  #   ))
+  #   
+  #   C = sapply(1:numVars, function(i){paste0("dotplot_comp_",i)})
+  #   L = sapply(1:numVars, function(i){paste0("dotplot_group_",i)})
+  # 
+  #   df <- data.frame(Comparison=selected, Group=NA_character_)
+  #   
+  #   for(i in seq_along(1:numVars)){
+  #     output[[i]] = tagList()
+  #     output[[i]][[1]] = selectInput(C[i], "Group comparison:", selected[i])
+  #     groups <- unlist(strsplit(selected[i], '__vs__'))
+  #     output[[i]][[2]] = selectInput(L[i], label = "Which group to show?", groups, multiple = F)
+  #   } ## for loop
+  #   #########################################
+  #   
+  #   
+  #   # creating table that will be displayed 
+  #   df <- data.frame(Object = c("car", "car", "car", "house", "house", "house"), Needs = NA, stringsAsFactors = FALSE)
+  #   # defining dropdown options
+  #   dropdownOptions <- c("tires", "wipers", "headlights", "gutters", "carpet")
+  #   rhandsontable(df, rowHeaders = NULL, stretchH = "all") %>%
+  #     hot_col("Object", readOnly = TRUE) %>%
+  #     hot_col("Needs", type = "dropdown", source = dropdownOptions)
+  # })
+  
   output$boolUniqueGroups <- renderUI({
     req(reacValues$dotplotGroupsDf)
     group <- reacValues$dotplotGroupsDf$group
@@ -1344,6 +1380,11 @@ server <- function(input, output, session) {
     req(reacValues$dotplotGroupsDf)
     DT::renderDataTable({reacValues$dotplotGroupsDf},
                         options = list(scrollX = TRUE))
+  })
+  
+  output$submitDotplot <- renderUI({
+    req(reacValues$dotplotGroupsDf)
+    actionButton("submitDotplot", label = "Plot Dotplot")
   })
   
   observeEvent(input$submitDotplot,{
@@ -1444,7 +1485,7 @@ server <- function(input, output, session) {
       longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
       
       longData$RelSpecs <- longData$AvgSpec/40 # max(longData$AvgSpec, na.rm = T)
-      longData$RelSpecs[longData$RelSpecs>1] <- 1
+      longData$RelSpecs[longData$RelSpecs>1] <- 40
       # longData[longData$AvgSpec > 50, 'RelSpecs'] <- 1
     }
     longData$pvalLfc <- -log10(longData$padj) * longData$log2FC
@@ -1466,7 +1507,18 @@ server <- function(input, output, session) {
       'Define Dotplot color gradient',
       minVal,
       maxVal,
-      value = c(minVal, maxVal)
+      value = c(
+        ifelse(
+          is.null(input$dotplot_color_gradient[1]),
+          minVal,
+          input$dotplot_color_gradient[1]
+        ),
+        ifelse(
+          is.null(input$dotplot_color_gradient[2]),
+          maxVal,
+          input$dotplot_color_gradient[2]
+        )
+      )
     )
   })
   
@@ -1477,7 +1529,18 @@ server <- function(input, output, session) {
       'Define Dotplot size gradient',
       1,
       8,
-      value = c(2, 6)
+      value = c(
+        ifelse(
+          is.null(input$dotplot_size_gradient[1]),
+          2,
+          input$dotplot_size_gradient[1]
+        ),
+        ifelse(
+          is.null(input$dotplot_size_gradient[2]),
+          6,
+          input$dotplot_size_gradient[2]
+        )
+      )
     )
   })
   
@@ -1565,12 +1628,14 @@ server <- function(input, output, session) {
     
     abundance <- "AvgIntensity"
     relativeAbund <- "RelIntensity"
-    if (clusteringMetric != "stats") {
+    if (clusteringMetric != "stats" && "RelSpecs" %in% names(reacValues$dataDotplot)) {
       abundance <- clusteringMetric
       relativeAbund <- ifelse(abundance == "AvgIntensity", "RelIntensity", "RelSpecs")
-    } else {
-      relativeAbund <- "RelIntensity"
     }
+    # else {
+    #   relativeAbund <- "RelIntensity"
+    # }
+    
     preFiltered <- reacValues$dataDotplot %>% filter(clusteringMetric > 0)
     p <- preFiltered %>%
       #p <- reacValues$dataDotplot %>% filter(AvgSpec > 0) %>%
