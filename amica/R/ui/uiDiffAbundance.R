@@ -497,23 +497,22 @@ tabPanel(
                    uiOutput("boolUniqueGroups"),
                    uiOutput("selectedDotplotGroups")
                    ),
-            column(width = 4,
-                   actionButton("submitDotplot", label = "Plot Dotplot"),
-                   
-                   div(
-                     style = "position:relative",
-                     uiOutput('plot.ui'),
-                     # plotOutput('dotplot',
-                     #            hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce") ),
-                     uiOutput("hover_info")
-                   )
-                   ),
-            column(width = 4,
-                   uiOutput("dotplot_color_gradient"),
-                   uiOutput("dotplot_size_gradient"),
-                   uiOutput("dotplot_clustering_option"),
-                   downloadButton('downloadDotPlot','Download Plot'),
-                   )
+            column(
+              width = 4,
+              uiOutput("submitDotplot"),
+              #actionButton("submitDotplot", label = "Plot Dotplot"),
+              
+              div(style = "position:relative",
+                  uiOutput('plot.ui'),
+                  uiOutput("hover_info"))
+            ), 
+            column(
+              width = 4,
+              uiOutput("dotplot_color_gradient"),
+              uiOutput("dotplot_size_gradient"),
+              uiOutput("dotplot_clustering_option"),
+              downloadButton('downloadDotPlot', 'Download Plot')
+            )
           )
         ),
         
