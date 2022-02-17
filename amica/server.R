@@ -1483,18 +1483,9 @@ server <- function(input, output, session) {
         aggregate(value ~ rowname + group, longSpecs, mean)
       names(longSpecs) <- c('ProteinID', 'Group', 'AvgSpec')
       longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
-      
-      longData$RelSpecs <- longData$AvgSpec/40 # max(longData$AvgSpec, na.rm = T)
-      longData$RelSpecs[longData$RelSpecs>1] <- 40
-      # longData[longData$AvgSpec > 50, 'RelSpecs'] <- 1
     }
-    longData$pvalLfc <- -log10(longData$padj) * longData$log2FC
+    #longData$pvalLfc <- -log10(longData$padj) * longData$log2FC
     longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
-    
-    # normalized = (x-min(x))/(max(x)-min(x))
-    x <- longData$AvgIntensity
-    longData$RelIntensity <- (x-min(x,na.rm = T))/(max(x, na.rm = T)-min(x, na.rm = T))
-    #longData$RelIntensity <- longData$AvgIntensity/max(longData$AvgIntensity, na.rm = T)
     reacValues$dataDotplot <- longData
   })
   
@@ -1551,7 +1542,7 @@ server <- function(input, output, session) {
     
     if ("AvgSpec" %in% names(reacValues$dataDotplot))
       options <- c(options, "AvgSpec")
-    options <- c(options, "stats")
+    options <- c(options, "log2FC")
     
     selectInput("dotplot_clustering_option", 
                 "How to cluster data in Dotplot?",
@@ -1559,6 +1550,16 @@ server <- function(input, output, session) {
                 selected = input$dotplot_clustering_option,
                 # selectize = F,
                 multiple = F)
+  })
+  
+  output$dotplot_ctrl_substraction <- renderUI({
+    req(input$dotplot_clustering_option)
+    
+    if (input$dotplot_clustering_option != "log2FC") return(NULL)
+    
+    checkboxInput("dotplot_ctrl_substraction",
+                  "Only show proteins with log2FC > 0?",
+                  value = T)
   })
     
   
@@ -1593,12 +1594,7 @@ server <- function(input, output, session) {
     
     clusteringMetric <- "AvgIntensity"
     if (!is.null(input$dotplot_clustering_option)) {
-      clusteringMetric <-
-        ifelse(
-          input$dotplot_clustering_option == "stats",
-          "pvalLfc",
-          input$dotplot_clustering_option
-        )
+      clusteringMetric <- input$dotplot_clustering_option
     }
     
     mat <- reacValues$dataDotplot %>%
@@ -1606,6 +1602,7 @@ server <- function(input, output, session) {
       pivot_wider(names_from = Group, values_from = clusteringMetric) %>%
       data.frame() # make df as tibbles -> matrix annoying
     
+    if (any(duplicated(mat$Gene))) mat$Gene <- make.names(mat$Gene, unique = T)
     row.names(mat) <- mat$Gene  # put gene in `row`
     mat$Gene <- NULL #drop gene column as now in rows
     
@@ -1626,26 +1623,31 @@ server <- function(input, output, session) {
     if (reacValues$sigCutoffValue == "p-value")
       signficantTitle <- "p-value"
     
-    abundance <- "AvgIntensity"
-    relativeAbund <- "RelIntensity"
-    if (clusteringMetric != "stats" && "RelSpecs" %in% names(reacValues$dataDotplot)) {
-      abundance <- clusteringMetric
-      relativeAbund <- ifelse(abundance == "AvgIntensity", "RelIntensity", "RelSpecs")
+    filterValues <- TRUE
+    if (clusteringMetric == "log2FC" &&
+        !is.null(input$dotplot_ctrl_substraction)) {
+      print(input$dotplot_ctrl_substraction)
+      filterValues <- input$dotplot_ctrl_substraction
     }
-    # else {
-    #   relativeAbund <- "RelIntensity"
-    # }
+
+    preFiltered <- reacValues$dataDotplot
+    if (filterValues) preFiltered <- preFiltered %>% filter(!!rlang::sym(clusteringMetric) > 0)
     
-    preFiltered <- reacValues$dataDotplot %>% filter(clusteringMetric > 0)
+    x <- preFiltered[[clusteringMetric]]
+    
+    if (input$dotplot_clustering_option == "log2FC") {
+      preFiltered$relativeAbundance <- (x-min(x,na.rm = T))/(max(x, na.rm = T)-min(x, na.rm = T))
+    } else {
+      preFiltered$relativeAbundance <- x/max(x, na.rm = T)
+    }
+    
     p <- preFiltered %>%
-      #p <- reacValues$dataDotplot %>% filter(AvgSpec > 0) %>%
       ggplot(aes(
         x = Group,
         y = Gene,
         fill = log2FC,
         color = significant,
-        size = !!sym(relativeAbund),
-        # size = RelIntensity,
+        size = relativeAbundance,
         stroke = 1
       )) +
       geom_point(shape = 21) +
@@ -1664,16 +1666,22 @@ server <- function(input, output, session) {
         breaks = c(
           #min(reacValues$dataDotplot$RelSpecs) + 0.01,
           #max(reacValues$dataDotplot$RelSpecs)
-          min(reacValues$dataDotplot[[relativeAbund]] ) + 0.01,
-          max(reacValues$dataDotplot[[relativeAbund]] )
+          min(preFiltered$relativeAbundance ) + 0.01,
+          max(preFiltered$relativeAbundance )
         ),
         labels = c('Less', 'More')
       ) +
       scale_fill_gradientn(
         # colours = heatColors(),
         colours = viridis::viridis(20),
-        limits = c(minColorGradient,
-                   maxColorGradient),
+        limits = c(
+          ifelse(
+            minColorGradient < min(preFiltered$log2FC),
+            min(preFiltered$log2FC),
+            minColorGradient
+          ),
+          maxColorGradient
+        ),
         oob = scales::squish,
         name = 'log2FC'
       ) +
@@ -1683,7 +1691,7 @@ server <- function(input, output, session) {
         limits = c('0', '1.5'),
         labels = c('> 0.05', '<= 0.05'),
         guide = "legend"
-      ) #+ scale_y_discrete(labels= reacValues$dataDotplot$Label[reacValues$dataDotplot$ProteinID])
+      )
     p
   }
   
@@ -1729,7 +1737,8 @@ server <- function(input, output, session) {
                     "<b> padj: </b>", scales::scientific(point$padj, digits = 3), "<br/>",
                     "<b> Comparison: </b>", point$Comparison, "<br/>",
                     "<b> Group: </b>", point$Group, "<br/>",
-                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>"
+                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>",
+                    "<b> Rel. Abundance: </b>", point$relativeAbundance, "<br/>"
                     #"<b> AvgSpec: </b>", round(point$AvgSpec, 2), "<br/>"
                     )))
     )
