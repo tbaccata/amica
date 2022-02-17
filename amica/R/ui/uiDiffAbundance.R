@@ -511,6 +511,7 @@ tabPanel(
               uiOutput("dotplot_color_gradient"),
               uiOutput("dotplot_size_gradient"),
               uiOutput("dotplot_clustering_option"),
+              uiOutput("dotplot_ctrl_substraction"),
               downloadButton('downloadDotPlot', 'Download Plot')
             )
           )
