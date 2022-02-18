@@ -1583,6 +1583,53 @@ server <- function(input, output, session) {
     max(400, value)
   })
   
+  output$dotplot_cluster_rows <- renderUI({
+    req(reacValues$dataDotplot)
+    
+    if (length(unique(reacValues$dataDotplot$Gene)) > 20) return(NULL)
+    
+    checkboxInput("dotplot_cluster_rows",
+                  "Manually order rows?",
+                  value = F)
+  })
+  
+  output$dotplot_manual_row_factors <- renderUI({
+    req(reacValues$dataDotplot)
+    req(input$dotplot_cluster_rows)
+    
+    if (!input$dotplot_cluster_rows) return(NULL)
+    
+    genes <- reacValues$dataDotplot$Gene
+    
+    selectizeInput(
+      "dotplot_manual_row_factors",
+      "Select the ordering of Genes in Dot plot.
+      Ordering will be done from first to last selected.",
+      genes,
+      multiple = T,
+      selected = NULL
+    )
+  })
+  
+  observeEvent(input$submitDotplotFactors, {
+    req(input$dotplot_manual_row_factors)
+    reacValues$dotplotFactors <- input$dotplot_manual_row_factors
+  })
+  
+  output$submitDotplotFactors <- renderUI({
+    req(input$dotplot_cluster_rows)
+    if (!input$dotplot_cluster_rows) return(NULL)
+    actionButton('submitDotplotFactors', 'Submit')
+  })
+  
+  output$dotplot_cluster_columns <- renderUI({
+    req(reacValues$dataDotplot)
+    
+    checkboxInput("dotplot_cluster_columns",
+                  "Cluster columns?",
+                  value = T)
+  })
+  
   dotplot <- function() {
     req(reacValues$dataDotplot)
     
@@ -1602,7 +1649,6 @@ server <- function(input, output, session) {
       pivot_wider(names_from = Group, values_from = clusteringMetric) %>%
       data.frame() # make df as tibbles -> matrix annoying
     
-    if (any(duplicated(mat$Gene))) mat$Gene <- make.names(mat$Gene, unique = T)
     row.names(mat) <- mat$Gene  # put gene in `row`
     mat$Gene <- NULL #drop gene column as now in rows
     
@@ -1616,8 +1662,27 @@ server <- function(input, output, session) {
     
     reacValues$dataDotplot$Gene <-
       factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rddr)$order])
-    reacValues$dataDotplot$Group <-
-      factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
+    
+    if (!is.null(input$dotplot_cluster_columns) && input$dotplot_cluster_columns) { # order by input
+      reacValues$dataDotplot$Group <-
+        factor(reacValues$dataDotplot$Group, levels = reacValues$dotplotGroupsDf$group)
+    } else { # order by clustering
+      reacValues$dataDotplot$Group <-
+        factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
+    }
+    
+    hclustRows <- TRUE
+    if (!is.null(input$dotplot_cluster_rows) && input$dotplot_cluster_rows) {
+      if (!is.null(reacValues$dotplotFactors) && length(reacValues$dotplotFactors) == length(unique(reacValues$dataDotplot$Gene))) {
+        hclustRows <- FALSE
+        reacValues$dataDotplot$Gene <-
+          factor(reacValues$dataDotplot$Gene, levels = reacValues$dotplotFactors)
+      }
+    }
+    if (hclustRows) {
+      reacValues$dataDotplot$Gene <-
+        factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rddr)$order])
+    }
     
     signficantTitle <- "adj.p-value"
     if (reacValues$sigCutoffValue == "p-value")
@@ -1626,7 +1691,6 @@ server <- function(input, output, session) {
     filterValues <- TRUE
     if (clusteringMetric == "log2FC" &&
         !is.null(input$dotplot_ctrl_substraction)) {
-      print(input$dotplot_ctrl_substraction)
       filterValues <- input$dotplot_ctrl_substraction
     }
 
@@ -1670,7 +1734,7 @@ server <- function(input, output, session) {
           max(preFiltered$relativeAbundance )
         ),
         labels = c('Less', 'More')
-      ) +
+        ) +
       scale_fill_gradientn(
         # colours = heatColors(),
         colours = viridis::viridis(20),
@@ -1683,15 +1747,15 @@ server <- function(input, output, session) {
           maxColorGradient
         ),
         oob = scales::squish,
-        name = 'log2FC'
+        name = 'log2FC',
+        guide = guide_colorbar(order = 1)
       ) +
       scale_color_manual(
         signficantTitle,
         values = c('skyblue', 'black'),
         limits = c('0', '1.5'),
-        labels = c('> 0.05', '<= 0.05'),
-        guide = "legend"
-      )
+        labels = c('> 0.05', '<= 0.05')
+        )
     p
   }
   
@@ -1729,18 +1793,22 @@ server <- function(input, output, session) {
     style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
                     "left:", left_px + 2, "px; top:", top_px + 2, "px;")
     
+    text <- paste0("<b> Gene: </b>", point$Gene, "<br/>",
+                   "<b> logFC: </b>", round(point$log2FC,2), "<br/>",
+                   "<b>", reacValues$sigCutoffValue , ": </b>", scales::scientific(point$padj, digits = 3), "<br/>",
+                   "<b> Comparison: </b>", point$Comparison, "<br/>",
+                   "<b> Group: </b>", point$Group, "<br/>",
+                   "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>"
+                   )
+    
+    if ("AvgSpec" %in% names(reacValues$dataDotplot))
+      text <- paste0(text, 
+                     "<b> AvgSpec: </b>", round(point$AvgSpec, 3), "<br/>")
+    
     # actual tooltip created as wellPanel
     wellPanel(
       style = style,
-      p(HTML(paste0("<b> Gene: </b>", point$Gene, "<br/>",
-                    "<b> logFC: </b>", round(point$log2FC,2), "<br/>",
-                    "<b> padj: </b>", scales::scientific(point$padj, digits = 3), "<br/>",
-                    "<b> Comparison: </b>", point$Comparison, "<br/>",
-                    "<b> Group: </b>", point$Group, "<br/>",
-                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>",
-                    "<b> Rel. Abundance: </b>", point$relativeAbundance, "<br/>"
-                    #"<b> AvgSpec: </b>", round(point$AvgSpec, 2), "<br/>"
-                    )))
+      p(HTML(text))
     )
   })
   
