@@ -512,6 +512,10 @@ tabPanel(
               uiOutput("dotplot_size_gradient"),
               uiOutput("dotplot_clustering_option"),
               uiOutput("dotplot_ctrl_substraction"),
+              uiOutput("dotplot_cluster_columns"),
+              #uiOutput("dotplot_cluster_rows"),
+              #uiOutput("dotplot_manual_row_factors"),
+              #uiOutput("submitDotplotFactors"),
               downloadButton('downloadDotPlot', 'Download Plot')
             )
           )
