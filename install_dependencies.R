@@ -31,4 +31,4 @@ install.packages(
 
 install.packages('BiocManager')
 library('BiocManager')
-BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn'))
+BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn', 'cowplot'))
