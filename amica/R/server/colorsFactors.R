@@ -168,3 +168,28 @@ heatColors <- reactive({
   }
   pal
 })
+
+
+dotplotColorPalette <- function(palette, reverse = F) {
+  color <- ifelse(is.null(palette), "viridis", palette)
+  
+  viridisPalettes <- c("viridis",
+                       "inferno",
+                       "plasma",
+                       "magma",
+                       "cividis")
+  
+  if (palette %in% viridisPalettes) {
+    pal <- viridis(20, option = color)
+  } else {
+    maxcol <- brewer.pal.info[color, "maxcolors"]
+    pal <- colorRampPalette(brewer.pal(n = maxcol, name =
+                                         color))(20)
+  } 
+  
+  if (reverse) {
+    pal <- rev(pal)
+  }
+  pal
+}
+
