@@ -1318,42 +1318,6 @@ server <- function(input, output, session) {
     output
   })
   
-  
-  # output$ExampleTable <- renderRHandsontable({
-  #   #########################################
-  #   input$dotplotSelection
-  #   req(input$dotplotGroupComparisons)
-  #   selected <- isolate(input$dotplotGroupComparisons)
-  #   numVars <- length(selected)
-  #   
-  #   validate(need(
-  #     numVars > 1,
-  #     "Need at least two groups for the Dotplot."
-  #   ))
-  #   
-  #   C = sapply(1:numVars, function(i){paste0("dotplot_comp_",i)})
-  #   L = sapply(1:numVars, function(i){paste0("dotplot_group_",i)})
-  # 
-  #   df <- data.frame(Comparison=selected, Group=NA_character_)
-  #   
-  #   for(i in seq_along(1:numVars)){
-  #     output[[i]] = tagList()
-  #     output[[i]][[1]] = selectInput(C[i], "Group comparison:", selected[i])
-  #     groups <- unlist(strsplit(selected[i], '__vs__'))
-  #     output[[i]][[2]] = selectInput(L[i], label = "Which group to show?", groups, multiple = F)
-  #   } ## for loop
-  #   #########################################
-  #   
-  #   
-  #   # creating table that will be displayed 
-  #   df <- data.frame(Object = c("car", "car", "car", "house", "house", "house"), Needs = NA, stringsAsFactors = FALSE)
-  #   # defining dropdown options
-  #   dropdownOptions <- c("tires", "wipers", "headlights", "gutters", "carpet")
-  #   rhandsontable(df, rowHeaders = NULL, stretchH = "all") %>%
-  #     hot_col("Object", readOnly = TRUE) %>%
-  #     hot_col("Needs", type = "dropdown", source = dropdownOptions)
-  # })
-  
   output$boolUniqueGroups <- renderUI({
     req(reacValues$dotplotGroupsDf)
     group <- reacValues$dotplotGroupsDf$group
@@ -1399,30 +1363,6 @@ server <- function(input, output, session) {
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     ridx <- rownames(reacValues$dataComp[ridx,])
 
-    aname <-
-      ifelse(
-        "LFQIntensity" %in% assayNames(reacValues$proteinData),
-        'LFQIntensity',
-        'Intensity'
-      )
-    df <- assay(reacValues$proteinData, aname)
-    df <- df[ridx,]
-
-    longData <- stats::reshape(df, idvar = "rowname",
-                                ids = rownames(df), times = names(df),
-                                timevar = "colname", varying = list(names(df)),
-                                direction = "long", v.names = "value")
-    midx <- match(longData$colname, reacValues$expDesign$samples)
-    longData$group <- reacValues$expDesign$groups[midx]
-
-
-    longData <- longData[longData$group %in% group2comps$group,]
-    longData <-
-      aggregate(value ~ rowname + group, longData, mean)
-    names(longData) <- c('ProteinID', 'Group', 'AvgIntensity')
-
-    
-    
     pattern <- padjPrefix
     if (reacValues$sigCutoffValue == "p-value") pattern <- pvalPrefix
     
@@ -1444,8 +1384,6 @@ server <- function(input, output, session) {
 
     longStats$Comparison <- NULL
 
-    longData <- merge(longData, longStats, by = c('ProteinID', 'Group'))
-
     selection <- grep(logfcPrefix, names(reacValues$dataLimma), value = T)
     widefcs <- reacValues$dataLimma[ridx, selection]
 
@@ -1461,30 +1399,38 @@ server <- function(input, output, session) {
     midx <- match(longFCs$Comparison, group2comps$comparison)
     longFCs$Group <- group2comps$group[midx]
 
-    longData <- merge(longData, longFCs, by = c('ProteinID', 'Group'))
-
+    longData <- merge(longFCs, longStats, by = c('ProteinID', 'Group'))
+    
+    aname <-
+      ifelse(
+        "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        'LFQIntensity',
+        'Intensity'
+      )
+    df <- assay(reacValues$proteinData, aname)
+    df <- df[ridx,]
+    
+    intData <- stats::reshape(df, idvar = "rowname",
+                               ids = rownames(df), times = names(df),
+                               timevar = "colname", varying = list(names(df)),
+                               direction = "long", v.names = "value")
+    midx <- match(intData$colname, reacValues$expDesign$samples)
+    intData$group <- reacValues$expDesign$groups[midx]
+    
+    intData <- intData[intData$group %in% group2comps$group,]
+    intData <-
+      aggregate(value ~ rowname + group, intData, mean)
+    names(intData) <- c('ProteinID', 'Group', 'AvgIntensity')
+    
+    longData <- merge(longData, intData, by = c('ProteinID', 'Group'))
+    
     longData$Gene <- reacValues$filtData[longData$ProteinID, "Gene.names"]
     longData$Gene <- gsub("^([^;]*;[^;]*);.*", "\\1", longData$Gene)
-    
-    sCount <- grep("spectraCount.", names(reacValues$filtData))
-    if (length(sCount) > 1) {
-      df <- reacValues$filtData[ridx, sCount]
-      names(df) <- gsub('spectraCount.', '', names(df))
-      longSpecs <- stats::reshape(df, idvar = "rowname",
-                                 ids = rownames(df), times = names(df),
-                                 timevar = "colname", varying = list(names(df)),
-                                 direction = "long", v.names = "value")
-      midx <- match(longSpecs$colname, reacValues$expDesign$samples)
-      longSpecs$group <- reacValues$expDesign$groups[midx]
 
-
-      longSpecs <- longSpecs[longSpecs$group %in% group2comps$group,]
-      longSpecs <-
-        aggregate(value ~ rowname + group, longSpecs, mean)
-      names(longSpecs) <- c('ProteinID', 'Group', 'AvgSpec')
-      longData <- merge(longData, longSpecs, by = c('ProteinID', 'Group'))
+    if (reacValues$show_dotplot == FALSE) {
+      reacValues$show_dotplot = TRUE
+      toggle(id = 'hide_dotplot_before_submit', anim = T)
     }
-    #longData$pvalLfc <- -log10(longData$padj) * longData$log2FC
     longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
     reacValues$dataDotplot <- longData
   })
@@ -1496,8 +1442,8 @@ server <- function(input, output, session) {
     sliderInput(
       'dotplot_color_gradient',
       'Define Dotplot color gradient',
-      minVal,
-      maxVal,
+      min = minVal,
+      max = maxVal,
       value = c(
         ifelse(
           is.null(input$dotplot_color_gradient[1]),
@@ -1538,17 +1484,12 @@ server <- function(input, output, session) {
   output$dotplot_clustering_option <- renderUI({
     req(reacValues$dataDotplot)
     
-    options <- c("AvgIntensity")
-    
-    if ("AvgSpec" %in% names(reacValues$dataDotplot))
-      options <- c(options, "AvgSpec")
-    options <- c(options, "log2FC")
-    
+    options <- c("AvgIntensity", "log2FC")
+
     selectInput("dotplot_clustering_option", 
                 "How to cluster data in Dotplot?",
                 choices = options,
                 selected = input$dotplot_clustering_option,
-                # selectize = F,
                 multiple = F)
   })
   
@@ -1558,7 +1499,7 @@ server <- function(input, output, session) {
     if (input$dotplot_clustering_option != "log2FC") return(NULL)
     
     checkboxInput("dotplot_ctrl_substraction",
-                  "Only show proteins with log2FC > 0?",
+                  "Control substraction: Only show proteins with log2FC > 0?",
                   value = T)
   })
     
@@ -1583,54 +1524,18 @@ server <- function(input, output, session) {
     max(400, value)
   })
   
-  output$dotplot_cluster_rows <- renderUI({
-    req(reacValues$dataDotplot)
-    
-    if (length(unique(reacValues$dataDotplot$Gene)) > 20) return(NULL)
-    
-    checkboxInput("dotplot_cluster_rows",
-                  "Manually order rows?",
-                  value = F)
-  })
-  
-  output$dotplot_manual_row_factors <- renderUI({
-    req(reacValues$dataDotplot)
-    req(input$dotplot_cluster_rows)
-    
-    if (!input$dotplot_cluster_rows) return(NULL)
-    
-    genes <- reacValues$dataDotplot$Gene
-    
-    selectizeInput(
-      "dotplot_manual_row_factors",
-      "Select the ordering of Genes in Dot plot.
-      Ordering will be done from first to last selected.",
-      genes,
-      multiple = T,
-      selected = NULL
-    )
-  })
-  
-  observeEvent(input$submitDotplotFactors, {
-    req(input$dotplot_manual_row_factors)
-    reacValues$dotplotFactors <- input$dotplot_manual_row_factors
-  })
-  
-  output$submitDotplotFactors <- renderUI({
-    req(input$dotplot_cluster_rows)
-    if (!input$dotplot_cluster_rows) return(NULL)
-    actionButton('submitDotplotFactors', 'Submit')
-  })
   
   output$dotplot_cluster_columns <- renderUI({
     req(reacValues$dataDotplot)
     
     checkboxInput("dotplot_cluster_columns",
                   "Cluster columns?",
-                  value = T)
+                  value = ifelse(!is.null(input$dotplot_cluster_columns),
+                                 input$dotplot_cluster_columns,
+                                 T))
   })
   
-  dotplot <- function() {
+  dotplot <- reactive({
     req(reacValues$dataDotplot)
     
     minColorGradient <- input$dotplot_color_gradient[1]
@@ -1639,14 +1544,17 @@ server <- function(input, output, session) {
     minSizeGradient <- input$dotplot_size_gradient[1]
     maxSizeGradient <- input$dotplot_size_gradient[2]
     
+    dotplotColors <- dotplotColorPalette(input$dotplot_palette,
+                                         input$dotplot_rev_colors)
+    
     clusteringMetric <- "AvgIntensity"
     if (!is.null(input$dotplot_clustering_option)) {
       clusteringMetric <- input$dotplot_clustering_option
     }
     
     mat <- reacValues$dataDotplot %>%
-      select(Gene, Group, clusteringMetric) %>%  # drop unused columns to faciliate widening
-      pivot_wider(names_from = Group, values_from = clusteringMetric) %>%
+      select(Gene, Group, all_of(clusteringMetric)) %>%  # drop unused columns to faciliate widening
+      pivot_wider(names_from = Group, values_from = all_of(clusteringMetric)) %>%
       data.frame() # make df as tibbles -> matrix annoying
     
     row.names(mat) <- mat$Gene  # put gene in `row`
@@ -1655,34 +1563,32 @@ server <- function(input, output, session) {
     tmat <- mat %>% as.matrix()
     tmat[is.na(tmat)] <- 0
     
-    rclust <- hclust(dist(tmat)) # hclust with distance matrix
-    cclust <- hclust(dist(t(tmat))) # hclust with distance matrix
-    rddr <- reorder(as.dendrogram(rclust), rowMeans(mat))
-    cddr <- reorder(as.dendrogram(cclust), colMeans(mat))
+    dist_meth <- ifelse(!is.null(input$dotplot_distance_metric),
+                        input$dotplot_distance_metric, 
+                        "canberra")
+    clst_meth <- ifelse(!is.null(input$dotplot_clustering_method),
+                        input$dotplot_clustering_method,
+                        "complete")
     
-    reacValues$dataDotplot$Gene <-
-      factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rddr)$order])
+    #rddr <- reorder(as.dendrogram(rclust), rowMeans(mat))
+    #cddr <- reorder(as.dendrogram(cclust), colMeans(mat))
     
     if (!is.null(input$dotplot_cluster_columns) && input$dotplot_cluster_columns) { # order by input
+      cclust <- hclust(dist(t(tmat), method = dist_meth),
+                       method = clst_meth) # hclust with distance matrix
       reacValues$dataDotplot$Group <-
-        factor(reacValues$dataDotplot$Group, levels = reacValues$dotplotGroupsDf$group)
+        factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cclust)$order])
     } else { # order by clustering
       reacValues$dataDotplot$Group <-
-        factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cddr)$order])
+        factor(reacValues$dataDotplot$Group, levels = reacValues$dotplotGroupsDf$group)
     }
-    
-    hclustRows <- TRUE
-    if (!is.null(input$dotplot_cluster_rows) && input$dotplot_cluster_rows) {
-      if (!is.null(reacValues$dotplotFactors) && length(reacValues$dotplotFactors) == length(unique(reacValues$dataDotplot$Gene))) {
-        hclustRows <- FALSE
-        reacValues$dataDotplot$Gene <-
-          factor(reacValues$dataDotplot$Gene, levels = reacValues$dotplotFactors)
-      }
-    }
-    if (hclustRows) {
-      reacValues$dataDotplot$Gene <-
-        factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rddr)$order])
-    }
+
+    rclust <- hclust(dist(tmat, 
+                          method = dist_meth), 
+                     method = clst_meth) # hclust with distance matrix
+    reacValues$dataDotplot$Gene <-
+      factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rclust)$order])
+
     
     signficantTitle <- "adj.p-value"
     if (reacValues$sigCutoffValue == "p-value")
@@ -1695,11 +1601,13 @@ server <- function(input, output, session) {
     }
 
     preFiltered <- reacValues$dataDotplot
-    if (filterValues) preFiltered <- preFiltered %>% filter(!!rlang::sym(clusteringMetric) > 0)
+    if (filterValues) {
+      preFiltered <- reacValues$dataDotplot %>% filter(!!rlang::sym(clusteringMetric) > 0)
+    }
     
     x <- preFiltered[[clusteringMetric]]
     
-    if (input$dotplot_clustering_option == "log2FC") {
+    if (clusteringMetric == "log2FC") {
       preFiltered$relativeAbundance <- (x-min(x,na.rm = T))/(max(x, na.rm = T)-min(x, na.rm = T))
     } else {
       preFiltered$relativeAbundance <- x/max(x, na.rm = T)
@@ -1728,8 +1636,6 @@ server <- function(input, output, session) {
         range = c(minSizeGradient, maxSizeGradient),
         name = 'Relative Abundance',
         breaks = c(
-          #min(reacValues$dataDotplot$RelSpecs) + 0.01,
-          #max(reacValues$dataDotplot$RelSpecs)
           min(preFiltered$relativeAbundance ) + 0.01,
           max(preFiltered$relativeAbundance )
         ),
@@ -1737,7 +1643,7 @@ server <- function(input, output, session) {
         ) +
       scale_fill_gradientn(
         # colours = heatColors(),
-        colours = viridis::viridis(20),
+        colours = dotplotColors,
         limits = c(
           ifelse(
             minColorGradient < min(preFiltered$log2FC),
@@ -1757,7 +1663,7 @@ server <- function(input, output, session) {
         labels = c('> 0.05', '<= 0.05')
         )
     p
-  }
+  })
   
   output$dotplot <- renderPlot({
     dotplot()
