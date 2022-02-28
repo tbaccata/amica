@@ -504,9 +504,9 @@ tabPanel(
                      uiOutput("dotplotGroupComparisons"),
                      uiOutput("dotplotGroups"),
                      inline(actionButton("dotplotSelection", label = "Select Groups")),
-                     uiOutput("boolUniqueGroups"),
-                     br(),
-                     uiOutput("selectedDotplotGroups")
+                     uiOutput("boolUniqueGroups")
+                     #br(),
+                     #uiOutput("selectedDotplotGroups")
                    )
                    ),
             column(
@@ -520,93 +520,112 @@ tabPanel(
             ), 
             column(
               width = 4,
-              shinyjs::hidden(div(id = 'hide_dotplot_before_submit',
-              uiOutput("dotplot_color_gradient"),
-              helpText("Specify a min. and a max. fold change. 
-                       All fold changes out side the specified 
-                       range will be capped."),
-              uiOutput("dotplot_size_gradient"),
-              helpText("The size of dotplots are scaled to the maximum
+              shinyjs::hidden(
+                div(
+                  id = 'hide_dotplot_before_submit',
+                  uiOutput("dotplot_color_gradient"),
+                  helpText(
+                    "Specify a min. and a max. fold change.
+                       All fold changes out side the specified
+                       range will be capped."
+                  ),
+                  uiOutput("dotplot_size_gradient"),
+                  helpText(
+                    "The size of dotplots are scaled to the maximum
                        avg. intensity or maximum fold change of the proteins
-                       in your selection."),
-              h3("Clustering"),
-              uiOutput("dotplot_clustering_option"),
-              helpText("Which quantitive information should be displayed as 
-                       circle size? This value will also be used to cluster the 
-                       Dot plot."),
-              uiOutput("dotplot_ctrl_substraction"),
-              inline(selectInput("dotplot_distance_metric",
-                                 "Distance method",
-                                 choices = c("canberra","euclidean", "maximum", "manhattan", "binary", "minkowski"),
-                                 selected = "canberra"
-              )
-              ),
-              inline(selectInput("dotplot_clustering_method",
-                                 "Clustering method",
-                                 choices = c("complete","average", "single", "ward.D", "median", "centroid"),
-                                 selected = "complete"
-              )
-              ),
-              uiOutput("dotplot_cluster_columns"),
-              helpText("If column clustering is disabled, columns are displayed  
-                       in the order they were inputted."),
-              h3("Colors"),
-              inline(
-              selectInput(
-                "dotplot_palette",
-                "Color palette",
-                choices = list(
-                  viridis = c(
-                  "viridis",
-                  "inferno",
-                  "plasma",
-                  "magma",
-                  "cividis"
+                       in your selection."
                   ),
-                  diverging = c(
-                  "BrBG",
-                  "PiYG",
-                  "PRGn",
-                  "PuOr",
-                  "RdBu",
-                  "RdGy",
-                  "RdYlBu",
-                  "RdYlGn",
-                  "Spectral"
+                  h3("Clustering"),
+                  uiOutput("dotplot_clustering_option"),
+                  helpText(
+                    "Which quantitive information should be displayed as
+                       circle size? This value will also be used to cluster the
+                       Dot plot."
                   ),
-                  sequential = c(
-                  "Blues",
-                  "BuGn",
-                  "BuPu",
-                  "GnBu",
-                  "Greens",
-                  "Greys",
-                  "Oranges",
-                  "OrRd",
-                  "PuBu",
-                  "PuBuGn",
-                  "PuRd",
-                  "Purples",
-                  "RdPu",
-                  "Reds",
-                  "YlGn",
-                  "YlGnBu",
-                  "YlOrBr",
-                  "YlOrRd"
-                  )
-                ),
-                selected = "viridis"
-                          )
-              ),
-              inline(
-                checkboxInput(
-                  "dotplot_rev_colors",
-                  "Reverse color palette?",
-                  value = FALSE
+                  uiOutput("dotplot_ctrl_substraction"),
+                  inline(
+                    selectInput(
+                      "dotplot_distance_metric",
+                      "Distance method",
+                      choices = c(
+                        "canberra",
+                        "euclidean",
+                        "maximum",
+                        "manhattan",
+                        "binary",
+                        "minkowski"
+                      ),
+                      selected = "canberra"
+                    )
+                  ),
+                  inline(
+                    selectInput(
+                      "dotplot_clustering_method",
+                      "Clustering method",
+                      choices = c("complete", "average", "single", "ward.D", "median", "centroid"),
+                      selected = "complete"
+                    )
+                  ),
+                  uiOutput("dotplot_cluster_columns"),
+                  helpText(
+                    "If column clustering is disabled, columns are displayed
+                       in the order they were inputted."
+                  ),
+                  h3("Colors"),
+                  div(
+                    id = 'dotplot_colors',
+                    selectInput(
+                      "dotplot_palette",
+                      "Color palette",
+                      choices = list(
+                        viridis = c("viridis",
+                                    "inferno",
+                                    "plasma",
+                                    "magma",
+                                    "cividis"),
+                        diverging = c(
+                          "BrBG",
+                          "PiYG",
+                          "PRGn",
+                          "PuOr",
+                          "RdBu",
+                          "RdGy",
+                          "RdYlBu",
+                          "RdYlGn",
+                          "Spectral"
+                        ),
+                        sequential = c(
+                          "Blues",
+                          "BuGn",
+                          "BuPu",
+                          "GnBu",
+                          "Greens",
+                          "Greys",
+                          "Oranges",
+                          "OrRd",
+                          "PuBu",
+                          "PuBuGn",
+                          "PuRd",
+                          "Purples",
+                          "RdPu",
+                          "Reds",
+                          "YlGn",
+                          "YlGnBu",
+                          "YlOrBr",
+                          "YlOrRd"
+                        )
+                      ),
+                      selected = "viridis"
+                    ),
+                    checkboxInput("dotplot_rev_colors",
+                                  "Reverse color palette?",
+                                  value = FALSE)
+                  ),
+                  br(),
+                  br(),
+                  downloadButton('downloadDotPlot', 'Download Plot')
                 )
-              ),
-              downloadButton('downloadDotPlot', 'Download Plot')
-              ))
+              )
             )
           )
         ),

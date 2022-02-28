@@ -1340,12 +1340,6 @@ server <- function(input, output, session) {
     reacValues$dotplotGroupsDf <- data.frame(comparison, group)
   })
   
-  output$selectedDotplotGroups <- renderUI({
-    req(reacValues$dotplotGroupsDf)
-    DT::renderDataTable({reacValues$dotplotGroupsDf},
-                        options = list(scrollX = TRUE))
-  })
-  
   output$submitDotplot <- renderUI({
     req(reacValues$dotplotGroupsDf)
     actionButton("submitDotplot", label = "Plot Dotplot")
