@@ -22,7 +22,9 @@ install.packages(
     'eulerr',
     'heatmaply',
     'ggfortify',
-    'colourvalues'
+    'colourvalues',
+    'tidyr',
+    'Cairo'
   ),
   repos = 'https://cloud.r-project.org/'
 )
