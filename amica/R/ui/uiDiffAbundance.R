@@ -489,13 +489,25 @@ tabPanel(
         ),
         tabPanel(
           h3("Dotplot"),
+          helpText("Dot plots integrate quantitive information together with 
+                   fold change and (adj.) p-values into one visualization. 
+                   Proteins are displayed as dots, with their circle size 
+                   corresponding to relative abundance (average intensities or 
+                   fold changes can be selected). Fold changes are mapped as 
+                   color gradients on the dots. When proteins are clustered 
+                   based on fold changes, users have to option to display 
+                   proteins with a positive fold change only."),
+          br(),br(),
           fluidRow(
             column(width = 4,
-                   uiOutput("dotplotGroupComparisons"),
-                   uiOutput("dotplotGroups"),
-                   inline(actionButton("dotplotSelection", label = "Select Groups")),
-                   uiOutput("boolUniqueGroups"),
-                   uiOutput("selectedDotplotGroups")
+                   wellPanel(
+                     uiOutput("dotplotGroupComparisons"),
+                     uiOutput("dotplotGroups"),
+                     inline(actionButton("dotplotSelection", label = "Select Groups")),
+                     uiOutput("boolUniqueGroups"),
+                     br(),
+                     uiOutput("selectedDotplotGroups")
+                   )
                    ),
             column(
               width = 4,
@@ -508,15 +520,93 @@ tabPanel(
             ), 
             column(
               width = 4,
+              shinyjs::hidden(div(id = 'hide_dotplot_before_submit',
               uiOutput("dotplot_color_gradient"),
+              helpText("Specify a min. and a max. fold change. 
+                       All fold changes out side the specified 
+                       range will be capped."),
               uiOutput("dotplot_size_gradient"),
+              helpText("The size of dotplots are scaled to the maximum
+                       avg. intensity or maximum fold change of the proteins
+                       in your selection."),
+              h3("Clustering"),
               uiOutput("dotplot_clustering_option"),
+              helpText("Which quantitive information should be displayed as 
+                       circle size? This value will also be used to cluster the 
+                       Dot plot."),
               uiOutput("dotplot_ctrl_substraction"),
+              inline(selectInput("dotplot_distance_metric",
+                                 "Distance method",
+                                 choices = c("canberra","euclidean", "maximum", "manhattan", "binary", "minkowski"),
+                                 selected = "canberra"
+              )
+              ),
+              inline(selectInput("dotplot_clustering_method",
+                                 "Clustering method",
+                                 choices = c("complete","average", "single", "ward.D", "median", "centroid"),
+                                 selected = "complete"
+              )
+              ),
               uiOutput("dotplot_cluster_columns"),
-              #uiOutput("dotplot_cluster_rows"),
-              #uiOutput("dotplot_manual_row_factors"),
-              #uiOutput("submitDotplotFactors"),
+              helpText("If column clustering is disabled, columns are displayed  
+                       in the order they were inputted."),
+              h3("Colors"),
+              inline(
+              selectInput(
+                "dotplot_palette",
+                "Color palette",
+                choices = list(
+                  viridis = c(
+                  "viridis",
+                  "inferno",
+                  "plasma",
+                  "magma",
+                  "cividis"
+                  ),
+                  diverging = c(
+                  "BrBG",
+                  "PiYG",
+                  "PRGn",
+                  "PuOr",
+                  "RdBu",
+                  "RdGy",
+                  "RdYlBu",
+                  "RdYlGn",
+                  "Spectral"
+                  ),
+                  sequential = c(
+                  "Blues",
+                  "BuGn",
+                  "BuPu",
+                  "GnBu",
+                  "Greens",
+                  "Greys",
+                  "Oranges",
+                  "OrRd",
+                  "PuBu",
+                  "PuBuGn",
+                  "PuRd",
+                  "Purples",
+                  "RdPu",
+                  "Reds",
+                  "YlGn",
+                  "YlGnBu",
+                  "YlOrBr",
+                  "YlOrRd"
+                  )
+                ),
+                selected = "viridis"
+                          )
+              ),
+              inline(
+                checkboxInput(
+                  "dotplot_rev_colors",
+                  "Reverse color palette?",
+                  value = FALSE
+                )
+              ),
               downloadButton('downloadDotPlot', 'Download Plot')
+              ))
             )
           )
         ),
