@@ -19,6 +19,7 @@ reacValues <-
     dataDotplot = NULL,
     dotplotGroupsDf = NULL,
     dotplotFactors = NULL,
+    show_dotplot = FALSE,
     GostPlot = NULL,
     clusterRows = NULL,
     clusterCols = NULL,
@@ -58,6 +59,7 @@ observeEvent(input$resetAnalysis,{
   reacValues$dotplotGroupsDf <- NULL
   reacValues$dataDotplot <- NULL
   reacValues$dotplotFactors <- NULL
+  reacValues$show_dotplot <- FALSE
   reacValues$GostPlot <- NULL
   reacValues$expDesign <- NULL
   reacValues$contrastMatrix <- NULL
