@@ -1463,7 +1463,7 @@ server <- function(input, output, session) {
       value = c(
         ifelse(
           is.null(input$dotplot_size_gradient[1]),
-          2,
+          1,
           input$dotplot_size_gradient[1]
         ),
         ifelse(
@@ -1478,7 +1478,7 @@ server <- function(input, output, session) {
   output$dotplot_clustering_option <- renderUI({
     req(reacValues$dataDotplot)
     
-    options <- c("AvgIntensity", "log2FC")
+    options <- c("log2FC", "AvgIntensity")
 
     selectInput("dotplot_clustering_option", 
                 "How to cluster data in Dotplot?",
@@ -1500,22 +1500,15 @@ server <- function(input, output, session) {
   
   numberOfDotplotPoints <- reactive({
     req(reacValues$dataDotplot)
-    max(600, 22 * length(unique(reacValues$dataDotplot$Gene)))
+    max(450, 20 * length(unique(reacValues$dataDotplot$Gene)))
   } )
   
   numberOfDotplotBaits <- reactive({
     req(reacValues$dataDotplot)
     maxNamelength <- max(nchar(as.character(reacValues$dataDotplot$Gene)))
     numCols <- length(unique(reacValues$dataDotplot$Group))
-    value <- 60 * numCols + 60
-    if (numCols < 3) {
-      if (maxNamelength >= 60) {
-        value <- value + 500
-      } else if (maxNamelength >= 20) {
-        value <- value + max(300, 6*maxNamelength)
-      }
-    }
-    max(400, value)
+    value <- 50 * numCols  + 40
+    max(300, value)
   })
   
   
@@ -1601,8 +1594,10 @@ server <- function(input, output, session) {
     
     x <- preFiltered[[clusteringMetric]]
     
+    legName <- "Relative AvgIntensity"
     if (clusteringMetric == "log2FC") {
       preFiltered$relativeAbundance <- (x-min(x,na.rm = T))/(max(x, na.rm = T)-min(x, na.rm = T))
+      legName <- "Relative Fold Change"
     } else {
       preFiltered$relativeAbundance <- x/max(x, na.rm = T)
     }
@@ -1625,18 +1620,18 @@ server <- function(input, output, session) {
         hjust = 1
       )) +
       ylab('') + xlab('') +
-      theme(axis.ticks = element_blank()) +
+      scale_x_discrete(position = "top") +
       scale_size_continuous(
         range = c(minSizeGradient, maxSizeGradient),
-        name = 'Relative Abundance',
+        name = legName, #paste("Relative", clusteringMetric),
+        guide = guide_legend(order=2),
         breaks = c(
           min(preFiltered$relativeAbundance ) + 0.01,
           max(preFiltered$relativeAbundance )
         ),
-        labels = c('Less', 'More')
+        labels = c('', '')
         ) +
       scale_fill_gradientn(
-        # colours = heatColors(),
         colours = dotplotColors,
         limits = c(
           ifelse(
@@ -1647,18 +1642,18 @@ server <- function(input, output, session) {
           maxColorGradient
         ),
         oob = scales::squish,
-        name = 'log2FC',
+        name = 'Fold Change',
         guide = guide_colorbar(order = 1)
       ) +
       scale_color_manual(
         signficantTitle,
         values = c('skyblue', 'black'),
         limits = c('0', '1.5'),
-        labels = c('> 0.05', '<= 0.05')
+        labels = c('> 0.05', '\u2264 0.05')
         )
     p
   })
-  
+
   output$dotplot <- renderPlot({
     dotplot()
   })
@@ -1674,9 +1669,16 @@ server <- function(input, output, session) {
     filename = function(){paste("dotplot",'.pdf',sep='')},
     content = function(file){
       cowplot::ggsave2(file,plot=dotplot(),
-                       width = numberOfDotplotBaits() * 1/80, 
-                       height = numberOfDotplotPoints() * 1/80,
+                       width = numberOfDotplotBaits() * 1/72, 
+                       height = numberOfDotplotPoints() * 1/72,
                        device = cairo_pdf)
+    })
+  
+  output$downloadDotPlotData <- downloadHandler(
+    filename = function(){paste("dotplot_data",'.tsv',sep='')},
+    content = function(file){
+      write.table(reacValues$dataDotplot[-which(names(reacValues$dataDotplot) == "significant")], 
+                  file, row.names = F, sep = '\t', quote = F)
     })
 
   output$hover_info <- renderUI({
@@ -1700,11 +1702,6 @@ server <- function(input, output, session) {
                    "<b> Group: </b>", point$Group, "<br/>",
                    "<b> AvgIntensity: </b>", round(point$AvgIntensity, 2), "<br/>"
                    )
-    
-    if ("AvgSpec" %in% names(reacValues$dataDotplot))
-      text <- paste0(text, 
-                     "<b> AvgSpec: </b>", round(point$AvgSpec, 3), "<br/>")
-    
     # actual tooltip created as wellPanel
     wellPanel(
       style = style,
