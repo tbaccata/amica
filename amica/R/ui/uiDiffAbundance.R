@@ -490,12 +490,12 @@ tabPanel(
         tabPanel(
           h3("Dotplot"),
           helpText("Dot plots integrate quantitive information together with 
-                   fold change and (adj.) p-values into one visualization. 
+                   fold changes and (adj.) p-values into one visualization. 
                    Proteins are displayed as dots, with their circle size 
                    corresponding to relative abundance (average intensities or 
                    fold changes can be selected). Fold changes are mapped as 
                    color gradients on the dots. When proteins are clustered 
-                   based on fold changes, users have to option to display 
+                   based on fold changes, users have the option to display 
                    proteins with a positive fold change only."),
           br(),br(),
           fluidRow(
@@ -505,15 +505,11 @@ tabPanel(
                      uiOutput("dotplotGroups"),
                      inline(actionButton("dotplotSelection", label = "Select Groups")),
                      uiOutput("boolUniqueGroups")
-                     #br(),
-                     #uiOutput("selectedDotplotGroups")
                    )
                    ),
             column(
               width = 4,
               uiOutput("submitDotplot"),
-              #actionButton("submitDotplot", label = "Plot Dotplot"),
-              
               div(style = "position:relative",
                   uiOutput('plot.ui'),
                   uiOutput("hover_info"))
