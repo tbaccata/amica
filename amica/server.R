@@ -1352,6 +1352,8 @@ server <- function(input, output, session) {
     
     validate(need(!any(duplicated(reacValues$dotplotGroupsDf$group)), "Error! Please provide 
                   unique groups"  )  )
+    
+    stopifnot(reacValues$compareAmicaSelected == TRUE)
 
     group2comps <- reacValues$dotplotGroupsDf
     ridx <- isolate(input$groupComparisonsDT_rows_all)
@@ -1419,7 +1421,8 @@ server <- function(input, output, session) {
     longData <- merge(longData, intData, by = c('ProteinID', 'Group'))
     
     longData$Gene <- reacValues$filtData[longData$ProteinID, "Gene.names"]
-    longData$Gene <- gsub("^([^;]*;[^;]*);.*", "\\1", longData$Gene)
+    longData$Gene <- gsub(";.*", "", longData$Gene)
+    # longData$Gene <- gsub("^([^;]*;[^;]*);.*", "\\1", longData$Gene)
 
     if (reacValues$show_dotplot == FALSE) {
       reacValues$show_dotplot = TRUE
@@ -1505,10 +1508,11 @@ server <- function(input, output, session) {
   
   numberOfDotplotBaits <- reactive({
     req(reacValues$dataDotplot)
-    maxNamelength <- max(nchar(as.character(reacValues$dataDotplot$Gene)))
     numCols <- length(unique(reacValues$dataDotplot$Group))
-    value <- 50 * numCols  + 40
-    max(300, value)
+    
+    value <- 300 + numCols * 20
+
+    value
   })
   
   
@@ -1523,6 +1527,14 @@ server <- function(input, output, session) {
   })
   
   dotplot <- reactive({
+    validate(need(
+      reacValues$compareAmicaSelected == FALSE,
+      paste0(
+        "Cannot output Dotplot for 'multiple_amica_upload'\n
+                         Change the data set back to the original data to
+                         plot a Dotplot"
+      )
+    ))
     req(reacValues$dataDotplot)
     
     minColorGradient <- input$dotplot_color_gradient[1]
@@ -1560,12 +1572,12 @@ server <- function(input, output, session) {
     #rddr <- reorder(as.dendrogram(rclust), rowMeans(mat))
     #cddr <- reorder(as.dendrogram(cclust), colMeans(mat))
     
-    if (!is.null(input$dotplot_cluster_columns) && input$dotplot_cluster_columns) { # order by input
+    if (!is.null(input$dotplot_cluster_columns) && input$dotplot_cluster_columns) { # order by clustering
       cclust <- hclust(dist(t(tmat), method = dist_meth),
                        method = clst_meth) # hclust with distance matrix
       reacValues$dataDotplot$Group <-
         factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cclust)$order])
-    } else { # order by clustering
+    } else { # order by input
       reacValues$dataDotplot$Group <-
         factor(reacValues$dataDotplot$Group, levels = reacValues$dotplotGroupsDf$group)
     }
@@ -1624,7 +1636,7 @@ server <- function(input, output, session) {
       scale_size_continuous(
         range = c(minSizeGradient, maxSizeGradient),
         name = legName, #paste("Relative", clusteringMetric),
-        guide = guide_legend(order=2),
+        guide = guide_legend(order=2, override.aes = list(shape = 19)),
         breaks = c(
           min(preFiltered$relativeAbundance ) + 0.01,
           max(preFiltered$relativeAbundance )
@@ -1671,6 +1683,7 @@ server <- function(input, output, session) {
       cowplot::ggsave2(file,plot=dotplot(),
                        width = numberOfDotplotBaits() * 1/72, 
                        height = numberOfDotplotPoints() * 1/72,
+                       limitsize = F,
                        device = cairo_pdf)
     })
   
