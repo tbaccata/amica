@@ -1353,8 +1353,6 @@ server <- function(input, output, session) {
     validate(need(!any(duplicated(reacValues$dotplotGroupsDf$group)), "Error! Please provide 
                   unique groups"  )  )
     
-    stopifnot(reacValues$compareAmicaSelected == TRUE)
-
     group2comps <- reacValues$dotplotGroupsDf
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     ridx <- rownames(reacValues$dataComp[ridx,])
