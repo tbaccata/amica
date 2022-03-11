@@ -1356,6 +1356,8 @@ server <- function(input, output, session) {
     group2comps <- reacValues$dotplotGroupsDf
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     ridx <- rownames(reacValues$dataComp[ridx,])
+    
+    validate(need(length(ridx) > 1, "Cannot output Dotplot with less than two proteins." ) )
 
     pattern <- padjPrefix
     if (reacValues$sigCutoffValue == "p-value") pattern <- pvalPrefix
@@ -1567,12 +1569,13 @@ server <- function(input, output, session) {
                         input$dotplot_clustering_method,
                         "complete")
     
-    #rddr <- reorder(as.dendrogram(rclust), rowMeans(mat))
+    
     #cddr <- reorder(as.dendrogram(cclust), colMeans(mat))
     
     if (!is.null(input$dotplot_cluster_columns) && input$dotplot_cluster_columns) { # order by clustering
       cclust <- hclust(dist(t(tmat), method = dist_meth),
                        method = clst_meth) # hclust with distance matrix
+      cclust <- reorder(as.dendrogram(cclust), colMeans(mat))
       reacValues$dataDotplot$Group <-
         factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cclust)$order])
     } else { # order by input
@@ -1583,6 +1586,7 @@ server <- function(input, output, session) {
     rclust <- hclust(dist(tmat, 
                           method = dist_meth), 
                      method = clst_meth) # hclust with distance matrix
+    rclust <- reorder(as.dendrogram(rclust), rowMeans(mat))
     reacValues$dataDotplot$Gene <-
       factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rclust)$order])
 
@@ -1628,7 +1632,7 @@ server <- function(input, output, session) {
         angle = 90,
         vjust = 0.5,
         hjust = 1
-      )) +
+      )) +  theme(legend.justification = "top") +
       ylab('') + xlab('') +
       scale_x_discrete(position = "top") +
       scale_size_continuous(
