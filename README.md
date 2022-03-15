@@ -67,6 +67,7 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 - Set comparisons (UpSet plots and Euler diagrams)
 - Customizable output data table (can be further filtered)
 - Heatmap
+- Dot plot
 - Fold change plot
 - Profile plot
 - Protein-protein interaction (PPI) network
