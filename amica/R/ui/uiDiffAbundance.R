@@ -39,7 +39,7 @@ tabPanel(
         width = 4,
         numericInput(
           "fcCutoff",
-          "Fold change threshold",
+          "Log2 fold change threshold",
           value = 1.5,
           min = 0,
           step = 0.01,
@@ -472,7 +472,8 @@ tabPanel(
                 )
               )
             ),
-            actionButton("submitHeatmap", strong("Submit"))
+            actionButton("submitHeatmap", strong("Submit")),
+            inline(uiOutput("download_button_heatmap"))
           ),
           shinyjs::hidden(div(id = 'hide_heatmap_before_submit',
                               fluidRow(
@@ -490,7 +491,7 @@ tabPanel(
         tabPanel(
           h3("Dotplot"),
           helpText("Dot plots integrate quantitive information together with 
-                   fold changes and (adj.) p-values into one visualization. 
+                   log2 fold changes and (adj.) p-values into one visualization. 
                    Proteins are displayed as dots, with their circle size 
                    corresponding to relative abundance (average intensities or 
                    fold changes can be selected). Fold changes are mapped as 
