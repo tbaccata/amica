@@ -1656,7 +1656,7 @@ server <- function(input, output, session) {
           maxColorGradient
         ),
         oob = scales::squish,
-        name = 'Fold Change',
+        name = 'Log2FC',
         guide = guide_colorbar(order = 1)
       ) +
       scale_color_manual(
@@ -2757,8 +2757,21 @@ server <- function(input, output, session) {
   
   output$download_button_heatmap <- renderUI({
     req(reacValues$dataHeatmap)
-    downloadButton("download_heatmap", "Download heatmap")
+    downloadButton("download_heatmap_data", "Download heatmap data")
   })
+  
+  output$download_heatmap_data <- downloadHandler(
+    filename = function() {
+      "heatmap_data.tsv"
+    },
+    content = function(file) {
+      df <-  reacValues$dataHeatmap
+      df[[geneName]] <- row.names(df)
+      df <- df[,c(ncol(df),1:ncol(df)-1)]
+
+      write.table(df, file, row.names = F, quote = F, sep = "\t")
+    }
+  )
   
   output$download_button_ora <- renderUI({
     req(reacValues$dataGprofiler)
