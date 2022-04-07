@@ -229,8 +229,8 @@ observeEvent(input$submitAnalysis, {
     reacValues$contrastMatrix <- tmpData
     
     for (elem in unique(c(tmpData[[1]], tmpData[[2]]))) {
-      if (!is.null(reacValues$expDesign) &
-          length(grep(elem, reacValues$expDesign)) < 1) {
+      if (!is.null(reacValues$expDesign) &&
+          length(grep(elem, reacValues$expDesign$groups)) < 1) {
         shiny:::reactiveStop(showNotification(
           paste(
             "Group",
