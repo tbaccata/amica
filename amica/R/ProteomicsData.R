@@ -177,8 +177,10 @@ filterOnMinValuesRnames = function(y, minMSMS, minRazor) {
       razorUniqueCount %in% names(y@rowData)) {
     
     rnames <-
-      row.names(y@rowData[y@rowData[[contaminantCol]] !=
-                             "+" &
+      row.names(y@rowData[
+        (is.na(y@rowData[[contaminantCol]]) |
+        y@rowData[[contaminantCol]] !=
+                             "+" ) &
                             y@rowData[[razorUniqueCount]] >=
                              minRazor &
                             y@rowData[[spectraCount]] >=
