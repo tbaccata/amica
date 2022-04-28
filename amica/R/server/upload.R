@@ -50,7 +50,25 @@ observeEvent(input$submitAnalysis, {
       !is.null(input$groupSpecification))  {
     inFile <- input$groupSpecification
     tmpData <- validateFile(inFile, c("groups", "samples"))
-    tmpData$samples <- make.names(tmpData$samples)
+    
+    if (class(tmpData$samples) == 'integer') {
+      tmpData$samples <- as.character(tmpData$samples)
+    } else {
+      tmpData$samples <- make.names(tmpData$samples)
+    }
+    
+    for (group in unique(tmpData$groups)) {
+      if (make.names(group) != group) {
+        out <- paste0("The group ", group, "is not a valid group name.\n",
+                      "A syntactically valid name does not contain whitespace, consists of letters, ",
+                      "numbers, dots or underline characters and starts with a letter.\n\n",
+                      "Please enter only valid group names in your experimental design."
+        )
+        showNotification(out, duration = NULL, type = "error")
+        return(NULL)
+      }
+    }
+    
     reacValues$expDesign <- tmpData
   }
   
@@ -148,7 +166,6 @@ observeEvent(input$submitAnalysis, {
     header <- make.names(header)
     mqNames <-
       c("Majority.protein.IDs",
-        "Gene.names",
         "Razor...unique.peptides")
     fragNames <-
       c("Indistinguishable.Proteins",
