@@ -117,13 +117,11 @@ groupComparisons <-
       
       group1_idx <- grep(paste0("^",group1names,"$", collapse = "|"), colnames(imp_df_int))
       group2_idx <- grep(paste0("^",group2names,"$", collapse = "|"), colnames(imp_df_int))
-
       
       rel_idxs <- c(group2_idx, group1_idx)
       relevant_group_names <- c(rep(group2, length(group2_idx)), rep(group1, length(group1_idx)) )
-    
       comparison <- subset(imp_df_int, select = rel_idxs)
-
+      
       limmaResults <- NULL #data.frame(row.names = rownames(imp_df_int) )
 
       if (length(group1_idx) < 2 | length(group2_idx) < 2) {
@@ -830,8 +828,7 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
                 "Majority.protein.IDs", " is not a column name of the uploaded input data."))
   }
   if (!(geneName %in% names(protData))) {
-    stop(paste0("Error: ", 
-                geneName, " is not a column name of the uploaded input data."))
+    protData[[geneName]] <- ""
   }
 
   row.names(protData) <- protData$Majority.protein.IDs
@@ -872,7 +869,7 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
   
   
   protData[[geneName]] <- ifelse(
-    protData[[geneName]] == "",
+    is.na(protData[[geneName]]) |protData[[geneName]] == "",
     as.character(protData[[proteinId]]),
     as.character(protData[[geneName]])
   )
