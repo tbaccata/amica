@@ -77,7 +77,6 @@ observeEvent(input$runAnalysis, {
       )
     ### filter on values
     impDf <- assay(reacValues$proteinData, quantIntensity)
-    
     reacValues$proteinData <-
       setAssay(x = reacValues$proteinData,
                assay = impDf,
@@ -100,7 +99,7 @@ observeEvent(input$runAnalysis, {
         input$minRazor,
         "\n"
       )
-    
+
     tmp <- tryCatch({
       filterOnValidValues(
         impDf[rnames, ],
@@ -120,7 +119,7 @@ observeEvent(input$runAnalysis, {
     finally = {
       showNotification(paste("Filtering values..."), type = "message")
     })
-    
+
     reacValues$inputParameterSummary <-
       paste0(
         reacValues$inputParameterSummary,
@@ -143,7 +142,6 @@ observeEvent(input$runAnalysis, {
       setRowData(reacValues$proteinData, rowsDf)
     
     normDf <- impDf[tmp,]
-    
     
     
     # renormalization
@@ -202,7 +200,6 @@ observeEvent(input$runAnalysis, {
         input$width,
         "\n"
       )
-    
     impDf[row.names(normDf), ] <- normDf
     reacValues$proteinData <-
       setAssay(x = reacValues$proteinData,
