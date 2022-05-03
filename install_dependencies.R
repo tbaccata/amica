@@ -24,11 +24,12 @@ install.packages(
     'ggfortify',
     'colourvalues',
     'tidyr',
-    'Cairo'
+    'Cairo',
+    'cowplot'
   ),
   repos = 'https://cloud.r-project.org/'
 )
 
 install.packages('BiocManager')
 library('BiocManager')
-BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn', 'cowplot'))
+BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn'))
