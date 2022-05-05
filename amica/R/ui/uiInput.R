@@ -67,6 +67,11 @@ tabPanel('Input',
                helpText(
                  "File needs to be tab-delimited and it needs to contain a unique
                  ProteinId, Gene name and an intensity prefix."
+               ),
+               checkboxInput(
+                 'customDataLogTransform',
+                 'Log2 transform intensities of custom data?',
+                 value = TRUE
                )
              ),
              
