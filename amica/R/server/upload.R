@@ -51,7 +51,7 @@ observeEvent(input$submitAnalysis, {
     inFile <- input$groupSpecification
     tmpData <- validateFile(inFile, c("groups", "samples"))
     
-    if (class(tmpData$samples) == 'integer') {
+    if (class(tmpData$samples) == 'integer' || class(tmpData$samples) == 'numeric') {
       tmpData$samples <- as.character(tmpData$samples)
     } else {
       tmpData$samples <- make.names(tmpData$samples)
@@ -134,7 +134,7 @@ observeEvent(input$submitAnalysis, {
     
     tryCatch({
       reacValues$proteinData <-
-        readInCustomSumm(input$customFile$datapath, specs, reacValues$expDesign)
+        readInCustomSumm(input$customFile$datapath, specs, reacValues$expDesign, input$customDataLogTransform)
     },
     error = function(cond) {
       message('Custom upload failed. ', cond)
