@@ -1086,7 +1086,7 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
 
 #### specific input
 
-readInCustomSumm <- function(mqFile, specs, design) {
+readInCustomSumm <- function(mqFile, specs, design, logtransform=TRUE) {
   protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
   
   specs$Pattern <- make.names(specs$Pattern, unique = FALSE)
@@ -1150,8 +1150,10 @@ readInCustomSumm <- function(mqFile, specs, design) {
   razor <- protData[,int_idx]
   names(razor) <- gsub(intensityPrefix, "", names(razor))
   razor[razor==0] <- NA
-  razor <- log2(razor)
-  
+  if (logtransform) {
+    razor <- log2(razor)
+  }
+
   intsList <- list(LFQIntensity=razor, ImputedIntensity=razor)
   dropIdx <- int_idx
   
@@ -1161,7 +1163,9 @@ readInCustomSumm <- function(mqFile, specs, design) {
     tots <- protData[,tot_idx]
     names(tots) <- gsub(abundancePrefix, "", names(tots))
     tots[tots==0] <- NA
-    tots <- log2(tots)
+    if (logtransform) {
+      tots <- log2(tots)
+    }
     intsList[[3]] <- tots
     names(intsList)[3] <- "iBAQ"
     dropIdx <- c(dropIdx, tot_idx)
