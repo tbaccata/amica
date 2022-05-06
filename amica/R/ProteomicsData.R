@@ -14,14 +14,13 @@ setClass(
 .valid.assays_nrow <- function(x, y) {
   if (length(x) < 2 )
     return(NULL)
-  
   lens <- unlist(lapply(x, nrow))
   variance <- var(lens)
   
   if (variance != 0) {
     txt <- sprintf(
-      "\n  nb of rows in 'assay' must be equal %s",
-      paste(lens, collapse = ", ") )
+      "\n  nb of rows in 'assay' must be equal %s \n",
+      paste0(names(x), ': ', lens, collapse = "\n") )
     return(txt)
   }
   
@@ -46,8 +45,12 @@ setClass(
   
   if (variance != 0) {
     txt <- sprintf(
-      "\n  nb of cols in 'assay' must be equal %s",
-      paste(lens, collapse = ", ") )
+      "\n  All 'Intensity' columns must have an equal amount of samples.\n
+      Recognized intensities with their corresponding number of samples: \n\n %s
+      \n\n Please rename or remove all 'Intensity' columns, that do not contain 
+      all samples.
+      ",
+      paste0(names(x), ': ', lens, collapse = "\n") )
     return(txt)
   }
   
@@ -79,7 +82,6 @@ setClass(
 
 
 ProteomicsData <- function(assays, rowData, colData) {
-  
   out <- .valid.assays_dim(assays, rowData, colData)
   
   if (!is.null(out)) {
