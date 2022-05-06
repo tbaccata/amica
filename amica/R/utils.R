@@ -1171,9 +1171,11 @@ readInCustomSumm <- function(mqFile, specs, design, logtransform=TRUE) {
     dropIdx <- c(dropIdx, tot_idx)
   }
   
-  
+  data <- protData[, -dropIdx]
+  names(data) <- gsub('Intensity', 'intensity', names(data)) 
   se <- ProteomicsData(assays = intsList,
-                       rowData = protData[, -dropIdx],
+                       rowData = data,
+                       #rowData = protData[, -dropIdx],
                        colData = design)
   
   return(se)
