@@ -529,9 +529,8 @@ output$overlapHeatmapHelpBox <- renderUI({
 })
 
 output$oraHelpBox <- renderUI({
-  if (input$oraHelp %% 2) {
-    HTML(
-      "
+  
+  text <- "
         Information from <a href='https://biit.cs.ut.ee/gprofiler/gost'target='_blank'>
         gprofiler's web site</a>:
         <p>
@@ -547,7 +546,24 @@ output$oraHelpBox <- renderUI({
         from Human Protein Atlas; protein complexes from CORUM and human disease
         phenotypes from Human Phenotype Ontology. g:GOSt supports close to 500
         organisms and accepts hundreds of identifier types.
-        </p>"
+        </p><h4>Source information:</h4>"
+  
+  out <- gprofiler2::get_version_info()
+  srcNames <- names(out$sources)
+  
+  outText <- "<p>"
+  for (src in srcNames) {
+    src_info <- out$sources[[src]]
+    outText <- paste0(outText, src, ':&emsp; ', src_info[[2]], '<br>')
+  }
+  
+  outText <- paste0(outText, "</p>")
+  
+  if (input$oraHelp %% 2) {
+    HTML(
+      paste0(
+        text, outText
+      )
     )
   }
 })
