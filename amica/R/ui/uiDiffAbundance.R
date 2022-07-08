@@ -837,6 +837,15 @@ tabPanel(
             "Only deselect this box if you are certain. 
                   The running time can increase dramatically if your gene list is too long."
           ),
+          checkboxInput("oraCustom", "Use quantified proteins as custom background?", value = FALSE),
+          helpText(
+            "A defined background gene set is required in order to determine 
+            over-represented functional terms. By default, all protein-coding 
+            genes are taken as background genes. Setting only quantified proteins 
+            as custom backgorund can be important in some cases, e.g when only a 
+            subset of proteins can be measured in an experiment. Examples include 
+            tissue-specific experiments (e.g liver-proteomics)."
+          )
         ),
         column(width = 6,
                inline(selectizeInput(
