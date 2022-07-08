@@ -2652,6 +2652,7 @@ server <- function(input, output, session) {
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     organism <- isolate(input$gprofilerOrganism)
     sources <- isolate(input$oraSources)
+    customBg <- isolate(input$oraCustom)
     
     validate(need(!is.null(organism), "Please select an organism."))
     validate(need(!is.null(sources), "Please select at least one source."))
@@ -2662,17 +2663,26 @@ server <- function(input, output, session) {
     queryGenes <- gsub(";.*", "", reacValues$dataComp[ridx, geneName])
 
     withProgress(message = 'Computing ORA ', {
-      reacValues$dataGprofiler <- gost(
-        query = queryGenes,
-        sources = sources,
-        evcodes = input$showGenes,
-        organism = organism,
-        exclude_iea = T,
-        significant = input$significantORA
-      )
+
+      customBgList <- NULL
+      if (customBg) {
+        customBgList <- gsub(";.*", "", reacValues$filtData[[geneName]])
+      }
+      
+      reacValues$dataGprofiler <- 
+        gost(
+          query = queryGenes,
+          sources = sources,
+          evcodes = input$showGenes,
+          organism = organism,
+          custom_bg = customBgList,
+          exclude_iea = T,
+          significant = input$significantORA
+        )
+       
       incProgress(1/1.01, detail = paste("Finished!"))
     })
-    
+
     reacValues$GostPlot <- reacValues$dataGprofiler
     reacValues$dataGprofiler <- reacValues$dataGprofiler$result
     
@@ -2891,7 +2901,7 @@ server <- function(input, output, session) {
       c("label",
         "CellMap NMF localization",
         "CellMap SAFE localization",
-        "Subcell. localization")
+        "Subcell_localization")
     cellmap
   })
 
@@ -2947,7 +2957,7 @@ server <- function(input, output, session) {
                height = "1200px",
                width = "2000px") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "Subcell. localization",
+      visOptions(selectedBy = "Subcell_localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
       visNodes(font = list(size = 20, strokeWidth = 2)) %>%
@@ -3032,7 +3042,7 @@ server <- function(input, output, session) {
                height = "1200px",
                width = "2000px") %>%
       visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "Subcell. localization",
+      visOptions(selectedBy = "Subcell_localization",
                  highlightNearest = TRUE,
                  nodesIdSelection = TRUE) %>%
       visNodes(font = list(size = 20, strokeWidth = 2)) %>%
