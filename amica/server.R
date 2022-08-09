@@ -23,7 +23,8 @@ server <- function(input, output, session) {
                            reacValues$proteinData
                          )$groups)), nrow(tmp)), ], aes(x = car, y = mpg, fill = car)) +
       geom_bar(stat = "Identity") + 
-      theme_minimal(base_size = 14) +
+      theme_cowplot(font_size = 14) + 
+      background_grid() +
       scale_fill_manual(values=myColors() ) +
       theme(axis.text.x = element_text(
         angle = 90,
@@ -67,7 +68,9 @@ server <- function(input, output, session) {
 
     p <-
       ggplot(iris, aes(x=Sepal.Length, y=Petal.Length, color=Species)) + geom_point() +
-      geom_point() + theme_minimal(base_size = 14) +  scale_color_manual(values=myScatterColors() )
+      geom_point() + theme_cowplot(font_size = 14) +  
+      background_grid() + 
+      scale_color_manual(values=myScatterColors() )
     
     ggplotly(p) %>% config(
       displaylogo = F,
@@ -293,8 +296,10 @@ server <- function(input, output, session) {
       
       p <- ggplot(df_out,aes(x=PC1,y=PC2,color=group, label=sample,  key=key ))
       p <- p + geom_point(size=pca_pointsize) + xlab(percentage[1]) + ylab(percentage[2])
-      p <- p + scale_color_manual(values=myGroupColors()) + theme_minimal(base_size = pca_base) +
+      p <- p + scale_color_manual(values=myGroupColors()) + theme_cowplot(font_size = pca_base) +
+        background_grid() + 
           theme(legend.text = element_text(size = pca_legend))
+      p <- p + ggtitle(paste0('PCA (', gsub("Intensity", " intensities", assayNames), ')'))
       
       # if (pca_show_label) {
       #   p <- p + geom_text(data=df_out,
@@ -318,7 +323,7 @@ server <- function(input, output, session) {
               format = input$pca_format,
               width = input$pca_width,
               height = input$pca_height,
-              filename = "pca"
+              filename = paste0("pca_", assayNames)
             )
           )
   })
@@ -358,6 +363,7 @@ server <- function(input, output, session) {
   ### ------------------------------------------- BOX PLOT
   
   boxplotPlotly <- eventReactive(input$submitBoxplot, {
+    assayNames <- isolate(input$assayNames)
     p <-
       ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = colname, y = value, fill =
                                                              group)) +
@@ -366,7 +372,8 @@ server <- function(input, output, session) {
         outlier.color = NULL,
         outlier.fill = NULL
       ) +
-      theme_minimal(base_size = input$boxplot_base) +
+      theme_cowplot(font_size = input$boxplot_base) +
+      background_grid() +
       scale_fill_manual(values = myGroupColors()) +
       theme(
         axis.text.x = element_text(
@@ -377,13 +384,16 @@ server <- function(input, output, session) {
         ),
         legend.text = element_text(size = input$boxplot_legend),
         legend.title = element_blank()
-      ) + ylab("Intensity (log2)") + xlab("")
+      ) + ylab(paste0(gsub("Intensity", " intensities", assayNames), 
+                      " (log2)")) + xlab("") +
+      ggtitle(paste0('Box plot (',gsub("Intensity", " intensities", assayNames), ')'))
     
     ggplotly(p)
   })
   
   output$boxPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
+    assayNames <- isolate(input$assayNames)
     withProgress(message = "Plotting boxplot of intensities", {
       boxplotPlotly()  %>%
         config(
@@ -393,7 +403,7 @@ server <- function(input, output, session) {
             format = input$boxplot_format,
             width = input$boxplot_width,
             height = input$boxplot_height,
-            filename = "boxplot"
+            filename = paste0("boxplot_", assayNames)
           )
         )
     })
@@ -402,13 +412,15 @@ server <- function(input, output, session) {
   ### ------------------------------------------- DENSITY PLOT
   
   densityPlotly <- eventReactive(input$submitDensity, {
+    assayNames <- isolate(input$assayNames)
     p <-
       ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
       # ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color =
       #                                                        colname)) +
       geom_density() +
       scale_color_manual(values = myColors()) +
-      theme_minimal(base_size = input$density_base) +
+      theme_cowplot(font_size = input$density_base) +
+      background_grid() +
       theme(
         axis.text.x = element_text(
           angle = 90,
@@ -418,12 +430,18 @@ server <- function(input, output, session) {
         ),
         legend.title = element_blank(),
         legend.text = element_text(size = input$density_legend),
-      ) + xlab("Intensity (log2)") + ylab("Density")
+      ) + xlab(paste0(gsub("Intensity", " intensities", assayNames), " (log2)")) + ylab("Density") +
+      ggtitle(paste0(
+        'Density plot (',
+        gsub("Intensity", " intensities", assayNames),
+        ')'
+      ))
     ggplotly(p)
   })
   
   output$densityPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
+    assayNames <- isolate(input$assayNames)
     
     withProgress(message = "Plotting density plot", {
       densityPlotly() %>%
@@ -434,7 +452,7 @@ server <- function(input, output, session) {
             format = input$density_format,
             width = input$density_width,
             height = input$density_height,
-            filename = "density_plot"
+            filename = paste0("density_plot", assayNames)
           )
         )
     })
@@ -594,8 +612,9 @@ server <- function(input, output, session) {
                  label = Gene,
                  key = key,
                  color = Contaminant
-               )) + theme_minimal(base_size = plot_fontsize) + labs(x = xLabel, y =
-                                                                      yLabel)  +
+               )) + theme_cowplot(font_size = plot_fontsize) + 
+        background_grid() +
+        labs(x = xLabel, y = yLabel)  +
         theme(
           legend.title = element_text(size = plot_legendsize),
           legend.text = element_text(size = plot_legendsize)
@@ -650,7 +669,7 @@ server <- function(input, output, session) {
           format = scatter_format,
           width = plot_width,
           height = plot_height,
-          filename = "scatter_plot"
+          filename = paste0("scatter_plot_", xLabel, "_", yLabel)
         )
       )
   })
@@ -714,6 +733,9 @@ server <- function(input, output, session) {
         xlab = "",
         ylab = "",
         limits = limits,
+        main = paste0("<b>Correlation plot (", 
+                      gsub("Intensity", " intensities", assayName), 
+                      ")</b>"),
         colors = heatColors(),
         row_side_palette = myGroupColors(),
         row_side_colors = annot,
@@ -727,6 +749,9 @@ server <- function(input, output, session) {
         ylab = "",
         colors = heatColors(),
         limits = limits,
+        main = paste0("<b>Correlation plot (", 
+                                     gsub("Intensity", " intensities", assayName), 
+                                     ")</b>"),
         plot_method = "plotly",
         key.title = "Pearson Correlation"
       )
@@ -735,6 +760,7 @@ server <- function(input, output, session) {
   })
   
   output$corrPlotly <- renderPlotly({
+    assayNames <- isolate(input$assayNames)
     withProgress(message = "Plotting correlation plot ", {
       p <- corrBasePlot()
     })
@@ -745,9 +771,17 @@ server <- function(input, output, session) {
         format = input$cor_format,
         width = input$cor_width,
         height = input$cor_height,
-        filename = "corrplot"
+        filename = paste0("corrplot_", assayNames)
       )
-    )
+    ) %>% layout(
+      # text = paste0("Correlation plot (", 
+      #               gsub("Intensity", " intensities", assayNames), 
+      #               ")"),
+      font = list(
+        family = "",
+        size = 16,
+        color = "black"
+      ))
   })
   
   
@@ -918,8 +952,9 @@ server <- function(input, output, session) {
     
     p <- ggplot(contsInts, aes(x = Sample, y = value, fill = group)) +
       geom_bar(stat = "identity") +
-      theme_minimal(base_size = input$contaminants_base) +
-      scale_fill_manual(values = myGroupColors()) +
+      scale_fill_manual(values = myGroupColors()) + 
+      theme_cowplot(font_size = input$contaminants_base) + 
+      background_grid() + 
       theme(
         axis.text.x = element_text(
           angle = 90,
@@ -929,7 +964,9 @@ server <- function(input, output, session) {
         ),
         legend.title = element_blank(),
         legend.text = element_text(size = input$contaminants_legend)
-      ) + xlab("") + ylab("% Contaminant")
+      ) + xlab("") + ylab("% Contaminant") +
+      ggtitle(paste("Relative Amount of Contaminants",
+                               "based on iBAQ Intensities", sep = '<br>'))
     
     ggplotly(p)
   })
@@ -975,21 +1012,28 @@ server <- function(input, output, session) {
     
     tmp$value <- 100 * tmp$value / sum(tmp$value, na.rm = T)
     
+    plotdf <- head(tmp, 15)
+    plotdf$Gene.name <- gsub(";.*", "", plotdf$Gene.name)
+    
     withProgress(message = "Plotting most abundant proteins", {
       p <-
-        ggplot(head(tmp, 15), aes(x = reorder(Gene.name,-value), y = value)) +
+        ggplot(plotdf, aes(x = reorder(Gene.name, value), y = value)) +
         geom_bar(stat = "identity", fill = myScatterColors()[1]) +
-        theme_minimal(base_size = 14) +
+        coord_flip() + 
+        theme_cowplot(font_size = input$abundant_base) + 
+        background_grid() +
         theme(
-          axis.text.x = element_text(
-            angle = 90,
-            hjust = 1,
-            vjust = 0.5,
-            size = 10
-          ),
+          # axis.text.x = element_text(
+          #   angle = 90,
+          #   hjust = 1,
+          #   vjust = 0.5,
+          #   size = 10
+          # ),
           legend.text = element_text(size = input$abundant_legend),
           legend.title = element_blank()
-        ) + xlab("") + ylab("%Signal of protein")
+        ) + xlab("") + ylab(paste0("%iBAQ in ", input$samples) ) +
+        ggtitle(paste("15 most abundant proteins",
+                      "based on iBAQ Intensities", sep = '<br>'))
     })
     
     ggplotly(p) %>% config(
@@ -999,7 +1043,7 @@ server <- function(input, output, session) {
         format = input$abundant_format,
         width = 676,
         height = 676,
-        filename = "plot"
+        filename = "most_abundant_proteins"
       )
     )
   })
@@ -1040,7 +1084,8 @@ server <- function(input, output, session) {
     
     p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
       geom_bar(stat = "identity") +
-      theme_minimal(base_size = input$barplotId_base) +
+      theme_cowplot(font_size = input$barplotId_base) +
+      background_grid() +
       scale_fill_manual(values = myGroupColors()) +
       theme(
         axis.text.x = element_text(
@@ -1109,7 +1154,8 @@ server <- function(input, output, session) {
     p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
       geom_bar(stat = "identity") +
       scale_fill_manual(values = myGroupColors()) +
-      theme_minimal(base_size = input$barplotMv_base) +
+      theme_cowplot(font_size = input$barplotMv_base) + 
+      background_grid() +
       theme(
         axis.text.x = element_text(
           angle = 90,
@@ -1143,6 +1189,7 @@ server <- function(input, output, session) {
   ### -------------------------------------------- CVs BOX PLOT
   
   cvsPlotly <- eventReactive(input$submitCVs, {
+    assayNames <- isolate(input$assayNames)
     calcData <- dataAssay()
     calcData$value <- 2 ^ calcData$value
     cvs <-
@@ -1157,7 +1204,8 @@ server <- function(input, output, session) {
         outlier.fill = NULL
       ) +
       scale_fill_manual(values = myGroupColors()) +
-      theme_minimal(base_size = input$cv_base) +
+      theme_cowplot(font_size = input$cv_base) +
+      background_grid() +
       theme(
         axis.text.x = element_text(
           angle = 90,
@@ -1167,13 +1215,15 @@ server <- function(input, output, session) {
         ),
         legend.text = element_text(size = input$cv_legend),
         legend.title = element_blank()
-      ) + ylab("Coefficient of Variation (%)") + xlab("")
+      ) + ylab("Coefficient of Variation (%)") + xlab("") +
+      ggtitle(paste0('CV plot (',gsub("Intensity", " intensities", assayNames), ')'))
     
     ggplotly(p)
   })
   
   output$boxplotCV <- renderPlotly({
     req(reacValues$uploadSuccess)
+    assayNames <- isolate(input$assayNames)
     validate(need(
       any(duplicated(
         colData(reacValues$proteinData)$groups
@@ -1189,7 +1239,7 @@ server <- function(input, output, session) {
           format = input$cv_format,
           width = input$cv_width,
           height = input$cv_height,
-          filename = "cv_plot"
+          filename = paste0("cv_plot_", assayNames)
         )
       )
     })
@@ -1763,7 +1813,16 @@ server <- function(input, output, session) {
         pageLength = 10,
         autoWidth = TRUE,
         search = list(regex = TRUE),
-        buttons = c('csv')
+        buttons = list(list(
+          extend = 'csv',
+          filename = paste0(
+            reacValues$enrichmentChoice,
+            '_proteins_log2fcThresh_',
+            reacValues$fcCutoff, 
+            'signcutoff_',
+            reacValues$sigCutoffValue
+          )
+        ))
       )
     ) %>% formatRound(paste0(logfcPrefix,selection), 4) 
     
