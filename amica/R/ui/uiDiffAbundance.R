@@ -837,7 +837,14 @@ tabPanel(
             "Only deselect this box if you are certain. 
                   The running time can increase dramatically if your gene list is too long."
           ),
-          checkboxInput("oraCustom", "Use quantified proteins as custom background?", value = FALSE),
+          checkboxInput("oraExcludeIea", 
+                        "Exclude electronic GO annotations?", 
+                        value = FALSE),
+          helpText("This options discards all evidence codes marked as IEA 
+                   (Inferred from Electronic Annotation)"),
+          checkboxInput("oraCustom", 
+                        "Use quantified proteins as custom background?", 
+                        value = FALSE),
           helpText(
             "A defined background gene set is required in order to determine 
             over-represented functional terms. By default, all protein-coding 
