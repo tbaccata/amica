@@ -2277,7 +2277,8 @@ server <- function(input, output, session) {
                  key = key,
                  color = significant
                )) + geom_point(size = pointsize) + 
-        theme_minimal(base_size = fontsize) + theme(
+        theme_cowplot(font_size = fontsize) + background_grid() +
+        theme(
           legend.text = element_text(size = legendFontSize),
           legend.title = element_text(size = legendFontSize)
         ) + scale_color_manual(values=colors) +
@@ -2419,7 +2420,8 @@ server <- function(input, output, session) {
       p <-
         plotVolcanoPlot(pltData,  pcols, padjYBoolean, pointsize)
       p <-
-        p + theme_minimal(base_size = fontsize) + theme(
+        p + theme_cowplot(font_size = fontsize) + background_grid() +
+        theme(
           legend.text = element_text(size = legend_fontsize),
           legend.title = element_text(size = legend_fontsize)
         )
@@ -2503,7 +2505,8 @@ server <- function(input, output, session) {
       p <- plotMAPlot(pltData, pcols, pointsize)
       
       p <-
-        p + theme_minimal(base_size = fontsize) + theme(
+        p + theme_cowplot(font_size = fontsize) + background_grid() + 
+        theme(
           legend.text = element_text(size = legend_fontsize),
           legend.title = element_text(size = legend_fontsize)
         )
@@ -2598,7 +2601,8 @@ server <- function(input, output, session) {
   
     p <- p +
       xlab("") + ylab("Intensity (log2)") + 
-      theme_minimal(base_size = input$profile_base) + 
+      theme_cowplot(font_size = input$profile_base) + 
+      background_grid() + 
       ggtitle(input$selectProfilePlotGene) + 
       theme(axis.text.x = element_text(
         angle = 90,
@@ -2712,6 +2716,7 @@ server <- function(input, output, session) {
     organism <- isolate(input$gprofilerOrganism)
     sources <- isolate(input$oraSources)
     customBg <- isolate(input$oraCustom)
+    excludeIea <- isolate(input$oraExcludeIea)
     
     validate(need(!is.null(organism), "Please select an organism."))
     validate(need(!is.null(sources), "Please select at least one source."))
@@ -2735,7 +2740,7 @@ server <- function(input, output, session) {
           evcodes = input$showGenes,
           organism = organism,
           custom_bg = customBgList,
-          exclude_iea = T,
+          exclude_iea = excludeIea,
           significant = input$significantORA
         )
        
@@ -2766,26 +2771,32 @@ server <- function(input, output, session) {
   })
   
   output$gostplot <- renderPlotly({
-    req(reacValues$GostPlot )
+    
     validate(
-      need(nrow(reacValues$GostPlot$result) >= 1, "No significant over-represented term detected.")
+      need(nrow(reacValues$GostPlot$result) >= 1, 
+           paste("No results to show\n",
+           "Please make sure that the organism",
+           "is correct or deselect Only show significant terms"))
     )
+    # req(reacValues$GostPlot )
     gostplot(reacValues$GostPlot, capped = F, interactive = T)
     # %>% layout(yaxis = list(title = '-log10(p-adj)'))
   })
   
   oraBarBase <- eventReactive(input$submitORABar,{
-    req(reacValues$dataGprofiler)
     orasource <- isolate(input$orasource)
+    plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
+    validate(need(!is.null(reacValues$dataGprofiler) | nrow(plotDf)>0, 
+                  paste("No results to show\n",
+                        "Please make sure that the organism",
+                        "is correct or deselect Only show significant terms")))
+    
+    
     oracolor <- isolate(input$oraBar_color)
     oraMaxTerm <- isolate(input$oraBar_maxTerms)
     baseSize <- isolate(input$oraBar_base)
     
     oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
-    
-    plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
-    
-    validate(need(nrow(plotDf)>0, "No significant over-represented terms detected."))
     
     plotDf$minusLog10p_value <- -log10(plotDf$p_value)
     plotDf <- plotDf[!duplicated(plotDf$term_name),]
@@ -2796,7 +2807,8 @@ server <- function(input, output, session) {
     p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
       geom_bar(stat = "identity", fill=oracolor, width = 0.9)  + xlab("") +
       ylab("-log10(p-value)") +
-      theme_minimal( base_size = baseSize) + coord_flip()
+      theme_cowplot(font_size = baseSize) + background_grid() +
+      coord_flip()
     
     ggplotly(p)
   })
@@ -3391,7 +3403,8 @@ server <- function(input, output, session) {
         x = paste0(assayNameAmicas, ' ', xvar, ' (log2)'),
         y = paste0(assayNameAmicas, ' ', yvar, ' (log2)')
       ) +
-      scale_color_manual(values = colors) + theme_minimal(base_size = fontsize)
+      scale_color_manual(values = colors) + theme_cowplot(font_size = fontsize) +
+      background_grid()
     
     intercept <- 0
     slope <- 1
