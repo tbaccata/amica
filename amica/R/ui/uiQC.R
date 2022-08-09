@@ -416,15 +416,15 @@ tabPanel(
                        min = 4,
                        max = 32,
                        step = 1
-                     ),
-                     numericInput(
-                       "abundant_legend",
-                       "Legend font size in pt.",
-                       value = 10,
-                       min = 4,
-                       max = 16,
-                       step = 1
                      )
+                     # numericInput(
+                     #   "abundant_legend",
+                     #   "Legend font size in pt.",
+                     #   value = 10,
+                     #   min = 4,
+                     #   max = 16,
+                     #   step = 1
+                     # )
                    )),
                  ###
                  plotlyOutput("mostAbundant", height = 600),
