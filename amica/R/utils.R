@@ -500,22 +500,44 @@ getComparisonsData2 <-
   }
 
 validateFile <- function(inFile, columns) {
-  if (is.null(inFile))
-    return(NULL)
+  if (is.null(inFile)) {
+    stop(paste0("Uploaded file ", inFile$name, " is empty."))
+  }
+    
+  isTabDelim <- "\t" %in% strsplit(readLines(inFile$datapath, n = 1), split='')[[1]]
   
-  validate(need(
-    file_ext(inFile$name) %in% c(
-      #'text/csv',
-      'text/comma-separated-values',
-      'text/tab-separated-values',
-      #'text/plain'
-      'csv',
-      'tsv',
-      'txt',
-      'dat'
-    ),
-    "Wrong File Format try again!"
-  ))
+  if (!isTabDelim) {
+    stop(paste0("Uploaded file ", inFile$name, "\n",
+                "is not tab-delimeted.\n",
+                "Please provide a tab-delimited file."))
+  }
+  
+  colNames <- strsplit(readLines(inFile$datapath, n = 1), split='\t')[[1]]
+  
+  wrongColNames <- ""
+  for (column in columns) {
+    if (length(grep(column, colNames)) < 1) {
+      wrongColNames <- paste0(
+        wrongColNames,
+        paste0(
+          "No column named \"",
+          column,
+          "\" found in ",
+          inFile$name,
+          "\nPlease provide a column named ",
+          "\"",
+          column,
+          "\"",
+          " in ",
+          inFile$name,
+          ".\n"
+        )
+      )
+    }
+  }
+  if (wrongColNames != "") {
+    stop(wrongColNames)
+  }
   
   data <-
     read.delim(
@@ -524,15 +546,6 @@ validateFile <- function(inFile, columns) {
       header = TRUE,
       sep = "\t"
     )
-  
-  for (column in columns) {
-    
-    validate(need(
-      length(grep(column, colnames(data))) > 0,
-      paste0("Column ", column, " not found in ", inFile$name)
-    ))
-    
-  }
   return(data)
 }
 
