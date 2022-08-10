@@ -1,6 +1,7 @@
 require(shiny)
 library(shinyjs)
 require(shinyBS)
+require(shinyalert)
 require(ggplot2)
 require(ggfortify)
 require(plotly)

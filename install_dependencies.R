@@ -5,6 +5,7 @@ install.packages(
     'shinyjs',
     'shinymanager',
     'shinyBS',
+    'shinyalert',
     'DT',
     'shinycssloaders',
     'bslib',
