@@ -4,6 +4,8 @@ observeEvent(input$submitAnalysis, {
   reacValues$combinedData = NULL
   reacValues$dataCompAmica = NULL
   
+  allFilesUploaded <- TRUE
+  
   ### EXAMPLE
   if (input$source == "example") {
     sourcePath <- "data/PXD0016455/"
@@ -41,6 +43,7 @@ observeEvent(input$submitAnalysis, {
   
   if (input$source != "example" &
       (is.null(input$groupSpecification))) {
+    allFilesUploaded <- FALSE
     showNotification(paste("Need to upload experimental design."), type = "message")
     return("")
   }
@@ -48,34 +51,98 @@ observeEvent(input$submitAnalysis, {
   # EXPERIMENTAL DESIGN
   if (input$source != "example" &
       !is.null(input$groupSpecification))  {
-    inFile <- input$groupSpecification
-    tmpData <- validateFile(inFile, c("groups", "samples"))
-    
-    if (class(tmpData$samples) == 'integer' || class(tmpData$samples) == 'numeric') {
-      tmpData$samples <- as.character(tmpData$samples)
-    } else {
-      tmpData$samples <- make.names(tmpData$samples)
+    ###
+    tryCatch({
+      tmpData <- validateFile(input$groupSpecification, c("groups", "samples"))
+    },
+    error = function(cond) {
+      #message('Upload of experimental design file failed. ', cond)
+      allFilesUploaded <- FALSE
+      
+      shinyalert(
+        title = "Upload of experimental design file failed.",
+        text = paste(cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+      
+      # showNotification(
+      #   paste(cond),
+      #   duration = 100,
+      #   closeButton = T,
+      #   type = "error"
+      # )
+      #return("")
+    },
+    warning = function(cond) {
+      showNotification(paste(cond))
     }
+    #, finally = {
+    #  showNotification(paste("Succesfully uploaded experimental design."), type = "message")
+    #}
+    )
+    ###
     
-    for (group in unique(tmpData$groups)) {
-      if (make.names(group) != group) {
-        out <- paste0("The group ", group, "is not a valid group name.\n",
-                      "A syntactically valid name does not contain whitespace, consists of letters, ",
-                      "numbers, dots or underline characters and starts with a letter.\n\n",
-                      "Please enter only valid group names in your experimental design."
-        )
-        showNotification(out, duration = NULL, type = "error")
-        return(NULL)
+    if (exists("tmpData")) {
+      if (class(tmpData$samples) == 'integer' ||
+          class(tmpData$samples) == 'numeric') {
+        tmpData$samples <- as.character(tmpData$samples)
+      } else {
+        tmpData$samples <- make.names(tmpData$samples)
       }
+      
+      for (group in unique(tmpData$groups)) {
+        if (make.names(group) != group) {
+          out <- paste0(
+            "The group ",
+            group,
+            "is not a valid group name.\n",
+            "A syntactically valid name does not contain whitespace, consists of letters, ",
+            "numbers, dots or underline characters and starts with a letter.\n\n",
+            "Please enter only valid group names in your experimental design."
+          )
+          
+          shinyalert(
+            title = "Please enter only valid group names in your experimental design.",
+            text = paste(out),
+            size = "s", 
+            closeOnEsc = TRUE,
+            closeOnClickOutside = TRUE,
+            html = FALSE,
+            type = "error",
+            showConfirmButton = TRUE,
+            showCancelButton = FALSE,
+            confirmButtonText = "OK",
+            confirmButtonCol = "#669966",
+            timer = 0,
+            imageUrl = "",
+            animation = TRUE
+          )
+          
+          #showNotification(out, duration = NULL, type = "error")
+          allFilesUploaded <- FALSE
+          return("")
+        }
+      }
+      reacValues$expDesign <- tmpData
     }
-    
-    reacValues$expDesign <- tmpData
   }
   
   if (input$source == "amica") {
     if (is.null(input$amicaFile)) {
-      showNotification(paste("Need to upload amica output."), type = "error")
-      return(NULL)
+      showNotification(paste("Need to upload amica output."), type = "message")
+      allFilesUploaded <- FALSE
+      return("")
     }
     
     withProgress(message = "Reading in amica file", {
@@ -86,17 +153,36 @@ observeEvent(input$submitAnalysis, {
       },
       error = function(cond) {
         message('amica upload failed. ', cond)
-        showNotification(
-          paste(cond),
-          duration = 100,
-          closeButton = T,
-          type = "error"
+        allFilesUploaded <- FALSE
+        # showNotification(
+        #   paste(cond),
+        #   duration = 100,
+        #   closeButton = T,
+        #   type = "error"
+        # )
+        
+        shinyalert(
+          title = "amica upload failed.",
+          text = paste(cond),
+          size = "s", 
+          closeOnEsc = TRUE,
+          closeOnClickOutside = TRUE,
+          html = FALSE,
+          type = "error",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#669966",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
         )
+        return("")
       },
       warning = function(cond) {
         message(paste(cond))
       }, finally = {
-        showNotification(paste("Reading in amica ..."), type = "message")
+        showNotification(paste("Successfully processed amica file"), type = "message")
       }
       )
       #
@@ -120,43 +206,103 @@ observeEvent(input$submitAnalysis, {
   
   if (input$source == "custom") {
     if (is.null(input$customFile)) {
-      showNotification(paste("Need to upload custom tab-separated file."), type = "error")
-      return(NULL)
+      allFilesUploaded <- FALSE
+      showNotification(paste("Need to upload custom tab-separated file."), type = "message")
+      return("")
     }
     
     if (is.null(input$specFile)) {
+      allFilesUploaded <- FALSE
       showNotification(paste("Need to upload specification file to map relevant columns."),
                        type = "error")
-      return(NULL)
+      return("")
     }
     
-    specs <- validateFile(input$specFile, c("Variable", "Pattern"))
+    ###
+    tryCatch({
+      specs <- validateFile(input$specFile, c("Variable", "Pattern"))
+    },
+    error = function(cond) {
+      #message('Upload of experimental design file failed. ', cond)
+      allFilesUploaded <- FALSE
+      # showNotification(
+      #   paste(cond),
+      #   duration = 100,
+      #   closeButton = T,
+      #   type = "error"
+      # )
+      shinyalert(
+        title = "Upload of specification file failed.",
+        text = paste(cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+      #return("")
+    },
+    warning = function(cond) {
+      showNotification(paste(cond))
+    }
+    #, finally = {
+    #  showNotification(paste("Succesfully uploaded experimental design."), type = "message")
+    #}
+    )
+    ###
     
     tryCatch({
       reacValues$proteinData <-
         readInCustomSumm(input$customFile$datapath, specs, reacValues$expDesign, input$customDataLogTransform)
     },
     error = function(cond) {
-      message('Custom upload failed. ', cond)
-      showNotification(
-        paste(cond),
-        duration = 100,
-        closeButton = T,
-        type = "error"
+      #message('Custom upload failed. ', cond)
+      allFilesUploaded <- FALSE
+      # showNotification(
+      #   paste(cond),
+      #   duration = 100,
+      #   closeButton = T,
+      #   type = "error"
+      # )
+      
+      shinyalert(
+        title = "Upload of custom file failed.",
+        text = paste(cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
       )
+      
       },
     warning = function(cond) {
-      message(paste(cond))
+      showNotification(paste(cond))
     }, finally = {
-      showNotification(paste("Reading in custom file format ..."), type = "message")
+      showNotification(paste("Successfully processed custom file"), type = "message")
     }
     )
   }
   
   if (input$source == "maxquant") {
     if (is.null(input$maxquantFile)) {
-      showNotification(paste("Need to upload MaxQuant or FragPipe output."), type = "error")
-      return(NULL)
+      allFilesUploaded <- FALSE
+      showNotification(paste("Need to upload MaxQuant or FragPipe output."), type = "message")
+      return("")
     }
     
     reacValues$uniqueGroups <- unique(reacValues$expDesign$groups)
@@ -172,20 +318,35 @@ observeEvent(input$submitAnalysis, {
         "Protein.ID",
         "Protein.Probability")
     
-    if (all(mqNames %in% header)) {
+    if (all(mqNames %in% header &&
+            length(grep("^Intensity|^iBAQ.|^LFQ.intensity", header)) > 0
+            )) {
       tryCatch({
         reacValues$proteinData <-
           readInMQproteinGroupsSumm(input$maxquantFile$datapath,
                                     reacValues$expDesign)
       },
       error = function(cond) {
+        allFilesUploaded <- FALSE
         message('MaxQuant upload failed. ', cond)
-        showNotification(
-          paste(cond),
-          duration = 100,
-          closeButton = T,
-          type = "error"
+        
+        shinyalert(
+          title = "Upload of MaxQuant file failed.",
+          text = paste(cond),
+          size = "s", 
+          closeOnEsc = TRUE,
+          closeOnClickOutside = TRUE,
+          html = FALSE,
+          type = "error",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#669966",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
         )
+        return("")
       },
       warning = function(cond) {
         message(paste(cond))
@@ -203,13 +364,32 @@ observeEvent(input$submitAnalysis, {
                                           reacValues$expDesign)
       },
       error = function(cond) {
-        message('FragPipe upload failed. ', cond)
-        showNotification(
-          paste(cond),
-          duration = 100,
-          closeButton = T,
-          type = "error"
+        allFilesUploaded <- FALSE
+        #message('FragPipe upload failed. ', cond)
+        
+        shinyalert(
+          title = "Upload of FragPipe file failed.",
+          text = paste(cond),
+          size = "s", 
+          closeOnEsc = TRUE,
+          closeOnClickOutside = TRUE,
+          html = FALSE,
+          type = "error",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#669966",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
         )
+        
+        # showNotification(
+        #   paste(cond),
+        #   duration = 100,
+        #   closeButton = T,
+        #   type = "error"
+        # )
       },
       warning = function(cond) {
         message(paste(cond))
@@ -220,16 +400,39 @@ observeEvent(input$submitAnalysis, {
       #
       reacValues$dbTool <- "fragpipe"
     } else {
-      showNotification(
-        paste0(
+      allFilesUploaded <- FALSE
+      
+      shinyalert(
+        title = "Unrecognized input format.",
+        text = paste0(
           "Unrecognized input format\n",
           "\tallowed input files:\n",
           "\tMaxQuant: proteinGroups.txt\n",
           "\tFragPipe: combined_protein.tsv"
         ),
-        type = "error"
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
       )
-      stop("Unrecognized input format")
+      
+      # showNotification(
+      #   paste0(
+      #     "Unrecognized input format\n",
+      #     "\tallowed input files:\n",
+      #     "\tMaxQuant: proteinGroups.txt\n",
+      #     "\tFragPipe: combined_protein.tsv"
+      #   ),
+      #   type = "error"
+      # )
     }
     
   }
@@ -237,29 +440,51 @@ observeEvent(input$submitAnalysis, {
   # contrasts
   if (input$source != "example" & input$source != "amica") {
     if (is.null(input$contrastMatrix)) {
-      showNotification(paste("Need to upload contrast matrix."), type = "error")
-      return(NULL)
+      showNotification(paste("Need to upload contrast matrix."), type = "message")
+      return("")
     }
-    
-    inFile <- input$contrastMatrix
-    tmpData <- validateFile(inFile, NULL)
-    reacValues$contrastMatrix <- tmpData
-    
-    for (elem in unique(c(tmpData[[1]], tmpData[[2]]))) {
-      if (!is.null(reacValues$expDesign) &&
-          length(grep(elem, reacValues$expDesign$groups)) < 1) {
-        shiny:::reactiveStop(showNotification(
-          paste(
-            "Group",
-            elem,
-            "in contrasts not in uploaded experimental design"
-          ),
-          type = "warning",
-          duration = 100
-        ))
+
+    ###
+    tryCatch({
+      contrastData <- validateFile(input$contrastMatrix, NULL)
+    },
+    error = function(cond) {
+      #message('Upload of experimental design file failed. ', cond)
+      allFilesUploaded <- FALSE
+      shiny:::reactiveStop(showNotification(
+        paste(cond),
+        duration = 100,
+        closeButton = T,
+        type = "error"
+      ))
+      #return("")
+    },
+    warning = function(cond) {
+      showNotification(paste(cond))
+    }
+    #, finally = {
+    #  showNotification(paste("Succesfully uploaded experimental design."), type = "message")
+    #}
+    )
+    ###
+    if (exists("contrastData")) {
+      reacValues$contrastMatrix <- contrastData
+      
+      for (elem in unique(c(contrastData[[1]], contrastData[[2]]))) {
+        if (!is.null(reacValues$expDesign) &&
+            length(grep(elem, reacValues$expDesign$groups)) < 1) {
+          shiny:::reactiveStop(showNotification(
+            paste(
+              "Group",
+              elem,
+              "in contrasts not in uploaded experimental design"
+            ),
+            type = "warning",
+            duration = 100
+          ))
+        }
       }
     }
-    
   } else {
     reacValues$nsubmits <- reacValues$nsubmits + 1
     if (reacValues$nsubmits < 2) {
@@ -270,6 +495,5 @@ observeEvent(input$submitAnalysis, {
       toggle(id = 'hide_before_input', anim = T)
     }
   }
-  
   reacValues$uploadSuccess <- TRUE
 })
