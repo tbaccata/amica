@@ -61,7 +61,7 @@ observeEvent(input$submitAnalysis, {
       
       shinyalert(
         title = "Upload of experimental design file failed.",
-        text = paste(cond),
+        text = gsub("Error in .*):|.*Error: ", "Error: ",  cond),
         size = "s", 
         closeOnEsc = TRUE,
         closeOnClickOutside = TRUE,
@@ -135,6 +135,8 @@ observeEvent(input$submitAnalysis, {
         }
       }
       reacValues$expDesign <- tmpData
+    } else {
+      return("")
     }
   }
   
@@ -150,20 +152,30 @@ observeEvent(input$submitAnalysis, {
       tryCatch({
         outData <-
           readInAmicaSumm(input$amicaFile$datapath, reacValues$expDesign)
+        
+        reacValues$proteinData <- outData$protData
+        reacValues$contrastMatrix = outData$contrasts
+        reacValues$dataLimma = outData$comparisons
+        reacValues$dataLimmaOriginal <- reacValues$dataLimma
+        
+        reacValues$amicaInput = TRUE
+        reacValues$analysisSuccess <- TRUE
+        
+        comps <-
+          grep(logfcPrefix, colnames(outData$comparisons), value = T)
+        reacValues$reacConditions <- gsub(logfcPrefix, "", comps)
+        
+        ### filtData
+        reacValues$filtData <-
+          rowData(reacValues$proteinData)[isQuantRnames(reacValues$proteinData),]
+        
       },
       error = function(cond) {
-        message('amica upload failed. ', cond)
-        allFilesUploaded <- FALSE
-        # showNotification(
-        #   paste(cond),
-        #   duration = 100,
-        #   closeButton = T,
-        #   type = "error"
-        # )
-        
+        #message('amica upload failed. ', cond)
+
         shinyalert(
           title = "amica upload failed.",
-          text = paste(cond),
+          text = gsub("Error in .*):|.*Error: ", "Error: ",  cond),
           size = "s", 
           closeOnEsc = TRUE,
           closeOnClickOutside = TRUE,
@@ -177,30 +189,15 @@ observeEvent(input$submitAnalysis, {
           imageUrl = "",
           animation = TRUE
         )
-        return("")
       },
       warning = function(cond) {
         message(paste(cond))
-      }, finally = {
-        showNotification(paste("Successfully processed amica file"), type = "message")
       }
+      # , finally = {
+      #   showNotification(paste("Successfully processed amica file"), type = "message")
+      # }
       )
       #
-      reacValues$proteinData <- outData$protData
-      reacValues$contrastMatrix = outData$contrasts
-      reacValues$dataLimma = outData$comparisons
-      reacValues$dataLimmaOriginal <- reacValues$dataLimma
-      
-      reacValues$amicaInput = TRUE
-      reacValues$analysisSuccess <- TRUE
-      
-      comps <-
-        grep(logfcPrefix, colnames(outData$comparisons), value = T)
-      reacValues$reacConditions <- gsub(logfcPrefix, "", comps)
-      
-      ### filtData
-      reacValues$filtData <-
-        rowData(reacValues$proteinData)[isQuantRnames(reacValues$proteinData),]
     })
   }
   
@@ -223,7 +220,7 @@ observeEvent(input$submitAnalysis, {
       specs <- validateFile(input$specFile, c("Variable", "Pattern"))
     },
     error = function(cond) {
-      #message('Upload of experimental design file failed. ', cond)
+      message('Upload of experimental design file failed. ', cond)
       allFilesUploaded <- FALSE
       # showNotification(
       #   paste(cond),
@@ -233,7 +230,7 @@ observeEvent(input$submitAnalysis, {
       # )
       shinyalert(
         title = "Upload of specification file failed.",
-        text = paste(cond),
+        text = gsub("Error in .*):|.*Error: ", "Error: ",  cond),
         size = "s", 
         closeOnEsc = TRUE,
         closeOnClickOutside = TRUE,
@@ -263,18 +260,12 @@ observeEvent(input$submitAnalysis, {
         readInCustomSumm(input$customFile$datapath, specs, reacValues$expDesign, input$customDataLogTransform)
     },
     error = function(cond) {
-      #message('Custom upload failed. ', cond)
+      message('Custom upload failed. ', cond)
       allFilesUploaded <- FALSE
-      # showNotification(
-      #   paste(cond),
-      #   duration = 100,
-      #   closeButton = T,
-      #   type = "error"
-      # )
       
       shinyalert(
         title = "Upload of custom file failed.",
-        text = paste(cond),
+        text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
         size = "s", 
         closeOnEsc = TRUE,
         closeOnClickOutside = TRUE,
@@ -332,7 +323,7 @@ observeEvent(input$submitAnalysis, {
         
         shinyalert(
           title = "Upload of MaxQuant file failed.",
-          text = paste(cond),
+          text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
           size = "s", 
           closeOnEsc = TRUE,
           closeOnClickOutside = TRUE,
@@ -365,11 +356,11 @@ observeEvent(input$submitAnalysis, {
       },
       error = function(cond) {
         allFilesUploaded <- FALSE
-        #message('FragPipe upload failed. ', cond)
+        message('FragPipe upload failed. ', cond)
         
         shinyalert(
           title = "Upload of FragPipe file failed.",
-          text = paste(cond),
+          text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
           size = "s", 
           closeOnEsc = TRUE,
           closeOnClickOutside = TRUE,
@@ -449,15 +440,25 @@ observeEvent(input$submitAnalysis, {
       contrastData <- validateFile(input$contrastMatrix, NULL)
     },
     error = function(cond) {
-      #message('Upload of experimental design file failed. ', cond)
+      message('Upload of contrast file failed. ', cond)
       allFilesUploaded <- FALSE
-      shiny:::reactiveStop(showNotification(
-        paste(cond),
-        duration = 100,
-        closeButton = T,
-        type = "error"
-      ))
-      #return("")
+
+      shinyalert(
+        title = "Unrecognized input format.",
+        text = gsub("Error in .*):|.*Error: ", "Error: ",  cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
     },
     warning = function(cond) {
       showNotification(paste(cond))
@@ -487,7 +488,10 @@ observeEvent(input$submitAnalysis, {
     }
   } else {
     reacValues$nsubmits <- reacValues$nsubmits + 1
-    if (reacValues$nsubmits < 2) {
+    if (reacValues$nsubmits < 2 && 
+        !is.null(reacValues$proteinData) &&
+        !is.null(reacValues$expDesign) &&
+        !is.null(reacValues$contrastMatrix)) {
       #toggle('ibaq_help')
       toggle(selector = "#navbar li a[data-value=qctab]")
       toggle(selector = "#navbar li a[data-value=quanttab]")
@@ -495,5 +499,10 @@ observeEvent(input$submitAnalysis, {
       toggle(id = 'hide_before_input', anim = T)
     }
   }
-  reacValues$uploadSuccess <- TRUE
+  if (reacValues$nsubmits < 2 && 
+      !is.null(reacValues$proteinData) &&
+      !is.null(reacValues$expDesign) &&
+      !is.null(reacValues$contrastMatrix)) {
+    reacValues$uploadSuccess <- TRUE
+  }
 })
