@@ -138,6 +138,7 @@ tabPanel('Input',
                condition = "input.source != 'example' 
                      && input.source != 'amica' 
                      && input.submitAnalysis!=0
+                     && output.uploadSuccess
                      && !output.amicaInput",
                h3("Analysis Parameters"),
                bsCollapse(
