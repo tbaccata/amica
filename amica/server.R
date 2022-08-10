@@ -109,6 +109,11 @@ server <- function(input, output, session) {
   })
   outputOptions(output, "amicaInput", suspendWhenHidden = FALSE)
   
+  output$uploadSuccess <- reactive({
+    reacValues$uploadSuccess
+  })
+  outputOptions(output, "uploadSuccess", suspendWhenHidden = FALSE)
+  
   output$uploadSummary <- renderText({
     req(reacValues$uploadSuccess)
     
@@ -2787,9 +2792,8 @@ server <- function(input, output, session) {
     orasource <- isolate(input$orasource)
     plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
     validate(need(!is.null(reacValues$dataGprofiler) | nrow(plotDf)>0, 
-                  paste("No results to show\n",
-                        "Please make sure that the organism",
-                        "is correct or deselect Only show significant terms")))
+                  paste("No results to show for this source\n",
+                        "Please make sure that the organism")))
     
     
     oracolor <- isolate(input$oraBar_color)
