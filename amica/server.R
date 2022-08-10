@@ -91,6 +91,7 @@ server <- function(input, output, session) {
   
   
   output$expDesignDT <- renderDT({
+    req(reacValues$uploadSuccess)
     req(reacValues$expDesign )
     datatable(
       reacValues$expDesign,
@@ -116,14 +117,16 @@ server <- function(input, output, session) {
   
   output$uploadSummary <- renderText({
     req(reacValues$uploadSuccess)
+    print(reacValues$analysisSuccess)
     
-    if (!is.null(reacValues$analysisSuccess) || reacValues$amicaInput == TRUE ||
+    if (!is.null(reacValues$analysisSuccess) || !reacValues$analysisSuccess ||
+        reacValues$amicaInput == TRUE ||
         input$source == "example"
         ) return(NULL)
     
     paste0(
       "Successfully uploaded data!\n",
-      "Open the 'Advanced' tab in the sidebar to chose parameters."
+      "Open the 'Advanced' tab in the sidebar to choose parameters."
     )
   })
   
@@ -3558,6 +3561,7 @@ server <- function(input, output, session) {
   })
   
   output$designTitle <- renderText({
+    req(reacValues$uploadSuccess)
     req(reacValues$proteinData)
     "Experimental Design"
     })
