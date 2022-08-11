@@ -264,8 +264,8 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
              uiOutput("download_amica"),
              br(),br(),br(),
              verbatimTextOutput("summaryText", placeholder = F),
+             DTOutput("inputParamDT"),
              verbatimTextOutput("inputParameterSummary", placeholder = F),
-             
              shinyjs::hidden(div(
                id = 'hide_before_input',
                bsCollapse(
