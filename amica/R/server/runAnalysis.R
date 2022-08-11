@@ -124,7 +124,9 @@ observeEvent(input$runAnalysis, {
       paste0(
         reacValues$inputParameterSummary,
         "Filter on groups:\t",
-        paste(ifelse(is.null(input$filterValuesInput), "all", input$filterValuesInput),collapse = ","),
+        paste(ifelse(is.null(input$filterValuesInput), "all", 
+                     paste(input$filterValuesInput, collapse = ',') ),
+              collapse = ","),
         "\n",
         "Filter on min. value in group:\t",
         input$minValidValue,
