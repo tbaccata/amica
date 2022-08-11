@@ -182,6 +182,26 @@ server <- function(input, output, session) {
     reacValues$inputParameterSummary
   })
   
+  output$inputParamDT <- renderDT({
+    req(reacValues$uploadSuccess)
+    req(reacValues$inputParameterSummary)
+    
+    dat <- read.table(
+      text = reacValues$inputParameterSummary,
+      sep = '\t',
+      header = F
+    )
+    names(dat) <- c("Analysis option", "Parameter")
+    dat$`Analysis option` <- gsub(":", "", dat$`Analysis option`)
+    
+    datatable(
+      dat,
+      caption = "Summary of analysis parameters used",
+      rownames = F
+      #options = list(#dom = 't',
+    )
+  })
+  
   
   ### QC LOGIC AND PLOTS 
   
@@ -1610,7 +1630,7 @@ server <- function(input, output, session) {
     }
     
     mat <- reacValues$dataDotplot %>%
-      select(Gene, Group, all_of(clusteringMetric)) %>%  # drop unused columns to faciliate widening
+      dplyr::select(Gene, Group, all_of(clusteringMetric)) %>%  # drop unused columns to faciliate widening
       pivot_wider(names_from = Group, values_from = all_of(clusteringMetric)) %>%
       data.frame() # make df as tibbles -> matrix annoying
     
