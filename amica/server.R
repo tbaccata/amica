@@ -176,10 +176,24 @@ server <- function(input, output, session) {
     )
   })
   
-  output$inputParameterSummary <- renderText({
+  # output$inputParameterSummary <- renderText({
+  #   req(reacValues$analysisSuccess)
+  #   req(reacValues$inputParameterSummary)
+  #   reacValues$inputParameterSummary
+  # })
+  output$analysisSuccessMsg <- renderUI({
     req(reacValues$analysisSuccess)
-    req(reacValues$inputParameterSummary)
-    reacValues$inputParameterSummary
+    
+    HTML(
+      "<h4>Successfully analyzed data!</h4>
+      <p>
+      Scroll to the top of the page to visit the analysis tabs.
+      </p>
+      <p>
+      The table below describes parameters used in the analysis. <br>
+      Please download this table in order to reproduce the analysis.
+      </p>"
+    )
   })
   
   output$inputParamDT <- renderDT({
@@ -196,9 +210,20 @@ server <- function(input, output, session) {
     
     datatable(
       dat,
+      
       caption = "Summary of analysis parameters used",
-      rownames = F
-      #options = list(#dom = 't',
+      rownames = F,
+      extensions = 'Buttons',
+      
+      options = list(
+        pageLength = 12,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'csv',
+          filename = paste0('parameter_summary_', Sys.Date())
+        ))
+      )
     )
   })
   
@@ -215,6 +240,7 @@ server <- function(input, output, session) {
   
   dataAssay <- reactive({
     req(input$assayNames)
+    req(reacValues$proteinData)
     
     object <- 0
     if (input$assayNames == "ImputedIntensity") {
@@ -440,6 +466,8 @@ server <- function(input, output, session) {
   ### ------------------------------------------- DENSITY PLOT
   
   densityPlotly <- eventReactive(input$submitDensity, {
+    reacValues$nsubmits
+    print(reacValues$nsubmits)
     assayNames <- isolate(input$assayNames)
     p <-
       ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
@@ -469,6 +497,7 @@ server <- function(input, output, session) {
   
   output$densityPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
+    reacValues$nsubmits
     assayNames <- isolate(input$assayNames)
     
     withProgress(message = "Plotting density plot", {
@@ -3585,15 +3614,7 @@ server <- function(input, output, session) {
     req(reacValues$proteinData)
     "Experimental Design"
     })
-  
-  output$analysisSuccessMsg <- renderUI({
-    req(reacValues$analysisSuccess)
-    HTML('<h4>Successfully processed data!</h4>\n<p>
-         Scroll to the top of the page to visit the analysis tabs.
-         </p>')
-  })
-  
-  
+
   # observeEvent(input$showMemory,{
   #   output$printMemory <- renderText({
   #     paste0(
