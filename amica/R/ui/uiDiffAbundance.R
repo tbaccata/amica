@@ -175,13 +175,13 @@ tabPanel(
                 max = 4,
                 step = 1
               ),
-              radioButtons(
-                'volcano_padj_y',
-                'Which p-values to plot on y-axis?',
-                choices = c('p-values',
-                            'adj. p-values'),
-                selected = 'p-values'
-              ),
+              # radioButtons(
+              #   'volcano_padj_y',
+              #   'Which p-values to plot on y-axis?',
+              #   choices = c('p-values',
+              #               'adj. p-values'),
+              #   selected = 'p-values'
+              # ),
               uiOutput('volcanoMAColors')
             )
           )
