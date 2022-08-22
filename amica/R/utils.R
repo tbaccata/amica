@@ -1243,7 +1243,7 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
       id = 1:(ncol(tmp) - 1),
       label = names(tmp)[2:ncol(tmp)],
       key = rep('', ncol(tmp) - 1),
-      group = rep('Bait', ncol(tmp) - 1),
+      group = rep('Comparison', ncol(tmp) - 1),
       shape = rep('diamond', ncol(tmp) - 1),
       color = rep(palette[1], ncol(tmp) - 1)
     )
@@ -1252,7 +1252,7 @@ getBait2PreyNetwork <- function(dataComp, matrixSet, samples, palette) {
       id = 1:nrow(tmp),
       label = tmp$Gene.names,
       key = key,
-      group = rep('Prey', nrow(tmp)),
+      group = rep('Protein', nrow(tmp)),
       #shape = rep('circle', nrow(tmp)),
       shape = rep(NA, nrow(tmp)),
       color = rep(palette[2], nrow(tmp))
