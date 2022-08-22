@@ -3015,7 +3015,7 @@ server <- function(input, output, session) {
       c("cell junction",
         "plasma membrane")
     
-    cellmap[cellmap$localization %in% mito, 'localization'] <- "mitchondrion"
+    cellmap[cellmap$localization %in% mito, 'localization'] <- "mitochondrion"
     cellmap[cellmap$localization %in% nucleus, 'localization'] <- "nucleus"
     cellmap[cellmap$localization %in% endoLyso, 'localization'] <-
       "endosome, lysosome"
@@ -3093,12 +3093,12 @@ server <- function(input, output, session) {
         main = "Legend",
         useGroups = F,
         addNodes = data.frame(
-          label = c("Bait", "Prey"),
+          label = c("Comparison", "Protein"),
           shape = c("diamond", "circle"),
           color = c(myScatterColors()[1], myScatterColors()[2])
         ),
         addEdges = data.frame(
-          label = c("Bait-Prey", "Protein-Protein"),
+          label = c("Comparison-Protein", "Protein-Protein"),
           color = c(myScatterColors()[1], myScatterColors()[2])
         ),
         width = 0.3
