@@ -3089,6 +3089,7 @@ server <- function(input, output, session) {
                  nodesIdSelection = TRUE) %>%
       visNodes(font = list(size = 20, strokeWidth = 2)) %>%
       visEdges(smooth=F) %>%
+      visInteraction(zoomView = input$enableNetworkZoom) %>%
       visLegend(
         main = "Legend",
         useGroups = F,
@@ -3174,7 +3175,7 @@ server <- function(input, output, session) {
                  nodesIdSelection = TRUE) %>%
       visNodes(font = list(size = 20, strokeWidth = 2)) %>%
       visEdges(smooth=F, color=list(color = "grey", highlight = "red")) %>%
-
+      visInteraction(zoomView = input$enableNetworkZoom) %>%
       visLegend(
         useGroups = F,
         addNodes = lnodes,
