@@ -201,7 +201,7 @@ tabPanel('Input',
                    radioButtons(
                      "impMethod",
                      "Imputation method",
-                     choices = c("normal", "min", "global"),
+                     choices = c("normal", "min", "global", "none"),
                      selected = "normal"
                    ),
                    
