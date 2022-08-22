@@ -246,16 +246,19 @@ observeEvent(input$runAnalysis, {
       showNotification(paste("error in", tool, cond),
                        type = "error",
                        duration = 100)
-    },
-    warning = function(cond) {
-      message(paste(cond))
+    }
+    #,
+    #warning = function(cond) {
+      #out <- tmpOut
+      #message(paste(cond))
       # showNotification(
       #   paste("warning in", tool, "\nResults may be invalid!\nPlease deselect DEqMS button to continue.\n", cond),
       #   type = "warning",
       #   duration = 100
       # )
       # shiny:::reactiveStop(conditionMessage(cond))
-    }, finally = invalidateLater(1))
+    #}
+    )
     
     reacValues$inputParameterSummary <-
       paste0(
