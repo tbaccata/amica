@@ -2014,7 +2014,7 @@ server <- function(input, output, session) {
   })
   
   output$download_button_eulerr <- renderUI({
-    downloadButton("download_eulerr", "Download Euler plot")
+    downloadButton("download_eulerr", "Download Euler plot", icon = icon("camera"))
   })
   
   output$download_eulerr <- downloadHandler(
@@ -2102,7 +2102,7 @@ server <- function(input, output, session) {
   
   output$download_button_upset <- renderUI({
     #req(upsetPlot())
-    downloadButton("download_upset", "Download UpSet plot")
+    downloadButton("download_upset", "Download UpSet plot", icon = icon("camera"))
   })
   
   output$download_upset <- downloadHandler(
@@ -2398,7 +2398,7 @@ server <- function(input, output, session) {
     fcThresh <- isolate(input$fcCutoff)
     choice <- isolate(input$enrichmentChoice)
     sigCutoffValue <- isolate(input$sigCutoffValue)
-    padjY <- isolate(input$volcano_padj_y)
+    #padjY <- isolate(input$volcano_padj_y)
     pvalThresh <- isolate(input$pvalCutoff)
     
     reacValues$selection <- sample
@@ -2407,8 +2407,8 @@ server <- function(input, output, session) {
     reacValues$sigCutoffValue <- sigCutoffValue
     
     validate(need(!is.null(sample) & sample!="" & length(sample)>0, "Please select a group comparison."))
-    
-    padjYBoolean <- ifelse(padjY == "p-values", FALSE, TRUE)
+    padjYBoolean <- ifelse(sigCutoffValue == "p-value", FALSE, TRUE)
+    #padjYBoolean <- ifelse(padjY == "p-values", FALSE, TRUE)
     
     getVolcanoPlotData(
       reacValues$dataLimma,
@@ -2436,10 +2436,10 @@ server <- function(input, output, session) {
     legend_fontsize <- isolate(input$volcano_legend)
     plot_width <- isolate(input$volcano_width)
     plot_height <- isolate(input$volcano_height)
-    padjY <- isolate(input$volcano_padj_y)
+    padjY <- isolate(input$sigCutoffValue) #padjY <- isolate(input$volcano_padj_y)
     pointsize <- isolate(input$volcano_pointsize)
     format <- isolate(input$volcano_format)
-    padjYBoolean <- ifelse(padjY == "p-values", FALSE, TRUE)
+    padjYBoolean <- ifelse(padjY == "p-value", FALSE, TRUE)
     
     c1 <- isolate(input$volcanocol_1)
     c2 <- isolate(input$volcanocol_2)
