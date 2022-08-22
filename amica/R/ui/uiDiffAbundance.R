@@ -815,7 +815,15 @@ tabPanel(
               width = '50%'
             )
           ),
-          visNetworkOutput("network", width = "100%", height = "800px"),
+          inline(
+            checkboxInput(
+              "enableNetworkZoom",
+              "Enable network zoom? 
+              Please scroll at sides of page when enabled.",
+              value = F
+            )
+          ),
+          visNetworkOutput("network", width = "90%", height = "800px"),
           inline(uiOutput("download_button_spec_network")),
           inline(uiOutput('download_network_button')),
           inline(actionButton("showNodeTable", strong("Show Node table"))),
