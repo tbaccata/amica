@@ -312,19 +312,19 @@ server <- function(input, output, session) {
                                           setdiff(groupInputs, reacValues$groupFactors)))
     }
     
-    plotData <- 0
+    #plotData <- 0
     
-    if (assayNames == "ImputedIntensity") {
-      plotData <-
-        assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),
-                                                          tmpCols$samples[tmpCols$groups %in% groupInputs]]
-    } else {
+    # if (assayNames == "ImputedIntensity") {
+    #   plotData <-
+    #     assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),
+    #                                                       tmpCols$samples[tmpCols$groups %in% groupInputs]]
+    # } else {
       plotData <- assay(reacValues$proteinData, assayNames)
       
       plotData <-
         plotData[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
       plotData <- plotData[complete.cases(plotData), ]
-    }
+    #}
     
     withProgress(message = "Plotting PCA ", {
 
@@ -467,7 +467,6 @@ server <- function(input, output, session) {
   
   densityPlotly <- eventReactive(input$submitDensity, {
     reacValues$nsubmits
-    print(reacValues$nsubmits)
     assayNames <- isolate(input$assayNames)
     p <-
       ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
@@ -1522,7 +1521,7 @@ server <- function(input, output, session) {
     
     intData <- intData[intData$group %in% group2comps$group,]
     intData <-
-      aggregate(value ~ rowname + group, intData, mean)
+      aggregate(value ~ rowname + group, intData, mean, na.rm=TRUE, na.action=NULL)
     names(intData) <- c('ProteinID', 'Group', 'AvgIntensity')
     
     longData <- merge(longData, intData, by = c('ProteinID', 'Group'))
@@ -1541,8 +1540,8 @@ server <- function(input, output, session) {
   
   output$dotplot_color_gradient <- renderUI({
     req(reacValues$dataDotplot)
-    minVal <- round(min(reacValues$dataDotplot$log2FC), 3)
-    maxVal <- round(max(reacValues$dataDotplot$log2FC), 3)
+    minVal <- round(min(reacValues$dataDotplot$log2FC, na.rm = T), 3)
+    maxVal <- round(max(reacValues$dataDotplot$log2FC, na.rm = T), 3)
     sliderInput(
       'dotplot_color_gradient',
       'Define Dotplot color gradient',
@@ -2631,7 +2630,7 @@ server <- function(input, output, session) {
     
     p <- 0
     if (plot_type == "error_bars") {
-      stats <- Rmisc::summarySE(object, measurevar="value", groupvars=c("Protein.IDs","group"))
+      stats <- Rmisc::summarySE(object, measurevar="value", groupvars=c("Protein.IDs","group"), na.rm = T)
       stats <- stats[!is.na(stats$value),]
       
       p <- ggplot(stats, aes(x = group, y = value, color = Protein.IDs)) +
@@ -2657,7 +2656,7 @@ server <- function(input, output, session) {
     }
   
     p <- p +
-      xlab("") + ylab("Intensity (log2)") + 
+      xlab("") + ylab("Imputed Intensities (log2)") + 
       theme_cowplot(font_size = input$profile_base) + 
       background_grid() + 
       ggtitle(input$selectProfilePlotGene) + 
