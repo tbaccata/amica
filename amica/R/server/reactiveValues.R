@@ -50,34 +50,63 @@ nclicks <- reactiveVal(0)
 
 ### RESET 
 
-observeEvent(input$resetAnalysis,{
-  reacValues$proteinData <- NULL
-  reacValues$amicaInput <- FALSE
-  reacValues$dbTool <- NULL
-  reacValues$inputParameterSummary <- NULL
-  reacValues$dataHeatmap <- NULL
-  reacValues$dotplotGroupsDf <- NULL
-  reacValues$dataDotplot <- NULL
-  reacValues$dotplotFactors <- NULL
-  reacValues$show_dotplot <- FALSE
-  reacValues$GostPlot <- NULL
-  reacValues$expDesign <- NULL
-  reacValues$contrastMatrix <- NULL
-  reacValues$uploadSuccess <- NULL
-  reacValues$analysisSuccess <- NULL
-  reacValues$filtData <- NULL
-  reacValues$overlapDf <- NULL
-  reacValues$dataLimma <- NULL
-  reacValues$dataLimmaOriginal <- NULL
-  reacValues$dataComp <- NULL
-  reacValues$geneNames <- NULL
-  reacValues$reacConditions <- NULL
-  reacValues$uniqueGroups <- NULL
-  reacValues$groupFactors <- NULL
-  reacValues$selection <- NULL
-  reacValues$newMultiNames <- NULL
-  reacValues$dataCompAmica <- NULL
-  reacValues$dataGprofiler <- NULL
-  reacValues$compareAmicaSelected <- FALSE
-  reacValues$compareAmicasToggled <- FALSE
-})
+# observeEvent(input$resetAnalysis,{
+#   # Variables
+#   reacValues$proteinData <- NULL
+#   reacValues$amicaInput <- FALSE
+#   reacValues$dbTool <- NULL
+#   reacValues$inputParameterSummary <- NULL
+#   reacValues$dataHeatmap <- NULL
+#   reacValues$dotplotGroupsDf <- NULL
+#   reacValues$dataDotplot <- NULL
+#   reacValues$dotplotFactors <- NULL
+#   reacValues$show_dotplot <- FALSE
+#   reacValues$GostPlot <- NULL
+#   reacValues$expDesign <- NULL
+#   reacValues$contrastMatrix <- NULL
+#   reacValues$uploadSuccess <- NULL
+#   reacValues$analysisSuccess <- NULL
+#   reacValues$filtData <- NULL
+#   reacValues$overlapDf <- NULL
+#   reacValues$dataLimma <- NULL
+#   reacValues$dataLimmaOriginal <- NULL
+#   reacValues$dataComp <- NULL
+#   reacValues$geneNames <- NULL
+#   reacValues$reacConditions <- NULL
+#   reacValues$uniqueGroups <- NULL
+#   reacValues$groupFactors <- NULL
+#   reacValues$selection <- NULL
+#   reacValues$newMultiNames <- NULL
+#   reacValues$dataCompAmica <- NULL
+#   reacValues$dataGprofiler <- NULL
+#   reacValues$compareAmicaSelected <- FALSE
+#   reacValues$compareAmicasToggled <- FALSE
+# })
+
+# ### RESET plots
+# observeEvent(input$runAnalysis,{
+#   ### QC
+#   # row 1
+#   pca <- NULL
+#   boxPlot <- NULL
+#   densityPlot <- NULL
+#   corrPlotly <- plotly_empty()
+#   boxplotCV <- NULL
+#   # row 2
+#   contaminants <- NULL
+#   mostAbundant <- NULL
+#   # row 3
+#   barplotProteins <- NULL
+#   barplotMissingValues <- NULL
+#   # row 4
+#   overlapHeatmapPlotly <- plotly_empty()
+#   overlapSummaryDT <- NULL
+#   # row 5
+#   scatterPlot <- NULL
+#   # Diff Abudance
+#   maVolcanoSample <- NULL
+#   volcanoMAColors <- NULL
+#   volcanoPlot <- NULL
+#   maplot <- NULL
+#   # Multi-comp
+# })
