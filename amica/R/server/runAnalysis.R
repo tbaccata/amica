@@ -111,6 +111,22 @@ observeEvent(input$runAnalysis, {
     },
     error = function(cond) {
       message(paste(cond))
+      shinyalert(
+        title = "Filter on valid values failed.",
+        text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
     },
     warning = function(cond) {
       message(paste(cond))
@@ -153,6 +169,22 @@ observeEvent(input$runAnalysis, {
       },
       error = function(cond) {
         message(paste(cond))
+        shinyalert(
+          title = "Normalization failed.",
+          text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
+          size = "s", 
+          closeOnEsc = TRUE,
+          closeOnClickOutside = TRUE,
+          html = FALSE,
+          type = "error",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#669966",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
+        )
       },
       warning = function(cond) {
         message(paste(cond))
@@ -181,6 +213,22 @@ observeEvent(input$runAnalysis, {
     },
     error = function(cond) {
       message(paste(cond))
+      shinyalert(
+        title = "Imputation failed.",
+        text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
     },
     warning = function(cond) {
       message(paste(cond))
@@ -243,9 +291,25 @@ observeEvent(input$runAnalysis, {
       )
     },
     error = function(cond) {
-      showNotification(paste("error in", tool, cond),
-                       type = "error",
-                       duration = 100)
+      # showNotification(paste("error in", tool, cond),
+      #                  type = "error",
+      #                  duration = 100)
+      shinyalert(
+        title = paste(tool, "failed."),
+        text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
     }
     #,
     #warning = function(cond) {
