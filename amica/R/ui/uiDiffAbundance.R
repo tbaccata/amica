@@ -620,7 +620,7 @@ tabPanel(
                   ),
                   br(),
                   br(),
-                  downloadButton('downloadDotPlot', 'Download Plot'),
+                  downloadButton('downloadDotPlot', 'Download Plot', icon = icon("camera")),
                   inline(downloadButton('downloadDotPlotData', 'Download data'))
                 )
               )
