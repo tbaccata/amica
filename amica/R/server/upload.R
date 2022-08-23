@@ -3,7 +3,7 @@ observeEvent(input$submitAnalysis, {
   reacValues$inputParameterSummary <- NULL
   reacValues$combinedData = NULL
   reacValues$dataCompAmica = NULL
-  
+  reacValues$amicaInput = FALSE
   allFilesUploaded <- TRUE
   
   ### EXAMPLE
@@ -429,7 +429,7 @@ observeEvent(input$submitAnalysis, {
   }
   
   # contrasts
-  if (input$source != "example" & input$source != "amica") {
+  if (input$source != "example" && input$source != "amica") {
     if (is.null(input$contrastMatrix)) {
       showNotification(paste("Need to upload contrast matrix."), type = "message")
       return("")
@@ -499,8 +499,7 @@ observeEvent(input$submitAnalysis, {
       toggle(id = 'hide_before_input', anim = T)
     }
   }
-  if (reacValues$nsubmits < 2 && 
-      !is.null(reacValues$proteinData) &&
+  if (!is.null(reacValues$proteinData) &&
       !is.null(reacValues$expDesign) &&
       !is.null(reacValues$contrastMatrix)) {
     reacValues$uploadSuccess <- TRUE
