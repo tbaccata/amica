@@ -9,6 +9,15 @@ tabPanel('Input',
                  )
                ),
              br(),
+             conditionalPanel(
+               condition = "output.uploadSuccess",
+               HTML(
+                 '<h3 style="color: #339999;"> Successfully uploaded data.<br>
+                 Refresh this page to upload another data set.</h3> <p></p>'
+               )
+            ),
+             conditionalPanel(
+               condition = "!output.uploadSuccess",
              h4("File input"),
              radioButtons(
                inputId = "source",
@@ -26,15 +35,6 @@ tabPanel('Input',
                      for this you have to upload an additional 'contrast matrix' to your experimental 'design'."
              ),
              br(),
-             conditionalPanel(
-               condition = "input.source == 'example'",
-               
-               actionButton('exampleHelp', label = '', icon = icon("info")),
-               uiOutput("exampleHelpBox"),
-               br(),br()
-             ),
-             # Wrap the file input in a conditional panel
-             
              
              conditionalPanel(
                # The condition should be that the user selects
@@ -121,18 +121,25 @@ tabPanel('Input',
                  "File needs to have two columns: the column 'Variable' which defines the variable and 
                        'Pattern' which is the column name or a pattern."
                )
-             ),
-             
-             br(),br(),br(),
-             downloadButton(
-               "exampleFiles",
-               "Example input"
-             ),
-             br(),br(), br(),
-             
-             ######## PARAMETERS BEGIN
-             actionButton("submitAnalysis", "Upload"),
-             actionButton("resetAnalysis", "Reset"),
+             )
+             ),##############
+            br(), br(), br(),
+            conditionalPanel(
+              condition = "input.source == 'example'",
+              
+              actionButton('exampleHelp', label = '', icon = icon("info")),
+              uiOutput("exampleHelpBox"),
+              br(),
+              br()
+            ),
+            downloadButton("exampleFiles",
+                           "Example input"),
+            br(), br(), br(),
+            
+            ######## PARAMETERS BEGIN
+            conditionalPanel(condition = "!output.analysisSuccess",
+                             actionButton("submitAnalysis", "Upload")), 
+             #actionButton("resetAnalysis", "Reset"),
              
              conditionalPanel(
                condition = "input.source != 'example' 
@@ -201,7 +208,7 @@ tabPanel('Input',
                    radioButtons(
                      "impMethod",
                      "Imputation method",
-                     choices = c("normal", "min", "global", "none"),
+                     choices = c("normal", "min", "global", "None"),
                      selected = "normal"
                    ),
                    
