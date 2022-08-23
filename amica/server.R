@@ -115,6 +115,11 @@ server <- function(input, output, session) {
   })
   outputOptions(output, "uploadSuccess", suspendWhenHidden = FALSE)
   
+  output$analysisSuccess <- reactive({
+    reacValues$analysisSuccess
+  })
+  outputOptions(output, "analysisSuccess", suspendWhenHidden = FALSE)
+  
   output$uploadSummary <- renderText({
     req(reacValues$uploadSuccess)
     print(reacValues$analysisSuccess)
@@ -183,6 +188,7 @@ server <- function(input, output, session) {
   # })
   output$analysisSuccessMsg <- renderUI({
     req(reacValues$analysisSuccess)
+    if (reacValues$amicaInput) return(NULL)
     
     HTML(
       "<h4>Successfully analyzed data!</h4>
@@ -416,7 +422,7 @@ server <- function(input, output, session) {
   
   ### ------------------------------------------- BOX PLOT
   
-  boxplotPlotly <- eventReactive(input$submitBoxplot, {
+  boxplotPlotly <- eventReactive(c(input$submitBoxplot, reacValues$nsubmits), {
     assayNames <- isolate(input$assayNames)
     p <-
       ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = colname, y = value, fill =
@@ -465,7 +471,7 @@ server <- function(input, output, session) {
   
   ### ------------------------------------------- DENSITY PLOT
   
-  densityPlotly <- eventReactive(input$submitDensity, {
+  densityPlotly <- eventReactive(c(input$submitDensity, reacValues$nsubmits), {
     reacValues$nsubmits
     assayNames <- isolate(input$assayNames)
     p <-
@@ -743,7 +749,7 @@ server <- function(input, output, session) {
     )
   })
   
-  corrBasePlot <- eventReactive(input$submitCor, {
+  corrBasePlot <- eventReactive(c(input$submitCor, reacValues$nsubmits), {
     assayName <- isolate(input$assayNames)
     annotSamples <- isolate(input$cor_annot)
     groupInputs <- isolate(input$corrSamplesInput)
@@ -842,7 +848,7 @@ server <- function(input, output, session) {
   
   
   ### OVERLAP HEATMAP
-  overlapBasePlot <- eventReactive(input$submitOverlapHeatmap, {
+  overlapBasePlot <- eventReactive(c(input$submitOverlapHeatmap, reacValues$nsubmits), {
     req(reacValues$uploadSuccess)
     tmpCols <- colData(reacValues$proteinData)
     
@@ -1244,7 +1250,7 @@ server <- function(input, output, session) {
   
   ### -------------------------------------------- CVs BOX PLOT
   
-  cvsPlotly <- eventReactive(input$submitCVs, {
+  cvsPlotly <- eventReactive(c(input$submitCVs,reacValues$nsubmits), {
     assayNames <- isolate(input$assayNames)
     calcData <- dataAssay()
     calcData$value <- 2 ^ calcData$value
@@ -1451,7 +1457,7 @@ server <- function(input, output, session) {
     actionButton("submitDotplot", label = "Plot Dotplot")
   })
   
-  observeEvent(input$submitDotplot,{
+  observeEvent(c(input$submitDotplot, reacValues$nsubmits),{
     
     req(reacValues$dotplotGroupsDf)
     req(reacValues$dataComp)
@@ -1901,10 +1907,11 @@ server <- function(input, output, session) {
     as.data.frame(matrixData)
   })
   
-  observeEvent(input$submitMultiComp,{
+  observeEvent(c(input$submitMultiComp, reacValues$nsubmits),{
     req(enrichedMatrixSet())
     
     req(input$upset1Sample)
+    
 
     if (reacValues$show_multi == FALSE) {
       reacValues$show_multi = TRUE
@@ -2009,6 +2016,7 @@ server <- function(input, output, session) {
   
   output$eulerrPlot <- renderPlot({
     input$submitMultiComp
+    reacValues$nsubmits
     print(eulerData())
   })
   
@@ -2086,6 +2094,7 @@ server <- function(input, output, session) {
   
   output$upsetPlot <- renderPlot({
     input$submitMultiComp
+    reacValues$nsubmits
     req(reacValues$dataComp)
 
     withProgress(message = "Comparing multigroup comparisons", {
@@ -2115,7 +2124,7 @@ server <- function(input, output, session) {
     }
   )
   
-  compareHeatmapBase <- eventReactive(input$submitHeatmap,{
+  compareHeatmapBase <- eventReactive(c(input$submitHeatmap, reacValues$nsubmits),{
 
     validate(need(reacValues$compareAmicaSelected==FALSE,
                   paste0("Cannot output heatmap for 'multiple_amica_upload'\n
@@ -2393,6 +2402,7 @@ server <- function(input, output, session) {
   
   volcanoPlotData <- reactive({
     input$maVolcanoSubmit
+    reacValues$nsubmits
     sample <- isolate(input$maVolcanoSampleSelect)
     fcThresh <- isolate(input$fcCutoff)
     choice <- isolate(input$enrichmentChoice)
@@ -2504,15 +2514,16 @@ server <- function(input, output, session) {
     )
   })
   
-  observeEvent(input$maVolcanoSubmit,{
+  observeEvent(c(input$maVolcanoSubmit, reacValues$nsubmits),{
     if (reacValues$show_single == FALSE) {
       reacValues$show_single = TRUE
       toggle(id = 'hide_before_single_submit', anim = T)
     }
+    req(input$maVolcanoSampleSelect)
     sigCutoffValue <- isolate(input$sigCutoffValue)
     reacValues$sigCutoffValue <- sigCutoffValue
     sample <- isolate(input$maVolcanoSampleSelect)
-    
+    reacValues$nsubmits
     reacValues$dataComp <-
       getComparisonsData2(reacValues$dataLimma,
                           enrichedMatrixSet(),
@@ -2532,7 +2543,7 @@ server <- function(input, output, session) {
     pointsize <- isolate(input$volcano_pointsize)
     format <- isolate(input$volcano_format)
     
-    pltData <- isolate(volcanoPlotData() )
+    pltData <- volcanoPlotData()
     c1 <- isolate(input$volcanocol_1)
     c2 <- isolate(input$volcanocol_2)
 
@@ -2766,7 +2777,7 @@ server <- function(input, output, session) {
     paste0("Available sources: ", sources)
   })
   
-  observeEvent(input$submitORA,{
+  observeEvent(c(input$submitORA, reacValues$nsubmits),{
     req(reacValues$dataComp)
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     organism <- isolate(input$gprofilerOrganism)
@@ -2839,7 +2850,7 @@ server <- function(input, output, session) {
     # %>% layout(yaxis = list(title = '-log10(p-adj)'))
   })
   
-  oraBarBase <- eventReactive(input$submitORABar,{
+  oraBarBase <- eventReactive(c(input$submitORABar, reacValues$nsubmits),{
     orasource <- isolate(input$orasource)
     plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
     validate(need(!is.null(reacValues$dataGprofiler) | nrow(plotDf)>0, 
