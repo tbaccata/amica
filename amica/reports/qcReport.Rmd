@@ -1,0 +1,84 @@
+---
+title: "amica QC Report"
+date: '`r format(Sys.Date(), "%Y-%B-%d")`'
+output: html_document
+params:
+  numberOfProteins: NA
+  quantifiedProteins: NA
+  numberOfComparisons: NA
+  numberOfGroups: NA
+  densityplot: NA
+  numid: NA
+  contaminants: NA
+  missingvals: NA
+  overlap: NA
+  overlapDf: NA
+---
+
+## Analysis parameters 
+```{r}
+# The `params` object is available in the document.
+params$nsubmits
+params$numberOfProteins
+params$quantifiedProteins
+params$numberOfGroups
+```
+
+
+### Summary
+
+There are 
+
+| Tables   |      Are      |  Cool |
+|----------|:-------------:|------:|
+| Number of proteins |  `r params$numberOfProteins` | $1600 |
+| col 2 is |    `r params$quantifiedProteins`   |   $12 |
+| col 2 is |    `r params$numberOfGroups`   |   $12 |
+| col 3 is | `r params$numberOfComparisons` |    $1 |
+
+### QC plots
+
+#### Number of identified proteins (based on LFQ intensities prior to imputation)
+```{r}
+params$numid
+```
+
+#### Percentages of contamination (based on iBAQ intensities)
+```{r}
+params$contaminants
+```
+
+#### Percentages of missing values (based on LFQ intensities prior to imputation)
+```{r}
+params$missingvals
+```
+
+
+#### Overlap table
+```{r}
+params$overlap
+df <- params$overlapDf
+names(df) <- c(
+      "Sample 1",
+      "Sample 2",
+      "# Sample 1",
+      "# Sample 2",
+      "# shared",
+      "Overlap Coeff.",
+      "Jaccard index"
+    )
+    datatable(
+      df,
+      extensions = 'Buttons',
+      filter = "top",
+      rownames = F,
+      options = list(
+        pageLength = 10,
+        autoWidth = TRUE
+        #dom = 'Bfrtip',
+        #buttons = c('csv')
+      )
+    )
+```
+
+
