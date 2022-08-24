@@ -26,6 +26,7 @@ require(eulerr)
 require(cowplot)
 require(tidyr)
 require(Cairo)
+require(rmarkdown)
 ###
 source("R/utils.R")
 source("R/ProteomicsData.R")
