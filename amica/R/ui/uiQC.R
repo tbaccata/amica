@@ -4,6 +4,7 @@ tabPanel(
   h1("Quality Control"),
   h2("Compare different intensities"),
   br(),
+  downloadLink("qcReport", "Report"),
   inline(uiOutput("assayNames")),
   inline(actionButton('assaysHelp', label = '', icon = icon("info"))),
   uiOutput("assaysHelpBox"),
