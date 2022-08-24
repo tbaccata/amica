@@ -471,8 +471,9 @@ server <- function(input, output, session) {
   
   ### ------------------------------------------- DENSITY PLOT
   
-  densityPlotly <- eventReactive(c(input$submitDensity, reacValues$nsubmits), {
-    reacValues$nsubmits
+  densityPlotly <- reactive({
+    input$submitDensity
+    #reacValues$nsubmits
     assayNames <- isolate(input$assayNames)
     p <-
       ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
@@ -497,7 +498,7 @@ server <- function(input, output, session) {
         gsub("Intensity", " intensities", assayNames),
         ')'
       ))
-    ggplotly(p)
+    p
   })
   
   output$densityPlot <- renderPlotly({
@@ -506,7 +507,7 @@ server <- function(input, output, session) {
     assayNames <- isolate(input$assayNames)
     
     withProgress(message = "Plotting density plot", {
-      densityPlotly() %>%
+      ggplotly(densityPlotly()) %>%
         config(
           displaylogo = F,
           modeBarButtonsToRemove = removePlotlyBars,
@@ -848,7 +849,7 @@ server <- function(input, output, session) {
   
   
   ### OVERLAP HEATMAP
-  overlapBasePlot <- eventReactive(c(input$submitOverlapHeatmap, reacValues$nsubmits), {
+  overlapBasePlot <- reactive({
     req(reacValues$uploadSuccess)
     tmpCols <- colData(reacValues$proteinData)
     
@@ -939,6 +940,7 @@ server <- function(input, output, session) {
   })
   
   output$overlapHeatmapPlotly <- renderPlotly({
+    input$submitOverlapHeatmap
     withProgress(message = "Plotting overlap plot ", {
       p <- overlapBasePlot()
     })
@@ -983,7 +985,7 @@ server <- function(input, output, session) {
   
   ### ------------------------------------------- CONTAMINANTS plots
   
-  contaminantsPlotly <- eventReactive(input$submitConts, {
+  contaminantsPlotly <- reactive({
     validate(need(
       abundancePrefix %in% assayNames(reacValues$proteinData),
       "No data to plot (no iBAQ columns available)."
@@ -1027,17 +1029,17 @@ server <- function(input, output, session) {
         legend.title = element_blank(),
         legend.text = element_text(size = input$contaminants_legend)
       ) + xlab("") + ylab("% Contaminant") +
-      ggtitle(paste("Relative Amount of Contaminants",
-                               "based on iBAQ Intensities", sep = '<br>'))
+      ggtitle(label = "Relative Amount of Contaminants", 
+              subtitle = "based on iBAQ Intensities")
     
-    ggplotly(p)
+    p
   })
   
   
   output$contaminants <- renderPlotly({
-    req(reacValues$uploadSuccess)
+    input$submitConts
     withProgress(message = "Plotting barplot of contaminants", {
-      contaminantsPlotly()  %>% config(
+      ggplotly(contaminantsPlotly())  %>% config(
         displaylogo = F,
         modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
@@ -1053,15 +1055,8 @@ server <- function(input, output, session) {
   
   ### ------------------------------------------- MOST ABUNDANT per sample barplot
   
-  output$mostAbundant <- renderPlotly({
-    req(input$samples)
-    req(reacValues$uploadSuccess)
-    validate(need(
-      abundancePrefix %in% assayNames(reacValues$proteinData),
-      "No data to plot (no iBAQ columns available)."
-    ))
-    
-    tmp <- object <- toLongFormat(
+  mostAbundantPlot <- reactive({
+    tmp <- toLongFormat(
       2 ^ assay(reacValues$proteinData, abundancePrefix),
       reacValues$proteinData,
       addGroup = TRUE,
@@ -1077,42 +1072,52 @@ server <- function(input, output, session) {
     plotdf <- head(tmp, 15)
     plotdf$Gene.name <- gsub(";.*", "", plotdf$Gene.name)
     
-    withProgress(message = "Plotting most abundant proteins", {
-      p <-
-        ggplot(plotdf, aes(x = reorder(Gene.name, value), y = value)) +
-        geom_bar(stat = "identity", fill = myScatterColors()[1]) +
-        coord_flip() + 
-        theme_cowplot(font_size = input$abundant_base) + 
-        background_grid() +
-        theme(
-          # axis.text.x = element_text(
-          #   angle = 90,
-          #   hjust = 1,
-          #   vjust = 0.5,
-          #   size = 10
-          # ),
-          legend.text = element_text(size = input$abundant_legend),
-          legend.title = element_blank()
-        ) + xlab("") + ylab(paste0("%iBAQ in ", input$samples) ) +
-        ggtitle(paste("15 most abundant proteins",
-                      "based on iBAQ Intensities", sep = '<br>'))
-    })
+    p <-
+      ggplot(plotdf, aes(x = reorder(Gene.name, value), y = value)) +
+      geom_bar(stat = "identity", fill = myScatterColors()[1]) +
+      coord_flip() + 
+      theme_cowplot(font_size = input$abundant_base) + 
+      background_grid() +
+      theme(
+        # axis.text.x = element_text(
+        #   angle = 90,
+        #   hjust = 1,
+        #   vjust = 0.5,
+        #   size = 10
+        # ),
+        legend.text = element_text(size = input$abundant_legend),
+        legend.title = element_blank()
+      ) + xlab("") + ylab(paste0("%iBAQ in ", input$samples) ) +
+      ggtitle(label = "15 most abundant proteins", 
+              subtitle = "based on iBAQ Intensities", )
+    p
+  })
+  
+  output$mostAbundant <- renderPlotly({
+    req(input$samples)
+    req(reacValues$uploadSuccess)
+    validate(need(
+      abundancePrefix %in% assayNames(reacValues$proteinData),
+      "No data to plot (no iBAQ columns available)."
+    ))
     
-    ggplotly(p) %>% config(
-      displaylogo = F,
-      modeBarButtonsToRemove = removePlotlyBars,
-      toImageButtonOptions = list(
-        format = input$abundant_format,
-        width = 676,
-        height = 676,
-        filename = "most_abundant_proteins"
+    withProgress(message = "Plotting most abundant proteins", {
+      ggplotly(mostAbundantPlot()) %>% config(
+        displaylogo = F,
+        modeBarButtonsToRemove = removePlotlyBars,
+        toImageButtonOptions = list(
+          format = input$abundant_format,
+          width = 676,
+          height = 676,
+          filename = "most_abundant_proteins"
+        )
       )
-    )
+    })
   })
   
   ### ------------------------------------------- NUM ID PROTEINS
   
-  numIdPlotly <- eventReactive(input$submitNumProts, {
+  numIdPlotly <- reactive({
     validate(
       need(
         "Intensity" %in% assayNames(reacValues$proteinData) |
@@ -1160,13 +1165,20 @@ server <- function(input, output, session) {
         legend.text = element_text(size = input$barplotId_legend)
       ) + xlab("") + ylab("#of identified proteins")
     
-    ggplotly(p)
+    p
   })
   
   output$barplotProteins <- renderPlotly({
-    req(reacValues$uploadSuccess)
+    input$submitNumProts
+    validate(
+      need(
+        "Intensity" %in% assayNames(reacValues$proteinData) |
+          "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
+      )
+    )
     withProgress(message = "Plotting Number of inferred protein groups", {
-      numIdPlotly()  %>% config(
+      ggplotly(numIdPlotly())  %>% config(
         displaylogo = F,
         modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
@@ -1181,14 +1193,7 @@ server <- function(input, output, session) {
   
   ### ------------------------------------------- % MVs
   
-  pctMvsPlotly <- eventReactive(input$submitNumMVs, {
-    validate(
-      need(
-        "Intensity" %in% assayNames(reacValues$proteinData) ||
-          "LFQIntensity" %in% assayNames(reacValues$proteinData),
-        "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
-      )
-    )
+  pctMvsPlotly <- reactive({
     
     aname <-
       ifelse(
@@ -1229,13 +1234,21 @@ server <- function(input, output, session) {
         legend.text = element_text(size = input$barplotMv_legend)
       ) + xlab("") + ylab("missing values (%)")
     
-    ggplotly(p)
+    p
   })
   
   output$barplotMissingValues <- renderPlotly({
-    req(reacValues$uploadSuccess)
+    input$submitNumMVs
+    validate(
+      need(
+        "Intensity" %in% assayNames(reacValues$proteinData) ||
+          "LFQIntensity" %in% assayNames(reacValues$proteinData),
+        "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
+      )
+    )
+    
     withProgress(message = "Plotting barplot of missing values ", {
-      pctMvsPlotly() %>% config(
+      ggplotly(pctMvsPlotly()) %>% config(
         displaylogo = F,
         modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
@@ -3650,4 +3663,46 @@ server <- function(input, output, session) {
     ))
     session$close()
   })
+  
+  output$qcReport <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = "qcReport.html",
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "qcReport.Rmd")
+      file.copy("reports/qcReport.Rmd", tempReport, overwrite = TRUE)
+      
+      # Set up parameters to pass to Rmd document
+
+      nsummary <- ifelse(
+        contaminantCol %in% names(rowData(reacValues$proteinData)),
+        nrow(rowData(reacValues$proteinData)[rowData(reacValues$proteinData)[[contaminantCol]] != filterVal, ]),
+        nrow(rowData(reacValues$proteinData))
+      )
+      ngroups <- length(unique(reacValues$expDesign$groups))
+      ncomps <- nrow(reacValues$contrastMatrix )
+      nquant <- length(which(rowData(reacValues$proteinData)$quantified=="+"))
+      
+      params <- list(numberOfProteins = nsummary,
+                     quantifiedProteins=nquant,
+                     numberOfComparisons=ncomps,
+                     numberOfGroups=ngroups,
+                     numid=numIdPlotly(),
+                     contaminants=contaminantsPlotly(),
+                     missingvals=pctMvsPlotly(),
+                     overlap=overlapBasePlot(),
+                     overlapDf=reacValues$overlapDf
+                     )
+      
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      rmarkdown::render(tempReport, output_file = file,
+                        params = params,
+                        envir = new.env(parent = globalenv())
+      )
+    }
+  )
 }
