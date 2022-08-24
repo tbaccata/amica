@@ -11,6 +11,7 @@ server <- function(input, output, session) {
   source('R/server/runAnalysis.R', local = TRUE)
   source('R/server/exampleData.R', local = TRUE)
   source('R/server/modals.R', local = TRUE)
+  source('R/server/qcPlots.R', local = TRUE)
   
   ### INPUT LOGIC AND PLOTS
   output$mtcarsBar <- renderPlotly({
@@ -424,30 +425,35 @@ server <- function(input, output, session) {
   
   boxplotPlotly <- eventReactive(c(input$submitBoxplot, reacValues$nsubmits), {
     assayNames <- isolate(input$assayNames)
-    p <-
-      ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = colname, y = value, fill =
-                                                             group)) +
-      geom_boxplot(
-        outlier.shape = NA,
-        outlier.color = NULL,
-        outlier.fill = NULL
-      ) +
-      theme_cowplot(font_size = input$boxplot_base) +
-      background_grid() +
-      scale_fill_manual(values = myGroupColors()) +
-      theme(
-        axis.text.x = element_text(
-          angle = 90,
-          hjust = 1,
-          vjust = 0.5,
-          size = 10
-        ),
-        legend.text = element_text(size = input$boxplot_legend),
-        legend.title = element_blank()
-      ) + ylab(paste0(gsub("Intensity", " intensities", assayNames), 
-                      " (log2)")) + xlab("") +
-      ggtitle(paste0('Box plot (',gsub("Intensity", " intensities", assayNames), ')'))
-    
+    p <- plotBoxPlot(dataAssay(),
+               assayNames,
+               myGroupColors(),
+               input$boxplot_base,
+               input$boxplot_legend)
+    # p <-
+    #   ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = colname, y = value, fill =
+    #                                                          group)) +
+    #   geom_boxplot(
+    #     outlier.shape = NA,
+    #     outlier.color = NULL,
+    #     outlier.fill = NULL
+    #   ) +
+    #   theme_cowplot(font_size = input$boxplot_base) +
+    #   background_grid() +
+    #   scale_fill_manual(values = myGroupColors()) +
+    #   theme(
+    #     axis.text.x = element_text(
+    #       angle = 90,
+    #       hjust = 1,
+    #       vjust = 0.5,
+    #       size = 10
+    #     ),
+    #     legend.text = element_text(size = input$boxplot_legend),
+    #     legend.title = element_blank()
+    #   ) + ylab(paste0(gsub("Intensity", " intensities", assayNames), 
+    #                   " (log2)")) + xlab("") +
+    #   ggtitle(paste0('Box plot (',gsub("Intensity", " intensities", assayNames), ')'))
+    # 
     ggplotly(p)
   })
   
@@ -475,29 +481,35 @@ server <- function(input, output, session) {
     input$submitDensity
     #reacValues$nsubmits
     assayNames <- isolate(input$assayNames)
-    p <-
-      ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
-      # ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color =
-      #                                                        colname)) +
-      geom_density() +
-      scale_color_manual(values = myColors()) +
-      theme_cowplot(font_size = input$density_base) +
-      background_grid() +
-      theme(
-        axis.text.x = element_text(
-          angle = 90,
-          hjust = 1,
-          vjust = 0.5,
-          size = 10
-        ),
-        legend.title = element_blank(),
-        legend.text = element_text(size = input$density_legend),
-      ) + xlab(paste0(gsub("Intensity", " intensities", assayNames), " (log2)")) + ylab("Density") +
-      ggtitle(paste0(
-        'Density plot (',
-        gsub("Intensity", " intensities", assayNames),
-        ')'
-      ))
+    p <- plotDensityPlot(dataAssay(),
+               assayNames,
+               myColors(),
+               base_size = input$density_base,
+               legend_size = input$density_legend
+               )
+    # p <-
+    #   ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
+    #   # ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color =
+    #   #                                                        colname)) +
+    #   geom_density() +
+    #   scale_color_manual(values = myColors()) +
+    #   theme_cowplot(font_size = input$density_base) +
+    #   background_grid() +
+    #   theme(
+    #     axis.text.x = element_text(
+    #       angle = 90,
+    #       hjust = 1,
+    #       vjust = 0.5,
+    #       size = 10
+    #     ),
+    #     legend.title = element_blank(),
+    #     legend.text = element_text(size = input$density_legend),
+    #   ) + xlab(paste0(gsub("Intensity", " intensities", assayNames), " (log2)")) + ylab("Density") +
+    #   ggtitle(paste0(
+    #     'Density plot (',
+    #     gsub("Intensity", " intensities", assayNames),
+    #     ')'
+    #   ))
     p
   })
   
@@ -768,57 +780,70 @@ server <- function(input, output, session) {
       )
     )
     
-    if (is.null(groupInputs))
-      groupInputs <- unique(colData(reacValues$proteinData)$groups)
-    
-    if (!is.null(reacValues$groupFactors) &&
-        all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
-      tmpCols$groups <-
-        factor(tmpCols$groups, levels = c(reacValues$groupFactors, 
-                                          setdiff(groupInputs, reacValues$groupFactors)))
-    }
-    
     df <- assay(reacValues$proteinData, assayName)
-    df <- df[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
+    print(dim(df))
+    p <- plotCorrPlotly(
+      df,
+      tmpCols,
+      myGroupColors(),
+      heatColors(),
+      assayName,
+      annotSamples,
+      reacValues$groupFactors,
+      groupInputs
+    )
     
-    annot <- colData(reacValues$proteinData)
-    row.names(annot) <- annot$samples
-    annot <- annot[names(df), ]
-    annot$samples <- NULL
-    
-    corDf <- cor(df, method = "pearson", use = "complete.obs")
-    limits <- c(min(corDf) - 0.003, 1)
-    diag(corDf) <- NA
-    
-    if (annotSamples) {
-      p <- heatmaply_cor(
-        round(corDf, 3),
-        xlab = "",
-        ylab = "",
-        limits = limits,
-        main = paste0("<b>Correlation plot (", 
-                      gsub("Intensity", " intensities", assayName), 
-                      ")</b>"),
-        colors = heatColors(),
-        row_side_palette = myGroupColors(),
-        row_side_colors = annot,
-        plot_method = "plotly",
-        key.title = "Pearson Correlation"
-      )
-    } else {
-      p <- heatmaply_cor(
-        round(corDf, 3),
-        xlab = "",
-        ylab = "",
-        colors = heatColors(),
-        limits = limits,
-        main = paste0("<b>Correlation plot (", 
-                                     gsub("Intensity", " intensities", assayName), 
-                                     ")</b>"),
-        plot_method = "plotly",
-        key.title = "Pearson Correlation"
-      )
-    }
+    # if (is.null(groupInputs))
+    #   groupInputs <- unique(colData(reacValues$proteinData)$groups)
+    # 
+    # if (!is.null(reacValues$groupFactors) &&
+    #     all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
+    #   tmpCols$groups <-
+    #     factor(tmpCols$groups, levels = c(reacValues$groupFactors, 
+    #                                       setdiff(groupInputs, reacValues$groupFactors)))
+    # }
+    # 
+    # df <- assay(reacValues$proteinData, assayName)
+    # df <- df[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
+    # 
+    # annot <- colData(reacValues$proteinData)
+    # row.names(annot) <- annot$samples
+    # annot <- annot[names(df), ]
+    # annot$samples <- NULL
+    # 
+    # corDf <- cor(df, method = "pearson", use = "complete.obs")
+    # limits <- c(min(corDf) - 0.003, 1)
+    # diag(corDf) <- NA
+    # 
+    # if (annotSamples) {
+    #   p <- heatmaply_cor(
+    #     round(corDf, 3),
+    #     xlab = "",
+    #     ylab = "",
+    #     limits = limits,
+    #     main = paste0("<b>Correlation plot (", 
+    #                   gsub("Intensity", " intensities", assayName), 
+    #                   ")</b>"),
+    #     colors = heatColors(),
+    #     row_side_palette = myGroupColors(),
+    #     row_side_colors = annot,
+    #     plot_method = "plotly",
+    #     key.title = "Pearson Correlation"
+    #   )
+    # } else {
+    #   p <- heatmaply_cor(
+    #     round(corDf, 3),
+    #     xlab = "",
+    #     ylab = "",
+    #     colors = heatColors(),
+    #     limits = limits,
+    #     main = paste0("<b>Correlation plot (", 
+    #                                  gsub("Intensity", " intensities", assayName), 
+    #                                  ")</b>"),
+    #     plot_method = "plotly",
+    #     key.title = "Pearson Correlation"
+    #   )
+    # }
     p
   })
   
