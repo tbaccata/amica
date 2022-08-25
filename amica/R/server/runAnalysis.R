@@ -66,6 +66,17 @@ observeEvent(input$runAnalysis, {
       } else {
         quantIntensity <- input$quantIntensity
       }
+      reacValues$inputParameterSummary <- paste0(
+        reacValues$inputParameterSummary,
+        "DB search tool:\t",
+        reacValues$dbTool,
+        "\n"
+      )
+    } else {
+      reacValues$inputParameterSummary <- paste0(
+        reacValues$inputParameterSummary,
+        "DB search tool:\tunknown\n"
+      )
     }
     
     reacValues$inputParameterSummary <-
@@ -244,12 +255,30 @@ observeEvent(input$runAnalysis, {
         reacValues$inputParameterSummary,
         "Imputation method:\t",
         input$impMethod,
-        "\nDownshift:\t",
-        input$downshift,
-        "\nWidth:\t",
-        input$width,
         "\n"
       )
+    
+    if (input$impMethod == 'normal' ||
+        input$impMethod == 'global') {
+      reacValues$inputParameterSummary <-
+        paste0(
+          reacValues$inputParameterSummary,
+          "Downshift:\t",
+          input$downshift,
+          "\nWidth:\t",
+          input$width,
+          "\n"
+        )
+    } else if (input$impMethod == 'min') {
+      reacValues$inputParameterSummary <-
+        paste0(
+          reacValues$inputParameterSummary,
+          "Min Intensity:\t",
+          min(normDf, na.rm = T),
+          "\n"
+        )
+    }
+    
     impDf[row.names(normDf), ] <- normDf
     reacValues$proteinData <-
       setAssay(x = reacValues$proteinData,
