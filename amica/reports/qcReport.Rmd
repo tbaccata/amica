@@ -3,82 +3,151 @@ title: "amica QC Report"
 date: '`r format(Sys.Date(), "%Y-%B-%d")`'
 output: html_document
 params:
+  analysisParams: NA
   numberOfProteins: NA
   quantifiedProteins: NA
   numberOfComparisons: NA
   numberOfGroups: NA
-  densityplot: NA
   numid: NA
   contaminants: NA
   missingvals: NA
-  overlap: NA
+  #overlap: NA
   overlapDf: NA
+  lfqPCA: NA
+  impPCA: NA
+  lfqBoxplot: NA
+  impBoxplot: NA
+  lfqDensityPlot: NA
+  impDensityPlot: NA
+  lfqCvBox: NA
+  impCvBox: NA
+  lfqCorrPlot: NA
+  impCorrPlot: NA
 ---
 
-## Analysis parameters 
-```{r}
-# The `params` object is available in the document.
-params$nsubmits
-params$numberOfProteins
-params$quantifiedProteins
-params$numberOfGroups
+
+## 1 Analysis parameters 
+
+
+```{r, echo=FALSE}
+if (params$analysisParams != 'NA') {
+  datatable(
+      params$analysisParams,
+      caption = "Summary of analysis parameters used",
+      rownames = F,
+      extensions = 'Buttons',
+      
+      options = list(
+        pageLength = 12,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'csv',
+          filename = paste0('parameter_summary_', Sys.Date())
+        ))
+      )
+    )
+} else {
+  paste("No analysis parameters accessible")
+}
 ```
 
+### 1.2 Summary
 
-### Summary
+Number of proteins in uploaded file: **`r params$numberOfProteins`**.
 
-There are 
+Number of quantified proteins: **`r params$quantifiedProteins`**.
 
-| Tables   |      Are      |  Cool |
-|----------|:-------------:|------:|
-| Number of proteins |  `r params$numberOfProteins` | $1600 |
-| col 2 is |    `r params$quantifiedProteins`   |   $12 |
-| col 2 is |    `r params$numberOfGroups`   |   $12 |
-| col 3 is | `r params$numberOfComparisons` |    $1 |
+Number of groups in experimental design: **`r params$quantifiedProteins`**.
 
-### QC plots
+Number of pairwise group comparisons performed: **`r params$numberOfComparisons`**.
 
-#### Number of identified proteins (based on LFQ intensities prior to imputation)
-```{r}
+
+## 2 QC plots
+
+### 2.1 Number of identified proteins (based on LFQ intensities prior to imputation)
+```{r, echo=FALSE}
 params$numid
 ```
 
-#### Percentages of contamination (based on iBAQ intensities)
-```{r}
+### 2.2 Percentages of contamination (based on iBAQ intensities)
+
+The percentage of contaminants is calculated with the iBAQ (Intensity based Absolute Quantification) values and shows the percentage of total signal from potential contaminants.
+
+```{r, echo=FALSE}
 params$contaminants
 ```
 
-#### Percentages of missing values (based on LFQ intensities prior to imputation)
-```{r}
+### 2.3 Percentages of missing values (based on LFQ intensities prior to imputation)
+```{r, echo=FALSE}
 params$missingvals
 ```
 
+### 2.4 PCA
+```{r, pca-side, fig.show="hold", out.width="50%", echo=FALSE}
+params$lfqPCA
+params$impPCA
+```
 
-#### Overlap table
-```{r}
-params$overlap
-df <- params$overlapDf
-names(df) <- c(
-      "Sample 1",
-      "Sample 2",
-      "# Sample 1",
-      "# Sample 2",
-      "# shared",
-      "Overlap Coeff.",
-      "Jaccard index"
-    )
-    datatable(
-      df,
-      extensions = 'Buttons',
-      filter = "top",
-      rownames = F,
-      options = list(
-        pageLength = 10,
-        autoWidth = TRUE
-        #dom = 'Bfrtip',
-        #buttons = c('csv')
-      )
-    )
+### 2.5 Intensity Boxplots
+
+Box plots show the distribution of selected intensities which gives an overview about their similarities.
+
+```{r, boxplots-side, fig.show="hold", out.width="50%", echo=FALSE}
+params$lfqBoxplot
+params$impBoxplot
+```
+
+### 2.6 Intensity density plots
+
+The density plot shows a smoothed version of a histogram. It is especially useful to compare density plots of the intensities before and after imputation. 
+
+```{r, densityplot-side, fig.show="hold", out.width="50%",echo=FALSE}
+params$lfqDensityPlot
+params$impDensityPlot
+```
+
+### 2.7 CV boxplots
+
+The Coefficient of Variation (CV) gets calculated by the standard deviation of replicates divided by their mean per protein, which gives an estimate on the reproducibility of the experiment.
+
+```{r, cv-boxplots-side, fig.show="hold", out.width="50%", echo=FALSE}
+params$lfqCvBox
+params$impCvBox
+```
+
+### 2.8 Correlation plots
+
+The Pearson correlation plot visualizes how well samples (e.g replicates) correlate.
+
+```{r, echo=FALSE}
+params$lfqCorrPlot
+params$impCorrPlot
+```
+
+```{r, echo=FALSE}
+# df <- params$overlapDf
+# names(df) <- c(
+#       "Sample 1",
+#       "Sample 2",
+#       "# Sample 1",
+#       "# Sample 2",
+#       "# shared",
+#       "Overlap Coeff.",
+#       "Jaccard index"
+#     )
+#     datatable(
+#       df,
+#       extensions = 'Buttons',
+#       filter = "top",
+#       rownames = F,
+#       options = list(
+#         pageLength = 10,
+#         autoWidth = TRUE
+#         #dom = 'Bfrtip',
+#         #buttons = c('csv')
+#       )
+#     )
 ```
 
 
