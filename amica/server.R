@@ -203,10 +203,8 @@ server <- function(input, output, session) {
     )
   })
   
-  output$inputParamDT <- renderDT({
-    req(reacValues$uploadSuccess)
+  analysisParams <- reactive({
     req(reacValues$inputParameterSummary)
-    
     dat <- read.table(
       text = reacValues$inputParameterSummary,
       sep = '\t',
@@ -214,10 +212,15 @@ server <- function(input, output, session) {
     )
     names(dat) <- c("Analysis option", "Parameter")
     dat$`Analysis option` <- gsub(":", "", dat$`Analysis option`)
+    dat
+  })
+  
+  output$inputParamDT <- renderDT({
+    req(reacValues$uploadSuccess)
+    req(reacValues$inputParameterSummary)
     
     datatable(
-      dat,
-      
+      analysisParams(),
       caption = "Summary of analysis parameters used",
       rownames = F,
       extensions = 'Buttons',
@@ -299,7 +302,10 @@ server <- function(input, output, session) {
     pca_pointsize <- isolate(input$pca_pointsize)
     pca_show_label <- isolate(input$pca_show_label)
     
-    validate(need(assayNames != "", "Please press submit or provide an intensity prefix."))
+    validate(need(
+      assayNames != "",
+      "Please press submit or provide an intensity prefix."
+    ))
     validate(
       need(
         length(groupInputs) > 1 |
@@ -308,85 +314,48 @@ server <- function(input, output, session) {
       )
     )
     
-    if (is.null(groupInputs))
-      groupInputs <- unique(colData(reacValues$proteinData)$groups)
-
-    tmpCols <- colData(reacValues$proteinData)
-    if (!is.null(reacValues$groupFactors) &&
-        all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
-      tmpCols$groups <-
-        factor(tmpCols$groups, levels = c(reacValues$groupFactors, 
-                                          setdiff(groupInputs, reacValues$groupFactors)))
-    }
-    
-    #plotData <- 0
-    
-    # if (assayNames == "ImputedIntensity") {
-    #   plotData <-
-    #     assay(reacValues$proteinData, "ImputedIntensity")[isQuantRnames(reacValues$proteinData),
-    #                                                       tmpCols$samples[tmpCols$groups %in% groupInputs]]
-    # } else {
-      plotData <- assay(reacValues$proteinData, assayNames)
-      
-      plotData <-
-        plotData[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
-      plotData <- plotData[complete.cases(plotData), ]
-    #}
+    plotData <- assay(reacValues$proteinData, assayNames)
     
     withProgress(message = "Plotting PCA ", {
-
-      # idxs <-
-      #   grep(paste0(colnames(plotData), collapse = "|"), tmpCols$samples)
-      # groups <- tmpCols$groups[idxs]
+      olist <-
+        computePCA(
+          plotData,
+          colData(reacValues$proteinData),
+          reacValues$groupFactors,
+          groupInputs
+        )
       
-      pca <- prcomp(as.data.frame(t(plotData)))
-      df_out <- as.data.frame(pca$x)
-      
-      df_out$group <- tmpCols$groups[tmpCols$samples %in% row.names(df_out)]
-      df_out$sample <- rownames(df_out)
-      df_out$key <- df_out$sample
+      df_out <- olist[[1]]
+      percentage <- olist[[2]]
       
       df_out$show_id <- FALSE
-      if (!is.null(get_pca_data() )) {
+      if (!is.null(get_pca_data())) {
         df_out[df_out$key %in% get_pca_data()$key, "show_id"] <- TRUE
       }
-
-      tmp <- summary(pca)
-      percentage <- round(100 * tmp$importance['Proportion of Variance', 1:2], 2)
-      percentage <- paste( colnames(df_out), "(", paste( as.character(percentage), "%", ")", sep="") )
       
-      p <- ggplot(df_out,aes(x=PC1,y=PC2,color=group, label=sample,  key=key ))
-      p <- p + geom_point(size=pca_pointsize) + xlab(percentage[1]) + ylab(percentage[2])
-      p <- p + scale_color_manual(values=myGroupColors()) + theme_cowplot(font_size = pca_base) +
-        background_grid() + 
-          theme(legend.text = element_text(size = pca_legend))
-      p <- p + ggtitle(paste0('PCA (', gsub("Intensity", " intensities", assayNames), ')'))
-      
-      # if (pca_show_label) {
-      #   p <- p + geom_text(data=df_out,
-      #                      aes(x=PC1,y=PC2, label=sample, key=key),
-      #                      position=position_jitter(width=0.25,height=0.25)
-      #                      )
-      # }
-      # 
-      p <- p + geom_text(
-        data = subset(df_out, show_id),
-        aes(PC1, PC2, label = sample),
-        position=position_jitter(width=0.25,height=0.5)
+      p <- plotPCA(
+        df_out,
+        percentage,
+        myGroupColors(),
+        assayNames,
+        pca_base,
+        pca_legend,
+        pca_pointsize
       )
+      
     })
-    ggplotly(p, source = "subset") %>% 
+    ggplotly(p, source = "subset") %>%
       layout(dragmode = "select") %>%
       config(
-            displaylogo = F,
-            modeBarButtonsToRemove = removePlotlyBars,
-            toImageButtonOptions = list(
-              format = input$pca_format,
-              width = input$pca_width,
-              height = input$pca_height,
-              filename = paste0("pca_", assayNames)
-            )
-          )
+        displaylogo = F,
+        modeBarButtonsToRemove = removePlotlyBars,
+        toImageButtonOptions = list(
+          format = input$pca_format,
+          width = input$pca_width,
+          height = input$pca_height,
+          filename = paste0("pca_", assayNames)
+        )
+      )
   })
   
   
@@ -404,58 +373,21 @@ server <- function(input, output, session) {
   })
   
   
-  # output$pca <- renderPlotly({
-  #   req(input$assayNames)
-  #   req(reacValues$uploadSuccess)
-  #   pcaPlotly()  %>%  config(
-  #     displaylogo = F,
-  #     modeBarButtonsToRemove = removePlotlyBars,
-  #     toImageButtonOptions = list(
-  #       format = input$pca_format,
-  #       width = input$pca_width,
-  #       height = input$pca_height,
-  #       #width = 768,
-  #       #height = 676,
-  #       filename = "pca"
-  #     )
-  #   )
-  # })
-  
   ### ------------------------------------------- BOX PLOT
   
-  boxplotPlotly <- eventReactive(c(input$submitBoxplot, reacValues$nsubmits), {
-    assayNames <- isolate(input$assayNames)
-    p <- plotBoxPlot(dataAssay(),
-               assayNames,
-               myGroupColors(),
-               input$boxplot_base,
-               input$boxplot_legend)
-    # p <-
-    #   ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = colname, y = value, fill =
-    #                                                          group)) +
-    #   geom_boxplot(
-    #     outlier.shape = NA,
-    #     outlier.color = NULL,
-    #     outlier.fill = NULL
-    #   ) +
-    #   theme_cowplot(font_size = input$boxplot_base) +
-    #   background_grid() +
-    #   scale_fill_manual(values = myGroupColors()) +
-    #   theme(
-    #     axis.text.x = element_text(
-    #       angle = 90,
-    #       hjust = 1,
-    #       vjust = 0.5,
-    #       size = 10
-    #     ),
-    #     legend.text = element_text(size = input$boxplot_legend),
-    #     legend.title = element_blank()
-    #   ) + ylab(paste0(gsub("Intensity", " intensities", assayNames), 
-    #                   " (log2)")) + xlab("") +
-    #   ggtitle(paste0('Box plot (',gsub("Intensity", " intensities", assayNames), ')'))
-    # 
-    ggplotly(p)
-  })
+  boxplotPlotly <-
+    eventReactive(c(input$submitBoxplot, reacValues$nsubmits), {
+      assayNames <- isolate(input$assayNames)
+      p <- plotBoxPlot(
+        dataAssay(),
+        assayNames,
+        myGroupColors(),
+        input$boxplot_base,
+        input$boxplot_legend
+      )
+      
+      ggplotly(p)
+    })
   
   output$boxPlot <- renderPlotly({
     req(reacValues$uploadSuccess)
@@ -479,37 +411,15 @@ server <- function(input, output, session) {
   
   densityPlotly <- reactive({
     input$submitDensity
-    #reacValues$nsubmits
     assayNames <- isolate(input$assayNames)
-    p <- plotDensityPlot(dataAssay(),
-               assayNames,
-               myColors(),
-               base_size = input$density_base,
-               legend_size = input$density_legend
-               )
-    # p <-
-    #   ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color = colname)) +
-    #   # ggplot(dataAssay()[!is.na(dataAssay()$value), ], aes(x = value, color =
-    #   #                                                        colname)) +
-    #   geom_density() +
-    #   scale_color_manual(values = myColors()) +
-    #   theme_cowplot(font_size = input$density_base) +
-    #   background_grid() +
-    #   theme(
-    #     axis.text.x = element_text(
-    #       angle = 90,
-    #       hjust = 1,
-    #       vjust = 0.5,
-    #       size = 10
-    #     ),
-    #     legend.title = element_blank(),
-    #     legend.text = element_text(size = input$density_legend),
-    #   ) + xlab(paste0(gsub("Intensity", " intensities", assayNames), " (log2)")) + ylab("Density") +
-    #   ggtitle(paste0(
-    #     'Density plot (',
-    #     gsub("Intensity", " intensities", assayNames),
-    #     ')'
-    #   ))
+    p <- plotDensityPlot(
+      dataAssay(),
+      assayNames,
+      myColors(),
+      base_size = input$density_base,
+      legend_size = input$density_legend
+    )
+    
     p
   })
   
@@ -762,90 +672,37 @@ server <- function(input, output, session) {
     )
   })
   
-  corrBasePlot <- eventReactive(c(input$submitCor, reacValues$nsubmits), {
-    assayName <- isolate(input$assayNames)
-    annotSamples <- isolate(input$cor_annot)
-    groupInputs <- isolate(input$corrSamplesInput)
-    tmpCols <- colData(reacValues$proteinData)
-    
-    req(reacValues$uploadSuccess)
-    
-    validate(need(assayName != "", "Please provide an intensity."))
-    
-    validate(
-      need(
-        length(groupInputs) > 1 |
-          is.null(groupInputs),
-        "Please select at least two groups. If none is selected all are considered."
+  corrBasePlot <-
+    eventReactive(c(input$submitCor, reacValues$nsubmits), {
+      assayName <- isolate(input$assayNames)
+      annotSamples <- isolate(input$cor_annot)
+      groupInputs <- isolate(input$corrSamplesInput)
+
+      req(reacValues$uploadSuccess)
+      
+      validate(need(assayName != "", "Please provide an intensity."))
+      
+      validate(
+        need(
+          length(groupInputs) > 1 |
+            is.null(groupInputs),
+          "Please select at least two groups. If none is selected all are considered."
+        )
       )
-    )
-    
-    df <- assay(reacValues$proteinData, assayName)
-    print(dim(df))
-    p <- plotCorrPlotly(
-      df,
-      tmpCols,
-      myGroupColors(),
-      heatColors(),
-      assayName,
-      annotSamples,
-      reacValues$groupFactors,
-      groupInputs
-    )
-    
-    # if (is.null(groupInputs))
-    #   groupInputs <- unique(colData(reacValues$proteinData)$groups)
-    # 
-    # if (!is.null(reacValues$groupFactors) &&
-    #     all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
-    #   tmpCols$groups <-
-    #     factor(tmpCols$groups, levels = c(reacValues$groupFactors, 
-    #                                       setdiff(groupInputs, reacValues$groupFactors)))
-    # }
-    # 
-    # df <- assay(reacValues$proteinData, assayName)
-    # df <- df[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
-    # 
-    # annot <- colData(reacValues$proteinData)
-    # row.names(annot) <- annot$samples
-    # annot <- annot[names(df), ]
-    # annot$samples <- NULL
-    # 
-    # corDf <- cor(df, method = "pearson", use = "complete.obs")
-    # limits <- c(min(corDf) - 0.003, 1)
-    # diag(corDf) <- NA
-    # 
-    # if (annotSamples) {
-    #   p <- heatmaply_cor(
-    #     round(corDf, 3),
-    #     xlab = "",
-    #     ylab = "",
-    #     limits = limits,
-    #     main = paste0("<b>Correlation plot (", 
-    #                   gsub("Intensity", " intensities", assayName), 
-    #                   ")</b>"),
-    #     colors = heatColors(),
-    #     row_side_palette = myGroupColors(),
-    #     row_side_colors = annot,
-    #     plot_method = "plotly",
-    #     key.title = "Pearson Correlation"
-    #   )
-    # } else {
-    #   p <- heatmaply_cor(
-    #     round(corDf, 3),
-    #     xlab = "",
-    #     ylab = "",
-    #     colors = heatColors(),
-    #     limits = limits,
-    #     main = paste0("<b>Correlation plot (", 
-    #                                  gsub("Intensity", " intensities", assayName), 
-    #                                  ")</b>"),
-    #     plot_method = "plotly",
-    #     key.title = "Pearson Correlation"
-    #   )
-    # }
-    p
-  })
+      
+      p <- plotCorrPlotly(
+        assay(reacValues$proteinData, assayName),
+        colData(reacValues$proteinData),
+        myGroupColors(),
+        heatColors(),
+        assayName,
+        annotSamples,
+        reacValues$groupFactors,
+        groupInputs
+      )
+      
+      p
+    })
   
   output$corrPlotly <- renderPlotly({
     assayNames <- isolate(input$assayNames)
@@ -1145,7 +1002,7 @@ server <- function(input, output, session) {
   numIdPlotly <- reactive({
     validate(
       need(
-        "Intensity" %in% assayNames(reacValues$proteinData) |
+        "Intensity" %in% assayNames(reacValues$proteinData) ||
           "LFQIntensity" %in% assayNames(reacValues$proteinData),
         "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
       )
@@ -1288,38 +1145,18 @@ server <- function(input, output, session) {
   
   ### -------------------------------------------- CVs BOX PLOT
   
-  cvsPlotly <- eventReactive(c(input$submitCVs,reacValues$nsubmits), {
-    assayNames <- isolate(input$assayNames)
-    calcData <- dataAssay()
-    calcData$value <- 2 ^ calcData$value
-    cvs <-
-      aggregate(value ~ rowname + group, calcData, function(x)
-        100 * (sd(x) / mean(x)))
-    
-    p <-
-      ggplot(cvs[!is.na(cvs$value), ], aes(x = group, y = value, fill = group)) +
-      geom_boxplot(
-        outlier.shape = NA,
-        outlier.color = NULL,
-        outlier.fill = NULL
-      ) +
-      scale_fill_manual(values = myGroupColors()) +
-      theme_cowplot(font_size = input$cv_base) +
-      background_grid() +
-      theme(
-        axis.text.x = element_text(
-          angle = 90,
-          hjust = 1,
-          vjust = 0.5,
-          size = input$cv_base
-        ),
-        legend.text = element_text(size = input$cv_legend),
-        legend.title = element_blank()
-      ) + ylab("Coefficient of Variation (%)") + xlab("") +
-      ggtitle(paste0('CV plot (',gsub("Intensity", " intensities", assayNames), ')'))
-    
-    ggplotly(p)
-  })
+  cvsPlotly <-
+    eventReactive(c(input$submitCVs, reacValues$nsubmits), {
+      assayNames <- isolate(input$assayNames)
+      
+      p <- plotCoeffVarPlot(dataAssay(),
+                            myGroupColors(),
+                            assayNames,
+                            input$cv_base,
+                            input$cv_legend)
+      
+      ggplotly(p)
+    })
   
   output$boxplotCV <- renderPlotly({
     req(reacValues$uploadSuccess)
@@ -3699,6 +3536,7 @@ server <- function(input, output, session) {
       tempReport <- file.path(tempdir(), "qcReport.Rmd")
       file.copy("reports/qcReport.Rmd", tempReport, overwrite = TRUE)
       
+      withProgress(message = "Generating QC report", value = 0, {
       # Set up parameters to pass to Rmd document
 
       nsummary <- ifelse(
@@ -3710,16 +3548,163 @@ server <- function(input, output, session) {
       ncomps <- nrow(reacValues$contrastMatrix )
       nquant <- length(which(rowData(reacValues$proteinData)$quantified=="+"))
       
-      params <- list(numberOfProteins = nsummary,
+      # prepare output plots
+      
+      lfqPCA <- NA
+      lfqDensityPlot <- NA
+      lfqCvBox <- NA
+      lfqCorrPlot <- NA
+      
+      if (
+        "Intensity" %in% assayNames(reacValues$proteinData) ||
+        "LFQIntensity" %in% assayNames(reacValues$proteinData)
+      ) {
+        aname <-
+          ifelse(
+            "LFQIntensity" %in% assayNames(reacValues$proteinData),
+            'LFQIntensity',
+            'Intensity'
+          )
+        
+        lfqData <- getAssayData(reacValues$proteinData,
+                                assayNames = "LFQIntensity"
+        )
+        
+        # PCA
+        lfqOlist <-
+          computePCA(
+            assay(reacValues$proteinData, aname),
+            colData(reacValues$proteinData),
+            reacValues$groupFactors
+          )
+        
+        lfqPCADf <- lfqOlist[[1]]
+        lfqPct <- lfqOlist[[2]]
+        
+        lfqPCA <- plotPCA(
+          lfqPCADf,
+          lfqPct,
+          myGroupColors(),
+          aname
+        )
+        
+        # box
+        lfqBoxplot <- plotBoxPlot(lfqData,
+                                  aname,
+                                  myGroupColors()
+        )
+        
+        # density
+        lfqDensityPlot <- plotDensityPlot(
+          lfqData,
+          aname,
+          myColors()
+        )
+        
+        lfqCvBox <- plotCoeffVarPlot(lfqData,
+                                     myGroupColors(),
+                                     aname
+        )
+        
+        # corr plot
+        lfqCorrPlot <- plotCorrPlotly(
+          assay(reacValues$proteinData, aname),
+          colData(reacValues$proteinData),
+          myGroupColors(),
+          heatColors(),
+          aname,
+          annotSamples=T,
+          reacValues$groupFactors
+        )
+        
+      }
+
+      incProgress(3/10)
+      impData <- getAssayData(reacValues$proteinData,
+                              assayNames = "ImputedIntensity"
+      )
+      
+      
+      
+      # PCA
+      
+      impOlist <-
+        computePCA(
+          assay(reacValues$proteinData, "ImputedIntensity"),
+          colData(reacValues$proteinData),
+          reacValues$groupFactors
+        )
+      
+      impPCADf <- impOlist[[1]]
+      impPct <- impOlist[[2]]
+      
+      impPCA <- plotPCA(
+        impPCADf,
+        impPct,
+        myGroupColors(),
+        "ImputedIntensity"
+      )
+      # intensity boxplot
+      
+      incProgress(4/10)
+      impBoxplot <- plotBoxPlot(impData,
+                                "ImputedIntensity",
+                                myGroupColors()
+      )
+      incProgress(5/10)
+      # density plots
+      incProgress(6/10)
+      impDensityPlot <- plotDensityPlot(
+        impData,
+        "ImputedIntensity",
+        myColors()
+      )
+      incProgress(7/10)
+      
+      # CV-boxplots
+      impCvBox <- plotCoeffVarPlot(impData,
+                                   myGroupColors(),
+                                   "ImputedIntensity"
+      )
+      incProgress(8/10)
+      
+      # corrplot
+      impCorrPlot <- plotCorrPlotly(
+        assay(reacValues$proteinData, "ImputedIntensity"),
+        colData(reacValues$proteinData),
+        myGroupColors(),
+        heatColors(),
+        "ImputedIntensity",
+        annotSamples=T,
+        reacValues$groupFactors
+      )
+      incProgress(9/10)
+      
+      
+      
+      params <- list(numberOfProteins=nsummary,
                      quantifiedProteins=nquant,
                      numberOfComparisons=ncomps,
                      numberOfGroups=ngroups,
                      numid=numIdPlotly(),
                      contaminants=contaminantsPlotly(),
                      missingvals=pctMvsPlotly(),
-                     overlap=overlapBasePlot(),
-                     overlapDf=reacValues$overlapDf
+                     #overlap=overlapBasePlot(),
+                     overlapDf=reacValues$overlapDf,
+                     lfqPCA=lfqPCA,
+                     impPCA=impPCA,
+                     lfqBoxplot=lfqBoxplot,
+                     impBoxplot=impBoxplot,
+                     lfqDensityPlot=lfqDensityPlot,
+                     impDensityPlot=impDensityPlot,
+                     lfqCvBox=lfqCvBox,
+                     impCvBox=impCvBox,
+                     lfqCorrPlot=lfqCorrPlot,
+                     impCorrPlot=impCorrPlot
                      )
+      
+      if (!is.null(reacValues$inputParameterSummary)) 
+        params[['analysisParams']] <- analysisParams()
       
       # Knit the document, passing in the `params` list, and eval it in a
       # child of the global environment (this isolates the code in the document
@@ -3728,6 +3713,7 @@ server <- function(input, output, session) {
                         params = params,
                         envir = new.env(parent = globalenv())
       )
+      })
     }
   )
 }
