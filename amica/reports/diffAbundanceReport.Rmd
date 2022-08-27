@@ -1,0 +1,80 @@
+---
+title: "amica Differential abundance Report"
+date: '`r format(Sys.Date(), "%Y-%B-%d")`'
+output: html_document
+params:
+  fcCutoff: NA
+  sigCutoffValue: NA # padj or p-value
+  pvalCutoff: NA
+  enrichmentChoice: NA # enriched, reduced or absolute (both)
+  summPlots: NA
+  enrichedTables: NA
+  reducedTables: NA
+  nsigs: NA
+  comparisons: NA
+---
+
+```{r, include=FALSE}
+prettyTable <- function(df) {
+  print(df)
+  datatable(
+      df,
+      rownames = F,
+      extensions = 'Buttons',
+      options = list(
+        pageLength = 12,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'csv'
+          ))
+      )
+    )
+}
+```
+
+## 1 Analysis parameters 
+
+log2FC-threshold: **`r params$fcCutoff`**.
+
+Significance value: **`r params$sigCutoffValue`**.
+
+Significance threshold: **`r ifelse(params$sigCutoffValue != 'none', params$pvalCutoff, 'none')`**.
+
+Which proteins to show: **`r params$enrichmentChoice`**
+
+## 2 Single group comparison(s) (MA - and volcano plots)
+
+
+```{r, echo=FALSE, results='asis'}
+for (idx in seq_along(params$summPlots)) {
+  cat(paste0("### 2.", idx, " ", params$comparisons[idx], "\n\n"))
+  
+  # knitr::kable(params$enrichedTables[[idx]], format="html")
+  cat("Volcano plot\n\n")
+  print(params$summPlots[[idx]])
+  cat("\n\n")
+  
+  if (params$enrichmentChoice == "absolute") {
+    cat("Top 10 enriched proteins (by log2 fold change)\n\n")
+    print(knitr::kable(params$enrichedTables[[idx]], format="html"))
+    #print(prettyTable(params$enrichedTables[[idx]]))
+    cat("\n\n")
+    
+    cat("Top 10 reduced proteins (by log2 fold change)\n\n")
+    print(knitr::kable(params$enrichedTables[[idx]], format="html"))
+    #print(prettyTable(params$reducedTables[[idx]]))
+    cat("\n\n")
+  } else {
+    if (params$enrichmentChoice == "enriched") {
+      cat("Top 10 enriched proteins (by log2 fold change)\n\n")
+      print(knitr::kable(params$enrichedTables[[idx]], format="html"))
+      #print(prettyTable(params$enrichedTables[[idx]]))
+    } else{
+      cat("Top 10 reduced proteins (by log2 fold change)\n\n")
+      print(knitr::kable(params$enrichedTables[[idx]], format="html"))
+      print(prettyTable(params$reducedTables[[idx]]))
+    }
+  }
+}
+```
