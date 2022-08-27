@@ -99,7 +99,7 @@ tabPanel(
         )
       )
     ),
-    
+    downloadButton('diffAbundanceReport', 'Generate diff. abundance Report', icon = icon("file")),
   ),
   h3("Summary"),
   p(
