@@ -4,12 +4,12 @@ tabPanel(
   h1("Quality Control"),
   h2("Compare different intensities"),
   br(),
-  downloadLink("qcReport", "Report"),
   inline(uiOutput("assayNames")),
   inline(actionButton('assaysHelp', label = '', icon = icon("info"))),
   uiOutput("assaysHelpBox"),
   helpText("ImputedIntensity are the intensities used for quantification"),
   verbatimTextOutput("quantSummary"),
+  downloadButton('qcReport', 'Generate QC Report', icon = icon("file")),
   tabsetPanel(
     type = "tabs",
     tabPanel(
