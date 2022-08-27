@@ -12,6 +12,7 @@ server <- function(input, output, session) {
   source('R/server/exampleData.R', local = TRUE)
   source('R/server/modals.R', local = TRUE)
   source('R/server/qcPlots.R', local = TRUE)
+  source('R/server/diffAbundancePlots.R', local = TRUE)
   
   ### INPUT LOGIC AND PLOTS
   output$mtcarsBar <- renderPlotly({
@@ -2358,20 +2359,14 @@ server <- function(input, output, session) {
     xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
     
     withProgress(message = 'Plotting Volcano plot ', {
-      p <-
-        plotVolcanoPlot(pltData,  pcols, padjYBoolean, pointsize)
-      p <-
-        p + theme_cowplot(font_size = fontsize) + background_grid() +
-        theme(
-          legend.text = element_text(size = legend_fontsize),
-          legend.title = element_text(size = legend_fontsize)
-        )
-      p <- p + geom_text(
-        data = subset(pltData, show_id),
-        aes(logFC, nlog10_pval, label = Gene.names),
-        position=position_jitter(width=0.25,height=0.25)
-        #,position = position_jitter(seed = 1)#position_nudge(y = -0.1)
-      ) + xlab(xText)
+      p <- plotVolcanoPlot(pltData,
+                           xText,
+                           padjYBoolean,
+                           pcols,
+                           fontsize,
+                           legend_fontsize,
+                           pointsize)
+
       incProgress(amount = 0.75)
       
       p <- ggplotly(p, source = "subset") %>% layout(dragmode = "select")
@@ -2443,24 +2438,16 @@ server <- function(input, output, session) {
       pltData[pltData$key %in% get_data()$key, "show_id"] <- TRUE
     }
     
+    xText <- unlist(strsplit(sample, "__vs__"))
+    xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
+    
     withProgress(message = "Plotting MA plot ", {
-      p <- plotMAPlot(pltData, pcols, pointsize)
-      
-      p <-
-        p + theme_cowplot(font_size = fontsize) + background_grid() + 
-        theme(
-          legend.text = element_text(size = legend_fontsize),
-          legend.title = element_text(size = legend_fontsize)
-        )
-      
-      xText <- unlist(strsplit(sample, "__vs__"))
-      xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
-      
-      p <- p + geom_text(
-        data = subset(pltData, show_id),
-        aes(logFC, AveExpr, label = Gene.names),
-        position = position_jitter(width = 0.25, height = 0.25)
-      ) + xlab(xText)
+      p <- plotMAPlot(pltData,
+                      xText,
+                      pcols,
+                      fontsize,
+                      legend_fontsize,
+                      pointsize)
     })
     
     p <- ggplotly(p, source = "subset") %>% layout(dragmode = "select")
@@ -3716,4 +3703,108 @@ server <- function(input, output, session) {
       })
     }
   )
+  
+  output$diffAbundanceReport <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = "diffAbudanceReport.html",
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "diffAbundanceReport.Rmd")
+      file.copy("reports/diffAbundanceReport.Rmd", tempReport, overwrite = TRUE)
+
+      withProgress(message = "Generating Diff. abundance report", value = 0, {
+        # Set up parameters to pass to Rmd document
+        
+        plots <- list()
+        enrTables <- list()
+        redTables <- list()
+        plotIdx <- 1
+        enrIdx <- 1
+        redIdx <- 1
+        for (comp in reacValues$reacConditions) {
+          pltData <- getVolcanoPlotData(
+            reacValues$dataLimma,
+            comp,
+            input$fcCutoff,
+            input$sigCutoffValue,
+            input$enrichmentChoice,
+            ifelse(input$sigCutoffValue == "p-value", FALSE, TRUE),
+            input$pvalCutoff
+          )
+
+          xText <- unlist(strsplit(comp, "__vs__"))
+          xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
+
+          vplot <- plotVolcanoPlot(pltData,
+                                   xText,
+                                   ifelse(input$sigCutoffValue == "p-value", FALSE, TRUE),
+                                   myScatterColors()
+                                   )
+          # mplot <- plotMAPlot(pltData,
+          #                     xText,
+          #                     myScatterColors()
+          #                     )
+
+
+
+          signData <- pltData[pltData$significant == 'yes',]
+          signData$Gene.names <- gsub(";.*", "", signData$Gene.names)
+          signData$logFC <- round(signData$logFC, 2)
+          signData$AveExpr <- round(signData$AveExpr, 2)
+          signData$P.Value <- format(signData$P.Value, digits=2)
+          signData$adj.P.Val <- format(signData$adj.P.Val, digits=2)
+
+          enrichedTop10 <-
+            head(signData[order(signData$logFC, decreasing = T),
+                         grep('key|show_id|nlog10_pval|sign', names(signData),
+                              invert = T)], 10)
+          
+          
+          
+          nenriched <- nrow(signData[signData$logFC>0,])
+          nreduced <- nrow(signData[signData$logFC<0,])
+
+          reducedTop10 <-
+            head(signData[order(signData$logFC, decreasing = F),
+                         grep('key|show_id|nlog10_pval|sign', names(signData),
+                              invert = T)], 10)
+          row.names(enrichedTop10) <- NULL
+          row.names(reducedTop10) <- NULL
+
+          plots[[plotIdx]] <- vplot
+          plotIdx <- plotIdx + 1
+          
+          enrTables[[enrIdx]] <- enrichedTop10
+          redTables[[redIdx]] <- reducedTop10
+          enrIdx <- enrIdx + 1
+          redIdx <- redIdx + 1
+          
+          #nIdx <- nIdx + 1
+        }
+        
+        #gridPlots <- gridExtra::grid.arrange(grobs=plots, ncol = 2)
+        
+        params <- list(fcCutoff=input$fcCutoff,
+                       sigCutoffValue=input$sigCutoffValue,
+                       pvalCutoff=input$pvalCutoff,
+                       enrichmentChoice=input$enrichmentChoice,
+                       summPlots=plots,
+                       enrichedTables=enrTables,
+                       reducedTables=redTables,
+                       comparisons=reacValues$reacConditions
+                       )
+        
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+        rmarkdown::render(tempReport, output_file = file,
+                          params = params,
+                          envir = new.env(parent = globalenv())
+        )
+      })
+    }
+  )
+  
 }
