@@ -7,30 +7,20 @@ params:
   sigCutoffValue: NA # padj or p-value
   pvalCutoff: NA
   enrichmentChoice: NA # enriched, reduced or absolute (both)
-  summPlots: NA
-  enrichedTables: NA
-  reducedTables: NA
-  nsigs: NA
   comparisons: NA
+  dataLimma: NA
+  myScatterColors: NA
+  enrichedUpSet: NA
+  reducedUpSet: NA
+  nMultiEnriched: NA
+  nMultiReduced: NA
 ---
 
-```{r, include=FALSE}
-prettyTable <- function(df) {
-  print(df)
-  datatable(
-      df,
-      rownames = F,
-      extensions = 'Buttons',
-      options = list(
-        pageLength = 12,
-        autoWidth = TRUE,
-        dom = 'Bfrtip',
-        buttons = list(list(
-          extend = 'csv'
-          ))
-      )
-    )
-}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(DT)
+source("diffAbundancePlots.R", local = TRUE)
 ```
 
 ## 1 Analysis parameters 
@@ -46,35 +36,101 @@ Which proteins to show: **`r params$enrichmentChoice`**
 ## 2 Single group comparison(s) (MA - and volcano plots)
 
 
-```{r, echo=FALSE, results='asis'}
-for (idx in seq_along(params$summPlots)) {
-  cat(paste0("### 2.", idx, " ", params$comparisons[idx], "\n\n"))
-  
-  # knitr::kable(params$enrichedTables[[idx]], format="html")
-  cat("Volcano plot\n\n")
-  print(params$summPlots[[idx]])
-  cat("\n\n")
-  
-  if (params$enrichmentChoice == "absolute") {
-    cat("Top 10 enriched proteins (by log2 fold change)\n\n")
-    print(knitr::kable(params$enrichedTables[[idx]], format="html"))
-    #print(prettyTable(params$enrichedTables[[idx]]))
-    cat("\n\n")
-    
-    cat("Top 10 reduced proteins (by log2 fold change)\n\n")
-    print(knitr::kable(params$enrichedTables[[idx]], format="html"))
-    #print(prettyTable(params$reducedTables[[idx]]))
-    cat("\n\n")
-  } else {
-    if (params$enrichmentChoice == "enriched") {
-      cat("Top 10 enriched proteins (by log2 fold change)\n\n")
-      print(knitr::kable(params$enrichedTables[[idx]], format="html"))
-      #print(prettyTable(params$enrichedTables[[idx]]))
-    } else{
-      cat("Top 10 reduced proteins (by log2 fold change)\n\n")
-      print(knitr::kable(params$enrichedTables[[idx]], format="html"))
-      print(prettyTable(params$reducedTables[[idx]]))
-    }
-  }
+```{r single-comp, results='asis', echo=FALSE}
+idx <- 1
+for (comp in params$comparisons) {
+  pltData <- getVolcanoPlotData(
+            params$dataLimma,
+            comp,
+            params$fcCutoff,
+            params$sigCutoffValue,
+            params$enrichmentChoice,
+            ifelse(params$sigCutoffValue == "p-value", FALSE, TRUE),
+            params$pvalCutoff
+          )
+  xText <- unlist(strsplit(comp, "__vs__"))
+          xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
+          
+           #cat(paste0('\n\n### 2.`', idx, "`", " ", comp, "\n\n"))
+          cat(paste0("\n\n### 2.",idx, " ", comp, "\n\n"))
+          vplot <- plotVolcanoPlot(pltData,
+                                   xText,
+                                   ifelse(params$sigCutoffValue == "p-value", FALSE, TRUE),
+                                   params$myScatterColors
+                                   )
+          print(vplot)
+          
+          nenriched <- nrow(pltData[pltData$logFC>0 & pltData$significant =="yes",])
+          nreduced <- nrow(pltData[pltData$logFC<0 & pltData$significant =="yes",])
+          
+          cat(paste0("\n\nNumber of enriched proteins: **", nenriched, "**\n\n"))
+          cat(paste0("\n\nNumber of reduced proteins : **", nreduced, "**\n\n"))
+          
+          idx <- idx + 1
 }
 ```
+
+## 3 Set comparisons of pairwise group comparisons
+Set comparison of differentially abundant proteins from selected comparisons under selected thresholds. The dots show which sets are getting compared. A dot not connected to another dot shows the number of proteins specific to that comparisons. The top barplot depicts the number of intersecting proteins, and the barplot on the side shows how many proteins are differentially abundant in the comparison. 
+
+```{r multi-comp-enriched, echo=FALSE, results='asis'}
+
+if (length(params$comparisons) < 2) {
+  cat("\n\nNot enough pairwise comparisons.\n\n")
+} else {
+  if (params$enrichmentChoice == "reduced") {
+  cat("\n\nSet comparison of enriched not shown.\n\n")
+} else {
+  cat(paste0("\n\n### UpSet plot of enriched proteins\n\n"))
+  print(params$enrichedUpSet)
+  cat(paste0("\n\nNumber of enriched proteins in all comparisons: **", params$nMultiEnriched, "**"))
+}
+}
+
+```
+
+```{r multi-comp-reduced, echo=FALSE, results='asis'}
+if (length(params$comparisons) < 2) {
+  cat("\n\nNot enough pairwise comparisons.\n\n")
+} else {
+  if (params$enrichmentChoice == "reduced") {
+  print("Set comparison of reduced not shown.")
+} else {
+  cat(paste0("\n\n### UpSet plot of reduced proteins\n\n"))
+  print(params$reducedUpSet)
+  cat(paste0("\n\nNumber of reduced proteins in all comparisons:  **", params$nMultiReduced, "**"))
+}
+}
+
+```
+
+```{r dynamic-datatable, echo=FALSE}
+# out = NULL
+# knit_expanded <- NULL
+# for (idx in seq_along(params$summPlots)) {
+#   #out <- paste0(out, "### 2.", idx, " ", params$comparisons[idx], "\n\n" )
+#   knit_expanded <- paste0("print(params$summPlots[[idx]])\n\n")
+#   
+#   enrTable <- "datatable(params$enrichedTables[[idx]],rownames = F)\n\n"
+#   redTable <- "datatable(params$reducedTables[[idx]],rownames = F)\n\n"
+# 
+#   out <- paste0(out, "\n\n### 2.",idx, " comparison: ", 
+#                           params$comparisons[idx], 
+#                           "\n\n```{r results='asis', echo=FALSE}\n\n", knit_expanded, "```\n\n")
+  # 
+  # if (params$enrichmentChoice == "enriched") {
+  #   out <- paste0(out, "#### Top 10 enriched proteins\n\n```{r result='asis', echo=FALSE}\n\n", enrTable, "\n\n```")
+  # } else if(params$enrichmentChoice == "reduced") {
+  #   out <- paste0(out, "#### Top 10 reduced proteins\n\n```{r result='asis', echo=FALSE}\n\n", redTable, "\n\n```")
+  # } else {
+  #   out <- paste0(out, "#### Top 10 enriched proteins\n\n```{r result='asis', echo=FALSE}\n\n", enrTable, "\n\n```")
+  #   out <- paste0(out, "#### Top 10 reduced proteins\n\n```{r result='asis', echo=FALSE}\n\n", redTable, "\n\n```")
+  # }
+  
+#}
+#`r paste(knit(text = out), collapse = '\n')`
+```
+
+
+
+
