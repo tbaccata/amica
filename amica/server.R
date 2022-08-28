@@ -1341,49 +1341,11 @@ server <- function(input, output, session) {
     validate(need(!any(duplicated(reacValues$dotplotGroupsDf$group)), "Error! Please provide 
                   unique groups"  )  )
     
-    group2comps <- reacValues$dotplotGroupsDf
+    #group2comps <- reacValues$dotplotGroupsDf
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     ridx <- rownames(reacValues$dataComp[ridx,])
     
     validate(need(length(ridx) > 1, "Cannot output Dotplot with less than two proteins." ) )
-
-    pattern <- padjPrefix
-    if (reacValues$sigCutoffValue == "p-value") pattern <- pvalPrefix
-    
-    selection <- grep(pattern, names(reacValues$dataLimma), value = T)
-    
-    widestats <- reacValues$dataLimma[ridx, selection]
-
-    longStats <- stats::reshape(widestats, idvar = "rowname",
-                                ids = rownames(widestats), times = names(widestats),
-                                timevar = "colname", varying = list(names(widestats)),
-                                direction = "long", v.names = "value")
-
-    longStats$colname <- gsub(pattern, "", longStats$colname)
-    names(longStats) <- c('Comparison', 'padj', 'ProteinID')
-
-    longStats <- longStats[longStats$Comparison %in% group2comps$comparison, ]
-    midx <- match(longStats$Comparison, group2comps$comparison)
-    longStats$Group <- group2comps$group[midx]
-
-    longStats$Comparison <- NULL
-
-    selection <- grep(logfcPrefix, names(reacValues$dataLimma), value = T)
-    widefcs <- reacValues$dataLimma[ridx, selection]
-
-    longFCs <- stats::reshape(widefcs, idvar = "rowname",
-                              ids = rownames(widefcs), times = names(widefcs),
-                              timevar = "colname", varying = list(names(widefcs)),
-                              direction = "long", v.names = "value")
-
-    longFCs$colname <- gsub("logFC_", "", longFCs$colname)
-    names(longFCs) <- c('Comparison', 'log2FC', 'ProteinID')
-
-    longFCs <- longFCs[longFCs$Comparison %in% group2comps$comparison, ]
-    midx <- match(longFCs$Comparison, group2comps$comparison)
-    longFCs$Group <- group2comps$group[midx]
-
-    longData <- merge(longFCs, longStats, by = c('ProteinID', 'Group'))
     
     aname <-
       ifelse(
@@ -1391,33 +1353,33 @@ server <- function(input, output, session) {
         'LFQIntensity',
         'Intensity'
       )
+    validate(need(aname %in% assayNames(reacValues$proteinData), 
+                  "No LFQIntensity or Intensity columns found." ) )
+    
+    pattern <- padjPrefix
+    if (reacValues$sigCutoffValue == "p-value") pattern <- pvalPrefix
+    
+    selection <- grep(pattern, names(reacValues$dataLimma), value = T)
+    widestats <- reacValues$dataLimma[ridx, selection]
+    
+    selection <- grep(logfcPrefix, names(reacValues$dataLimma), value = T)
+    widefcs <- reacValues$dataLimma[ridx, selection]
+    
     df <- assay(reacValues$proteinData, aname)
     df <- df[ridx,]
     
-    intData <- stats::reshape(df, idvar = "rowname",
-                               ids = rownames(df), times = names(df),
-                               timevar = "colname", varying = list(names(df)),
-                               direction = "long", v.names = "value")
-    midx <- match(intData$colname, reacValues$expDesign$samples)
-    intData$group <- reacValues$expDesign$groups[midx]
-    
-    intData <- intData[intData$group %in% group2comps$group,]
-    intData <-
-      aggregate(value ~ rowname + group, intData, mean, na.rm=TRUE, na.action=NULL)
-    names(intData) <- c('ProteinID', 'Group', 'AvgIntensity')
-    
-    longData <- merge(longData, intData, by = c('ProteinID', 'Group'))
-    
-    longData$Gene <- reacValues$filtData[longData$ProteinID, "Gene.names"]
-    longData$Gene <- gsub(";.*", "", longData$Gene)
-    # longData$Gene <- gsub("^([^;]*;[^;]*);.*", "\\1", longData$Gene)
-
     if (reacValues$show_dotplot == FALSE) {
       reacValues$show_dotplot = TRUE
       toggle(id = 'hide_dotplot_before_submit', anim = T)
     }
-    longData$significant <- factor(ifelse(longData$padj <= 0.05, 1.5, 0))
-    reacValues$dataDotplot <- longData
+    
+    reacValues$dataDotplot <- getDotplotData(widestats,
+               widefcs,
+               df,
+               reacValues$filtData,
+               reacValues$dotplotGroupsDf,
+               reacValues$expDesign,
+               reacValues$sigCutoffValue)
   })
   
   output$dotplot_color_gradient <- renderUI({
@@ -1524,6 +1486,7 @@ server <- function(input, output, session) {
       )
     ))
     req(reacValues$dataDotplot)
+    req(reacValues$dotplotGroupsDf)
     
     minColorGradient <- input$dotplot_color_gradient[1]
     maxColorGradient <- input$dotplot_color_gradient[2]
@@ -1534,126 +1497,25 @@ server <- function(input, output, session) {
     dotplotColors <- dotplotColorPalette(input$dotplot_palette,
                                          input$dotplot_rev_colors)
     
+    
     clusteringMetric <- "AvgIntensity"
     if (!is.null(input$dotplot_clustering_option)) {
       clusteringMetric <- input$dotplot_clustering_option
     }
     
-    mat <- reacValues$dataDotplot %>%
-      dplyr::select(Gene, Group, all_of(clusteringMetric)) %>%  # drop unused columns to faciliate widening
-      pivot_wider(names_from = Group, values_from = all_of(clusteringMetric)) %>%
-      data.frame() # make df as tibbles -> matrix annoying
-    
-    row.names(mat) <- mat$Gene  # put gene in `row`
-    mat$Gene <- NULL #drop gene column as now in rows
-    
-    tmat <- mat %>% as.matrix()
-    tmat[is.na(tmat)] <- 0
-    
-    dist_meth <- ifelse(!is.null(input$dotplot_distance_metric),
-                        input$dotplot_distance_metric, 
-                        "canberra")
-    clst_meth <- ifelse(!is.null(input$dotplot_clustering_method),
-                        input$dotplot_clustering_method,
-                        "complete")
-    
-    
-    #cddr <- reorder(as.dendrogram(cclust), colMeans(mat))
-    
-    if (!is.null(input$dotplot_cluster_columns) && input$dotplot_cluster_columns) { # order by clustering
-      cclust <- hclust(dist(t(tmat), method = dist_meth),
-                       method = clst_meth) # hclust with distance matrix
-      cclust <- reorder(as.dendrogram(cclust), colMeans(mat))
-      reacValues$dataDotplot$Group <-
-        factor(reacValues$dataDotplot$Group, levels = names(mat)[as.hclust(cclust)$order])
-    } else { # order by input
-      reacValues$dataDotplot$Group <-
-        factor(reacValues$dataDotplot$Group, levels = reacValues$dotplotGroupsDf$group)
-    }
-
-    rclust <- hclust(dist(tmat, 
-                          method = dist_meth), 
-                     method = clst_meth) # hclust with distance matrix
-    rclust <- reorder(as.dendrogram(rclust), rowMeans(mat))
-    reacValues$dataDotplot$Gene <-
-      factor(reacValues$dataDotplot$Gene, levels = rownames(mat)[as.hclust(rclust)$order])
-
-    
-    signficantTitle <- "adj.p-value"
-    if (reacValues$sigCutoffValue == "p-value")
-      signficantTitle <- "p-value"
-    
-    filterValues <- TRUE
-    if (clusteringMetric == "log2FC" &&
-        !is.null(input$dotplot_ctrl_substraction)) {
-      filterValues <- input$dotplot_ctrl_substraction
-    }
-
-    preFiltered <- reacValues$dataDotplot
-    if (filterValues) {
-      preFiltered <- reacValues$dataDotplot %>% filter(!!rlang::sym(clusteringMetric) > 0)
-    }
-    
-    x <- preFiltered[[clusteringMetric]]
-    
-    legName <- "Relative AvgIntensity"
-    if (clusteringMetric == "log2FC") {
-      preFiltered$relativeAbundance <- (x-min(x,na.rm = T))/(max(x, na.rm = T)-min(x, na.rm = T))
-      legName <- "Relative Fold Change"
-    } else {
-      preFiltered$relativeAbundance <- x/max(x, na.rm = T)
-    }
-    
-    p <- preFiltered %>%
-      ggplot(aes(
-        x = Group,
-        y = Gene,
-        fill = log2FC,
-        color = significant,
-        size = relativeAbundance,
-        stroke = 1
-      )) +
-      geom_point(shape = 21) +
-      cowplot::theme_cowplot() +
-      theme(axis.line  = element_blank()) +
-      theme(axis.text.x = element_text(
-        angle = 90,
-        vjust = 0.5,
-        hjust = 1
-      )) +  theme(legend.justification = "top") +
-      ylab('') + xlab('') +
-      scale_x_discrete(position = "top") +
-      scale_size_continuous(
-        range = c(minSizeGradient, maxSizeGradient),
-        name = legName, #paste("Relative", clusteringMetric),
-        guide = guide_legend(order=2, override.aes = list(shape = 19)),
-        breaks = c(
-          min(preFiltered$relativeAbundance ) + 0.01,
-          max(preFiltered$relativeAbundance )
-        ),
-        labels = c('', '')
-        ) +
-      scale_fill_gradientn(
-        colours = dotplotColors,
-        limits = c(
-          ifelse(
-            minColorGradient < min(preFiltered$log2FC),
-            min(preFiltered$log2FC),
-            minColorGradient
-          ),
-          maxColorGradient
-        ),
-        oob = scales::squish,
-        name = 'Log2FC',
-        guide = guide_colorbar(order = 1)
-      ) +
-      scale_color_manual(
-        signficantTitle,
-        values = c('skyblue', 'black'),
-        limits = c('0', '1.5'),
-        labels = c('> 0.05', '\u2264 0.05')
-        )
-    p
+    plotDotplot(reacValues$dataDotplot,
+                reacValues$dotplotGroupsDf,
+                dotplotColors,
+                minColorGradient,
+                maxColorGradient,
+                minSizeGradient,
+                maxSizeGradient,
+                clusteringMetric,
+                input$dotplot_distance_metric,
+                input$dotplot_clustering_method,
+                input$dotplot_cluster_columns,
+                reacValues$sigCutoffValue,
+                input$dotplot_ctrl_substraction)
   })
 
   output$dotplot <- renderPlot({
@@ -1859,35 +1721,25 @@ server <- function(input, output, session) {
     showQuant <- isolate(input$euler_quant)
     bool <- isolate(input$euler_line)
     showLegend <- isolate(input$euler_legend)
-    lty <- ifelse(bool, 1, 0)
     
     validate(need(!is.null(comparisons), "Please select at least two comparisons."))
     validate(need(length(comparisons) > 1, 
                   "Need at least two comparisons to render UpSet plot."))
     validate(need(length(comparisons) < 6, "Cannot output Euler plot for more than 5 sets."))
-    
-    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "") &&
-        length(reacValues$newMultiNames$new) == length(comparisons)) {
-      for (idx in seq_along(reacValues$newMultiNames$old)) {
-        names(binMat)[which(names(binMat) == reacValues$newMultiNames$old[idx])] <- reacValues$newMultiNames$new[idx]
-        comparisons[idx] <- reacValues$newMultiNames$new[idx]
-      }
-    }
 
     cols <- myScatterColors()[1:length(comparisons)]
     if (!is.null(input$eulercol_1)) {
       tmp <- sapply(1:length(comparisons), function(i) {input[[paste0("eulercol_",i)]]})
       if (all(!is.null(tmp))) cols <- tmp
     }
-
-    fit <- euler(binMat[, comparisons])
-    comps <- grep("&", names(fit$original), invert = T, value = T)
-    numComps <- length(comps)
-    plot(fit, quantities=showQuant, 
-         fills = list(fill = cols),
-         legend = ifelse(showLegend, list(labels = comps), F), 
-         lty = lty
-    )
+    
+    plotEulerDiagram(comparisons,
+               binMat,
+               showQuant,
+               bool,
+               showLegend,
+               reacValues$newMultiNames,
+               cols)
   }
   
   output$eulerrPlot <- renderPlot({
@@ -2171,91 +2023,17 @@ server <- function(input, output, session) {
       plotData[plotData$key %in% get_fc_data()$key, "show_id"] <- TRUE
     }
     
-    formula <- as.formula(paste0(paste0(logfcPrefix, selection[2]), ' ~ ',
-                                   paste0(logfcPrefix, selection[1])   ) )
-    
-    fit1 <- lm(formula, data=plotData)
-    fit1.intercept <- fit1$coefficients[[1]]
-    fit1.slope <- fit1$coefficients[[2]]
-    
-    eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
-                     list(a = format(unname(coef(fit1)[1]), digits = 2),
-                          b = format(unname(coef(fit1)[2]), digits = 2),
-                          r2 = format(summary(fit1)$r.squared, digits = 3)))
-    txt <- as.character(as.expression(eq))
-    
-    
-    title <-
-      paste0(signif(fit1$coef[[1]], 5), 
-             "x + ", 
-             signif(fit1$coef[[2]], 5),
-             ", r2 = ",
-             signif(summary(fit1)$r.squared, 5))
-    
-    labelNamesX <- paste(unlist(strsplit(selection[1], "__vs__") ), collapse = "/")
-    labelNamesX <- paste0("log2FC(", labelNamesX, ")")
-    labelNamesY <- paste(unlist(strsplit(selection[2], "__vs__") ), collapse = "/")
-    labelNamesY <- paste0("log2FC(", labelNamesY, ")")
-    
-    levels <- c('both', selection[1], selection[2], 'none')
-    if(!is.null(labels) & all(labels != "")) {
-      levels[2] <- labels[1]
-      levels[3] <- labels[2]
-    }
-    
-    plotData$significant <-
-      factor(plotData$significant,
-             levels = levels)
-    
     withProgress(message = "Plotting Fold Change plot", {
-      pu <-
-        ggplot(plotData,
-               # variable != literal in the R "programming" ""language""
-               aes(
-                 x = !!sym(paste0(logfcPrefix, selection[1])),
-                 y = !!sym(paste0(logfcPrefix, selection[2])),
-                 label = Gene.names,
-                 key = key,
-                 color = significant
-               )) + geom_point(size = pointsize) + 
-        theme_cowplot(font_size = fontsize) + background_grid() +
-        theme(
-          legend.text = element_text(size = legendFontSize),
-          legend.title = element_text(size = legendFontSize)
-        ) + scale_color_manual(values=colors) +
-        labs(x = labelNamesX, y = labelNamesY) #, title =  title) 
-      
-      intercept <- 0
-      slope <- 1
-      if (showLine == "linear regression") {
-        intercept <- fit1.intercept
-        slope <- fit1.slope
-        pu <- pu + ggtitle(title)
-      } else if (showLine == "straight line") {
-        intercept <- 0
-        slope <- 1
-      }
-      
-      if (showLine != "none") {
-        pu <- pu + geom_abline(
-          intercept = intercept,
-          slope = slope,
-          size = 1,
-          alpha = 0.5,
-          color = colors[5]
-        )
-      }
-      
-      pu <- pu + geom_text(
-        data = subset(plotData, show_id),
-        aes(!!sym(paste0(logfcPrefix, selection[1])),
-            !!sym(paste0(logfcPrefix, selection[2])),
-            label = Gene.names)
-        #hjust=0, vjust=0
-        ,position = position_jitter(width=0.25,height=0.25)
-      )
+    pu <- plotFoldChangePlot(plotData,
+                       selection,
+                       colors,
+                       labels,
+                       showLine,
+                       fontsize,
+                       legendFontSize,
+                       pointsize)
     })
-    
+
     p <- ggplotly(pu, source = "subset") %>% layout(dragmode = "select")
     p %>% config(displaylogo = F,
              modeBarButtonsToRemove = removePlotlyBars,
@@ -2715,7 +2493,7 @@ server <- function(input, output, session) {
   oraBarBase <- eventReactive(c(input$submitORABar, reacValues$nsubmits),{
     orasource <- isolate(input$orasource)
     plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
-    validate(need(!is.null(reacValues$dataGprofiler) | nrow(plotDf)>0, 
+    validate(need(!is.null(reacValues$dataGprofiler) || nrow(plotDf)>0, 
                   paste("No results to show for this source\n",
                         "Please make sure that the organism")))
     
@@ -3711,89 +3489,64 @@ server <- function(input, output, session) {
       # Copy the report file to a temporary directory before processing it, in
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
-      tempReport <- file.path(tempdir(), "diffAbundanceReport.Rmd")
+      tmpDir <- tempdir()
+      tempReport <- file.path(tmpDir, "diffAbundanceReport.Rmd")
+      tempHelpers <- file.path(tmpDir, "diffAbundancePlots.R")
       file.copy("reports/diffAbundanceReport.Rmd", tempReport, overwrite = TRUE)
+      file.copy("R/server/diffAbundancePlots.R", tempHelpers, overwrite = TRUE)
 
       withProgress(message = "Generating Diff. abundance report", value = 0, {
         # Set up parameters to pass to Rmd document
         
-        plots <- list()
-        enrTables <- list()
-        redTables <- list()
-        plotIdx <- 1
-        enrIdx <- 1
-        redIdx <- 1
-        for (comp in reacValues$reacConditions) {
-          pltData <- getVolcanoPlotData(
-            reacValues$dataLimma,
-            comp,
-            input$fcCutoff,
-            input$sigCutoffValue,
-            input$enrichmentChoice,
-            ifelse(input$sigCutoffValue == "p-value", FALSE, TRUE),
-            input$pvalCutoff
-          )
-
-          xText <- unlist(strsplit(comp, "__vs__"))
-          xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
-
-          vplot <- plotVolcanoPlot(pltData,
-                                   xText,
-                                   ifelse(input$sigCutoffValue == "p-value", FALSE, TRUE),
-                                   myScatterColors()
-                                   )
-          # mplot <- plotMAPlot(pltData,
-          #                     xText,
-          #                     myScatterColors()
-          #                     )
-
-
-
-          signData <- pltData[pltData$significant == 'yes',]
-          signData$Gene.names <- gsub(";.*", "", signData$Gene.names)
-          signData$logFC <- round(signData$logFC, 2)
-          signData$AveExpr <- round(signData$AveExpr, 2)
-          signData$P.Value <- format(signData$P.Value, digits=2)
-          signData$adj.P.Val <- format(signData$adj.P.Val, digits=2)
-
-          enrichedTop10 <-
-            head(signData[order(signData$logFC, decreasing = T),
-                         grep('key|show_id|nlog10_pval|sign', names(signData),
-                              invert = T)], 10)
+        enrichedUpSet <- NA
+        nMultiEnriched <- 0
+        nMultiReduced <- 0
+        
+        if (length(reacValues$reacConditions) > 1) {
+          if (input$enrichmentChoice == "enriched" ||
+              input$enrichmentChoice == "absolute") {
+            enrMatrix <- generateEnrichedMatrix(
+              reacValues$dataLimma,
+              "enriched",
+              input$sigCutoffValue,
+              input$fcCutoff,
+              input$pvalCutoff
+            )
+            enrMatrix <- as.data.frame(enrMatrix)
+            if (nrow(enrMatrix>0))
+            enrichedUpSet <- upset(enrMatrix, order.by = "freq")
+            nMultiEnriched <- nrow(enrMatrix)
+          }
           
-          
-          
-          nenriched <- nrow(signData[signData$logFC>0,])
-          nreduced <- nrow(signData[signData$logFC<0,])
-
-          reducedTop10 <-
-            head(signData[order(signData$logFC, decreasing = F),
-                         grep('key|show_id|nlog10_pval|sign', names(signData),
-                              invert = T)], 10)
-          row.names(enrichedTop10) <- NULL
-          row.names(reducedTop10) <- NULL
-
-          plots[[plotIdx]] <- vplot
-          plotIdx <- plotIdx + 1
-          
-          enrTables[[enrIdx]] <- enrichedTop10
-          redTables[[redIdx]] <- reducedTop10
-          enrIdx <- enrIdx + 1
-          redIdx <- redIdx + 1
-          
-          #nIdx <- nIdx + 1
+          if (input$enrichmentChoice == "reduced" ||
+              input$enrichmentChoice == "absolute") {
+            redMatrix <- generateEnrichedMatrix(
+              reacValues$dataLimma,
+              "reduced",
+              input$sigCutoffValue,
+              input$fcCutoff,
+              input$pvalCutoff
+            )
+            redMatrix <- as.data.frame(redMatrix)
+            if (nrow(redMatrix>0))
+            reducedUpSet <- upset(redMatrix, order.by = "freq")
+            nMultiReduced <- nrow(redMatrix)
+          }
         }
         
-        #gridPlots <- gridExtra::grid.arrange(grobs=plots, ncol = 2)
+        incProgress(5/10)
         
         params <- list(fcCutoff=input$fcCutoff,
                        sigCutoffValue=input$sigCutoffValue,
                        pvalCutoff=input$pvalCutoff,
                        enrichmentChoice=input$enrichmentChoice,
-                       summPlots=plots,
-                       enrichedTables=enrTables,
-                       reducedTables=redTables,
-                       comparisons=reacValues$reacConditions
+                       comparisons=reacValues$reacConditions,
+                       dataLimma=reacValues$dataLimma,
+                       myScatterColors=myScatterColors(),
+                       enrichedUpSet=enrichedUpSet,
+                       reducedUpSet=reducedUpSet,
+                       nMultiEnriched=nMultiEnriched,
+                       nMultiReduced=nMultiReduced
                        )
         
         # Knit the document, passing in the `params` list, and eval it in a
