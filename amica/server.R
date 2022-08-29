@@ -377,11 +377,10 @@ server <- function(input, output, session) {
   ### ------------------------------------------- BOX PLOT
   
   boxplotPlotly <-
-    eventReactive(c(input$submitBoxplot, reacValues$nsubmits), {
-      assayNames <- isolate(input$assayNames)
+    reactive({
       p <- plotBoxPlot(
         dataAssay(),
-        assayNames,
+        input$assayNames,
         myGroupColors(),
         input$boxplot_base,
         input$boxplot_legend
@@ -391,8 +390,11 @@ server <- function(input, output, session) {
     })
   
   output$boxPlot <- renderPlotly({
+    input$submitBoxplot
     req(reacValues$uploadSuccess)
+    
     assayNames <- isolate(input$assayNames)
+  
     withProgress(message = "Plotting boxplot of intensities", {
       boxplotPlotly()  %>%
         config(
@@ -535,115 +537,35 @@ server <- function(input, output, session) {
     validate(need(!is.null(assay2),
                   "Please enter an assay for y-axis."))
     
-    xLabel <- paste0(assay1, "_", selection1)
-    yLabel <- paste0(assay2, "_", selection2)
-    plotData <- data.frame()
-    
     if (assay1 == assay2) {
       validate(need(
         selection1 != selection2,
         "Cannot plot the same column on x - and y-axis."
       ))
-      
-      plotData <-
-        assay(reacValues$proteinData, assay1)[, c(selection1, selection2)]
-      names(plotData) <- c("x", "y")
-      
-    } else {
-      plotData <-
-        assay(reacValues$proteinData, assay1)[, selection1, drop = F]
-      names(plotData) <- c("x")
-      plotData[[selection2]] <-
-        assay(reacValues$proteinData, assay2)[, selection2, drop = T]
-    }
-    names(plotData)[2] <- "y"
-    
-    plotData$Contaminant <- "no"
-    
-    if (contaminantCol %in% names(rowData(reacValues$proteinData))) {
-      plotData$Contaminant <- ifelse(rowData(reacValues$proteinData)[[contaminantCol]] ==
-                                       "+",
-                                     "yes",
-                                     "no")
     }
     
-    plotData$Gene <-
-      rowData(reacValues$proteinData)[[geneName]]
-    plotData$key <- plotData$Gene
+    pu <- plotScatterPlot(
+      reacValues$proteinData,
+      assay1,
+      assay2,
+      selection1,
+      selection2,
+      myScatterColors(),
+      plot_fontsize,
+      plot_legendsize,
+      showLine,
+      get_scatter_data()
+    )
     
-    plotData$show_id <- FALSE
-    if (!is.null(get_scatter_data() )) {
-      plotData[plotData$key %in% get_scatter_data()$key, "show_id"] <- TRUE
-    }
-    
-    fit1 <- lm(y ~ x, data = plotData)
-    fit1.intercept <- fit1$coefficients[[1]]
-    fit1.slope <- fit1$coefficients[[2]]
-    
-    title <-
-      paste0(
-        signif(fit1$coef[[1]], 5),
-        "x + ",
-        signif(fit1$coef[[2]], 5),
-        ", r2 = ",
-        signif(summary(fit1)$r.squared, 5)
-      )
-    
-    withProgress(message = "Plotting scatter plot", {
-      pu <-
-        ggplot(plotData,
-               aes(
-                 x = x,
-                 y = y,
-                 label = Gene,
-                 key = key,
-                 color = Contaminant
-               )) + theme_cowplot(font_size = plot_fontsize) + 
-        background_grid() +
-        labs(x = xLabel, y = yLabel)  +
-        theme(
-          legend.title = element_text(size = plot_legendsize),
-          legend.text = element_text(size = plot_legendsize)
-        ) +
-        geom_point() + scale_color_manual(values = myScatterColors()) # + ggtitle(title) #scale_color_brewer(palette = "Paired")
-      
-      intercept <- 0
-      slope <- 1
-      if (showLine == "linear regression") {
-        intercept <- fit1.intercept
-        slope <- fit1.slope
-        pu <- pu + ggtitle(title)
-      } else if (showLine == "straight line") {
-        intercept <- 0
-        slope <- 1
-      }
-      
-      if (showLine != "none") {
-        pu <- pu + geom_abline(
-          intercept = intercept,
-          slope = slope,
-          size = 1,
-          alpha = 0.5,
-          color = myScatterColors()[3]
-        )
-      }
-    })
-    
+    xLabel <- paste0(assay1, "_", selection1)
+    yLabel <- paste0(assay2, "_", selection2)
+
     m = list(
       l = 100,
       r = 40,
       b = 100,
       t = 50,
       pad = 0
-    )
-    
-    pu <- pu + geom_text(
-      data = subset(plotData, show_id),
-      aes(x,
-          y,
-          label = Gene)
-      #hjust=0, vjust=0
-      ,position = position_jitter(width=0.25,height=0.25)
     )
     
     ggplotly(pu, margin = m, source = "subset") %>% 
@@ -732,20 +654,40 @@ server <- function(input, output, session) {
   
   
   ### OVERLAP HEATMAP
-  overlapBasePlot <- reactive({
-    req(reacValues$uploadSuccess)
-    tmpCols <- colData(reacValues$proteinData)
+  # overlapBasePlot <- reactive({
+  #   req(reacValues$uploadSuccess)
+  # 
+  #   annotSamples <- isolate(input$overlapHeatmap_annot)
+  #   metric <- isolate(input$overlapHeatmap_metric)
+  # 
+  #   aname <-
+  #     ifelse(
+  #       "LFQIntensity" %in% assayNames(reacValues$proteinData),
+  #       'LFQIntensity',
+  #       'Intensity'
+  #     )
+  # 
+  #   lfqs <- assay(reacValues$proteinData, aname)
+  # 
+  #   outp <- plotOverlaply(
+  #     lfqs,
+  #     colData(reacValues$proteinData),
+  #     myGroupColors(),
+  #     heatColors(),
+  #     annotSamples = annotSamples,
+  #     metric = metric,
+  #     groupFactors = reacValues$groupFactors
+  #   )
+  # 
+  #   reacValues$overlapDf <- outp$df
+  #   outp$plot
+  # })
+  
+  output$overlapHeatmapPlotly <- renderPlotly({
+    input$submitOverlapHeatmap
     
     annotSamples <- isolate(input$overlapHeatmap_annot)
     metric <- isolate(input$overlapHeatmap_metric)
-    
-    if (!is.null(reacValues$groupFactors) &&
-        all(reacValues$groupFactors %in% unique(tmpCols$groups))) {
-      tmpCols <- tmpCols[tmpCols$groups %in% reacValues$groupFactors, ]
-      tmpCols$groups <-
-        factor(tmpCols$groups, levels = c(reacValues$groupFactors))
-    }
-    groupInputs <- unique(tmpCols$groups)
     
     aname <-
       ifelse(
@@ -755,77 +697,24 @@ server <- function(input, output, session) {
       )
     
     lfqs <- assay(reacValues$proteinData, aname)
-    lfqs <- lfqs[, tmpCols$samples[tmpCols$groups %in% groupInputs]]
     
-    annot <- tmpCols
-    row.names(annot) <- annot$samples
-    annot$samples <- NULL
+    outp <- plotOverlaply(
+      lfqs,
+      colData(reacValues$proteinData),
+      myGroupColors(),
+      heatColors(),
+      annotSamples = annotSamples,
+      metric = metric,
+      groupFactors = reacValues$groupFactors
+    )
     
-    idProts <- list()
-    for (col in names(lfqs)) {
-      tmp <- row.names(lfqs)[!is.na(lfqs[, col])]
-      idProts[[col]] <- tmp
-    }
+    reacValues$overlapDf <- outp$df
+    outp$plot
     
-    reacValues$overlapDf <- calc_pairwise_overlaps(idProts)
-    idProts <- NULL
     
-    validate(need(ncol(lfqs)>2, "Need more than 2 samples."))
-    
-    limits <- c(0, 1)
-    title <- "Overlap Coefficient"
-    df <- head(reacValues$overlapDf)
-    df1 <- head(reacValues$overlapDf)
-    
-    if (metric == 'num_shared') {
-      df <- reacValues$overlapDf[, c("sample1", "sample2", "num_shared")]
-      df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$num_shared)
-      limits <- c(min(df[,3], na.rm = T) - 0.05, max(df[,3], na.rm = T))
-      title <- "#shared proteins"
-    } else if (metric == 'overlap_coefficient') {
-      df <- reacValues$overlapDf[, c("sample1", "sample2", "overlap")]
-      df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$overlap)
-      limits <- c(min(df[,3], na.rm = T) - 0.05, 1)
-    } else if (metric == 'jaccard_index') {
-      df <- reacValues$overlapDf[, c("sample1", "sample2", "jaccard")]
-      df1 <- data.frame(sample1 = df$sample2, sample2 = df$sample1, overlap = df$jaccard)
-      limits <- c(min(df[,3], na.rm = T) - 0.05, 1)
-      title <- "Jaccard Coefficient"
-    }
-    names(df) <- c("sample1", "sample2", "overlap")
-    df <- rbind(df, df1)
-    overlap_matrix <- acast(df, sample1 ~ sample2, value.var = "overlap")
-
-    if (annotSamples) {
-      p <- heatmaply_cor(
-        overlap_matrix,
-        xlab = "",
-        ylab = "",
-        limits = limits,
-        row_side_palette = myGroupColors(),
-        row_side_colors = annot,
-        plot_method = "plotly",
-        key.title = title,
-        colors = heatColors()
-      )
-    } else {
-      p <- heatmaply_cor(
-        overlap_matrix,
-        xlab = "",
-        ylab = "",
-        limits = limits,
-        plot_method = "plotly",
-        key.title = title,
-        colors = heatColors()
-      )
-    }
-    p
-  })
-  
-  output$overlapHeatmapPlotly <- renderPlotly({
-    input$submitOverlapHeatmap
     withProgress(message = "Plotting overlap plot ", {
-      p <- overlapBasePlot()
+      p <- outp$plot
+      #p <- overlapBasePlot()
     })
     p %>%  config(
       displaylogo = F,
@@ -874,48 +763,14 @@ server <- function(input, output, session) {
       "No data to plot (no iBAQ columns available)."
     ))
     
-    tmp <- 2 ^ assay(reacValues$proteinData, abundancePrefix)
-    allInts <- apply(tmp, 2, sum, na.rm = T)
-    contsInts <-
-      apply(tmp[rowData(reacValues$proteinData)[[contaminantCol]] == "+",], 2, sum, na.rm =
-              T)
-    contsInts <- contsInts / allInts
-    
-    contsInts <- reshape2::melt(contsInts)
-    midx <-
-      match(row.names(contsInts),
-            colData(reacValues$proteinData)$samples)
-    contsInts$group <- colData(reacValues$proteinData)$groups[midx]
-    contsInts$Sample <- row.names(contsInts)
-    contsInts$value <- 100 * contsInts$value
-    
-    if (!is.null(reacValues$groupFactors) &&
-        all(reacValues$groupFactors %in% unique(contsInts$group))) {
-      contsInts <-
-        contsInts[contsInts$group %in% reacValues$groupFactors, ]
-      contsInts$group <-
-        factor(contsInts$group, levels = reacValues$groupFactors)
-    }
-    
-    p <- ggplot(contsInts, aes(x = Sample, y = value, fill = group)) +
-      geom_bar(stat = "identity") +
-      scale_fill_manual(values = myGroupColors()) + 
-      theme_cowplot(font_size = input$contaminants_base) + 
-      background_grid() + 
-      theme(
-        axis.text.x = element_text(
-          angle = 90,
-          hjust = 1,
-          vjust = 0.5,
-          size = input$contaminants_base
-        ),
-        legend.title = element_blank(),
-        legend.text = element_text(size = input$contaminants_legend)
-      ) + xlab("") + ylab("% Contaminant") +
-      ggtitle(label = "Relative Amount of Contaminants", 
-              subtitle = "based on iBAQ Intensities")
-    
-    p
+    plotContaminants(
+      reacValues$proteinData,
+      colData(reacValues$proteinData),
+      myGroupColors(),
+      groupFactors = reacValues$groupFactors,
+      contaminants_base = input$contaminants_base,
+      contaminants_legend = input$contaminants_legend
+    )
   })
   
   
@@ -947,33 +802,12 @@ server <- function(input, output, session) {
       addGeneName = TRUE
     )
     
-    tmp <- tmp[tmp$colname == input$samples, ]
-    tmp <- tmp[order(tmp$value, decreasing = T), ]
-    
-    tmp$value <- 100 * tmp$value / sum(tmp$value, na.rm = T)
-    
-    plotdf <- head(tmp, 15)
-    plotdf$Gene.name <- gsub(";.*", "", plotdf$Gene.name)
-    
-    p <-
-      ggplot(plotdf, aes(x = reorder(Gene.name, value), y = value)) +
-      geom_bar(stat = "identity", fill = myScatterColors()[1]) +
-      coord_flip() + 
-      theme_cowplot(font_size = input$abundant_base) + 
-      background_grid() +
-      theme(
-        # axis.text.x = element_text(
-        #   angle = 90,
-        #   hjust = 1,
-        #   vjust = 0.5,
-        #   size = 10
-        # ),
-        legend.text = element_text(size = input$abundant_legend),
-        legend.title = element_blank()
-      ) + xlab("") + ylab(paste0("%iBAQ in ", input$samples) ) +
-      ggtitle(label = "15 most abundant proteins", 
-              subtitle = "based on iBAQ Intensities", )
-    p
+    plotMostAbundantProteinsInSample(
+      dataAssay=tmp,
+      sample=input$samples,
+      color = myScatterColors()[1],
+      abundant_base = input$abundant_base
+      )
   })
   
   output$mostAbundant <- renderPlotly({
@@ -1016,39 +850,14 @@ server <- function(input, output, session) {
         'Intensity'
       )
     
-    
-    df <-
-      as.data.frame(apply(assay(reacValues$proteinData, aname), 2, function(x)
-        sum(!is.na(x))))
-    names(df) <- "Number"
-    df$Sample <- row.names(df)
-    
-    midx <- match(df$Sample, colData(reacValues$proteinData)$samples)
-    df$group <- colData(reacValues$proteinData)$groups[midx]
-    
-    if (!is.null(reacValues$groupFactors) &&
-        all(reacValues$groupFactors %in% unique(df$group))) {
-      df <- df[df$group %in% reacValues$groupFactors, ]
-      df$group <- factor(df$group, levels = reacValues$groupFactors)
-    }
-    
-    p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
-      geom_bar(stat = "identity") +
-      theme_cowplot(font_size = input$barplotId_base) +
-      background_grid() +
-      scale_fill_manual(values = myGroupColors()) +
-      theme(
-        axis.text.x = element_text(
-          angle = 90,
-          hjust = 1,
-          vjust = 0.5,
-          size = input$barplotId_base
-        ),
-        legend.title = element_blank(),
-        legend.text = element_text(size = input$barplotId_legend)
-      ) + xlab("") + ylab("#of identified proteins")
-    
-    p
+    plotNumberIdentifiedProteins(
+      assay(reacValues$proteinData, aname),
+      colData(reacValues$proteinData),
+      myGroupColors(),
+      groupFactors = reacValues$groupFactors,
+      barplotId_base = input$barplotId_base,
+      barplotId_legend = input$barplotId_legend
+    )
   })
   
   output$barplotProteins <- renderPlotly({
@@ -1085,39 +894,14 @@ server <- function(input, output, session) {
         'Intensity'
       )
     
-    df <-
-      as.data.frame(apply(assay(reacValues$proteinData, aname), 2, function(x) {
-        100 * sum(is.na(x)) / length(x)
-      }))
-    names(df) <- "Number"
-    df$Sample <- row.names(df)
-    
-    midx <- match(df$Sample, colData(reacValues$proteinData)$samples)
-    df$group <- colData(reacValues$proteinData)$groups[midx]
-    
-    if (!is.null(reacValues$groupFactors) &&
-        all(reacValues$groupFactors %in% unique(df$group))) {
-      df <- df[df$group %in% reacValues$groupFactors, ]
-      df$group <- factor(df$group, levels = reacValues$groupFactors)
-    }
-    
-    p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
-      geom_bar(stat = "identity") +
-      scale_fill_manual(values = myGroupColors()) +
-      theme_cowplot(font_size = input$barplotMv_base) + 
-      background_grid() +
-      theme(
-        axis.text.x = element_text(
-          angle = 90,
-          hjust = 1,
-          vjust = 0.5,
-          size = input$barplotMv_base
-        ),
-        legend.title = element_blank(),
-        legend.text = element_text(size = input$barplotMv_legend)
-      ) + xlab("") + ylab("missing values (%)")
-    
-    p
+    plotMissingValues(
+      assay(reacValues$proteinData, aname),
+      colData(reacValues$proteinData),
+      myGroupColors(),
+      groupFactors = reacValues$groupFactors,
+      barplotMv_base = input$barplotMv_base,
+      barplotMv_legend = input$barplotMv_legend
+    )
   })
   
   output$barplotMissingValues <- renderPlotly({
@@ -1206,42 +990,6 @@ server <- function(input, output, session) {
       compareComparisons,
       multiple = T
     )
-  })
-
-  observeEvent(input$submitHeatmap,{
-    req(reacValues$dataComp)
-    ridx <- isolate(input$groupComparisonsDT_rows_all)
-    ridx <- rownames(reacValues$dataComp[ridx,])
-    
-    validate(need(nrow(reacValues$dataComp)>0, "No data to plot"))
-    df <- assay(reacValues$proteinData, "ImputedIntensity")
-    df <- df[ridx,]
-    
-    if (!any(duplicated(rowData(reacValues$proteinData)[ridx, geneName]))) {
-      rownames(df) <-
-        as.character(rowData(reacValues$proteinData)[ridx, geneName] )
-    } else {
-      rownames(df) <-
-        make.names(rowData(reacValues$proteinData)[ridx, geneName] , unique = T)
-    }
-    
-    if (!is.null(input$heatmapSamplesInput) & length(input$heatmapSamplesInput) > 1) {
-      idxs <- c()
-      for (elem in input$heatmapSamplesInput) {
-        relSamples <- reacValues$expDesign$samples[reacValues$expDesign$groups==elem]
-        idxs <- c(idxs, grep( paste0(relSamples, collapse = "|"), colnames(df) ) )
-      }
-      df <- df[, idxs]
-    }
-    reacValues$clusterRows = input$clusterRows
-    reacValues$clusterCols = input$clusterCols
-    reacValues$scaleHeatmap = input$scaleHeatmap
-    reacValues$dataHeatmap <- df
-    
-    if (reacValues$show_heatmap == FALSE) {
-      reacValues$show_heatmap = TRUE
-      toggle(id = 'hide_heatmap_before_submit', anim = T)
-    }
   })
   
   output$dotplotGroupComparisons <- renderUI({
@@ -1768,7 +1516,6 @@ server <- function(input, output, session) {
     matrixSet <- isolate(enrichedMatrixSet() )
     samples <- isolate(input$upset1Sample)
     scale <- isolate(input$upset_scale)
-    setChoice <- "union"
     fcThresh <- isolate(input$fcCutoff)
     enrichmentChoice <- isolate(input$enrichmentChoice)
     sigCutoffValue <- isolate(input$sigCutoffValue)
@@ -1777,15 +1524,11 @@ server <- function(input, output, session) {
     reacValues$selection <- samples
     reacValues$fcCutoff <- fcThresh
     reacValues$enrichmentChoice <- enrichmentChoice
-    reacValues$setChoice <- setChoice
-    
+
     upset_ratio <- isolate(input$upset_ratio)
     upset_pointsize <- isolate(input$upset_pointsize)
     upset_sorted <- isolate(input$upset_sorted)
-    
-    upset_sorted <- ifelse(upset_sorted == 'Degree', 'degree', 'freq')
-    
-    
+
     validate(need(!is.null(samples), "Please select at least two comparisons."))
     validate(need(length(colnames(matrixSet) ) > 1, "Need at least two comparisons to render UpSet plot. Only one provided.") )
     if (!is.null(samples)) {
@@ -1794,29 +1537,14 @@ server <- function(input, output, session) {
     validate(need(any(matrixSet[,samples]==1),
                   "There are no significant proteins to display."))
     
-    mb.ratio <- c(upset_ratio, 1-upset_ratio)
-
-    if (!is.null(reacValues$newMultiNames) && all(reacValues$newMultiNames$new != "") && 
-        length(reacValues$newMultiNames$new) == length(samples)) {
-      for (idx in seq_along(reacValues$newMultiNames$old)) {
-        names(matrixSet)[which(names(matrixSet) == reacValues$newMultiNames$old[idx])] <- reacValues$newMultiNames$new[idx]
-        samples[idx] <- reacValues$newMultiNames$new[idx]
-      }
-    }
-    
-    upset(
-      matrixSet,
-      sets = samples,
-      mb.ratio = mb.ratio,
-      #set_size.numbers_size = 8,
-      #set_size.show = T,
-      order.by = upset_sorted,
-      #cutoff = cutoff,
-      text.scale = scale,
-      # text.scale = c(2, 2,
-      #                2, 2,
-      #                2, 3),
-      point.size = upset_pointsize
+    plotUpsetPlot(
+      matrixSet = matrixSet,
+      samples = samples,
+      scale=scale,
+      upset_ratio = upset_ratio,
+      upset_pointsize = upset_pointsize,
+      upset_sorted = upset_sorted,
+      newMultiNames = reacValues$newMultiNames
     )
   }
   
@@ -1826,13 +1554,11 @@ server <- function(input, output, session) {
     req(reacValues$dataComp)
 
     withProgress(message = "Comparing multigroup comparisons", {
-
+      print(plotMultiUpset())
       if (reacValues$show_analysis == FALSE) {
         reacValues$show_analysis = TRUE
         toggle(id = 'hide_before_comparisons', anim = T)
       }
-      
-      print(plotMultiUpset())
     })
   })
   
@@ -1852,21 +1578,47 @@ server <- function(input, output, session) {
     }
   )
   
-  compareHeatmapBase <- eventReactive(c(input$submitHeatmap, reacValues$nsubmits),{
-
+  observeEvent(input$submitHeatmap, {
+    if (reacValues$show_heatmap == FALSE) {
+      reacValues$show_heatmap = TRUE
+      toggle(id = 'hide_heatmap_before_submit', anim = T)
+    }
+  })
+  
+  compareHeatmapBase <- reactive({
+    input$submitHeatmap
     validate(need(reacValues$compareAmicaSelected==FALSE,
                   paste0("Cannot output heatmap for 'multiple_amica_upload'\n
                          Change the data set back to the original data to 
                          plot a heatmap.") ))
     
-    req(reacValues$dataHeatmap)
+    req(reacValues$dataComp)
+    ridx <- isolate(input$groupComparisonsDT_rows_all)
+    ridx <- rownames(reacValues$dataComp[ridx,])
+    
+    validate(need(nrow(reacValues$dataComp)>0, "No data to plot"))
+    
+    heatmapSamplesInput <- isolate(input$heatmapSamplesInput)
+    
+    df <- assay(reacValues$proteinData, "ImputedIntensity")
+    df <- df[ridx,]
+    
+    reacValues$dataHeatmap <- getHeatmaplyData(df,
+                                               rowData(reacValues$proteinData)[ridx, geneName],
+                                               reacValues$expDesign,
+                                               heatmapSamplesInput
+    )
+
+    #req(reacValues$dataHeatmap)
     fontsize = isolate(input$heatmap_base)
     plot_width = isolate(input$heatmap_width)
     plot_height = isolate(input$heatmap_height)
     show_row_labels <- isolate(input$heatmap_row_labels)
     show_col_labels <- isolate(input$heatmap_col_labels)
     show_annot <- isolate(input$heatmap_annot)
-    format <- isolate(input$heatmap_format)
+    clusterRows = isolate(input$clusterRows)
+    clusterCols = isolate(input$clusterCols)
+    scaleHeatmap = isolate(input$scaleHeatmap)
     
     validate(need(all(names(reacValues$dataHeatmap) %in% colData(reacValues$proteinData)$samples),""))
     
@@ -1878,60 +1630,38 @@ server <- function(input, output, session) {
         " proteins selected. Apply less stringent thresholds."
       )
     ))
-    annot <- colData(reacValues$proteinData)
-    row.names(annot) <- annot$samples
-    annot <- annot[names(reacValues$dataHeatmap),]
-    annot$samples <- NULL
-    
-    cbarTitle <-
-      ifelse(reacValues$scaleHeatmap != "none", "Z-score", "Intensity (log2)")
     
     withProgress(message = "Plotting heatmap ", {
-      p <- 0
-      
-      if (show_annot) {
-        p <- heatmaply(
-          reacValues$dataHeatmap,
-          Rowv = reacValues$clusterRows,
-          Colv = reacValues$clusterCols,
-          scale = reacValues$scaleHeatmap,
-          plot_method = "plotly",
-          fontsize_row = fontsize,
-          fontsize_col = fontsize,
-          showticklabels = c(show_col_labels, show_row_labels),
-          col_side_palette = myGroupColors(),
-          col_side_colors = annot,
-          row_dend_left = TRUE,
-          column_text_angle = 90,
-          key.title = cbarTitle,
-          colors = heatColors()
-        )
-      } else {
-        p <- heatmaply(
-          reacValues$dataHeatmap,
-          Rowv = reacValues$clusterRows,
-          Colv = reacValues$clusterCols,
-          scale = reacValues$scaleHeatmap,
-          plot_method = "plotly",
-          fontsize_row = fontsize,
-          fontsize_col = fontsize,
-          showticklabels = c(show_col_labels, show_row_labels),
-          row_dend_left = TRUE,
-          column_text_angle = 90,
-          key.title = cbarTitle,
-          colors = heatColors()
-        )
-      }
-      
+      annot <- colData(reacValues$proteinData)
+      p <- plotHeatmaply(dataHeatmap=reacValues$dataHeatmap,
+                 annot=annot,
+                 myGroupColors=myGroupColors(),
+                 heatColors=heatColors(),
+                 fontsize=fontsize,
+                 scaleHeatmap = scaleHeatmap,
+                 show_annot=show_annot,
+                 show_col_labels = show_col_labels,
+                 show_row_labels = show_row_labels,
+                 clusterRows = clusterRows,
+                 clusterCols = clusterCols,
+                 plot_method = "plotly"
+                 )
       calc_height <- min(15 * nrow(reacValues$dataHeatmap), 1200)
-      if (calc_height < 600) calc_height <- 800
+      if (calc_height < 600)
+        calc_height <- 800
       
-      p %>% layout(height=calc_height)
+      p %>% layout(height = calc_height)
     })
   })
   
   output$compareHeatmap <- renderPlotly({
-
+    input$submitHeatmap
+    
+    if (reacValues$show_heatmap == FALSE) {
+      reacValues$show_heatmap = TRUE
+      toggle(id = 'hide_heatmap_before_submit', anim = T)
+    }
+    
     compareHeatmapBase() %>%
       config(displaylogo = F,
              modeBarButtonsToRemove = removePlotlyBars,
@@ -2490,34 +2220,33 @@ server <- function(input, output, session) {
     # %>% layout(yaxis = list(title = '-log10(p-adj)'))
   })
   
-  oraBarBase <- eventReactive(c(input$submitORABar, reacValues$nsubmits),{
-    orasource <- isolate(input$orasource)
-    plotDf <- reacValues$dataGprofiler[reacValues$dataGprofiler$source==orasource,]
-    validate(need(!is.null(reacValues$dataGprofiler) || nrow(plotDf)>0, 
-                  paste("No results to show for this source\n",
-                        "Please make sure that the organism")))
-    
-    
-    oracolor <- isolate(input$oraBar_color)
-    oraMaxTerm <- isolate(input$oraBar_maxTerms)
-    baseSize <- isolate(input$oraBar_base)
-    
-    oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
-    
-    plotDf$minusLog10p_value <- -log10(plotDf$p_value)
-    plotDf <- plotDf[!duplicated(plotDf$term_name),]
-    plotDf <- plotDf[order(plotDf$minusLog10p_value),]
-    plotDf <- tail(plotDf, min(nrow(plotDf), oraMaxTerm))
-    plotDf$term_name <- factor(plotDf$term_name, levels = plotDf$term_name)
-    
-    p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
-      geom_bar(stat = "identity", fill=oracolor, width = 0.9)  + xlab("") +
-      ylab("-log10(p-value)") +
-      theme_cowplot(font_size = baseSize) + background_grid() +
-      coord_flip()
-    
-    ggplotly(p)
-  })
+  oraBarBase <-
+    eventReactive(c(input$submitORABar, reacValues$nsubmits), {
+      orasource <- isolate(input$orasource)
+      plotDf <-
+        reacValues$dataGprofiler[reacValues$dataGprofiler$source == orasource, ]
+      validate(need(
+        !is.null(reacValues$dataGprofiler) || nrow(plotDf) > 0,
+        paste(
+          "No results to show for this source\n",
+          "Please make sure that the organism"
+        )
+      ))
+      
+      oracolor <- isolate(input$oraBar_color)
+      oraMaxTerm <- isolate(input$oraBar_maxTerms)
+      baseSize <- isolate(input$oraBar_base)
+      
+      p <- plotGprofilerBarplot(
+        plotDf = plotDf,
+        orasource = orasource,
+        oracolor = oracolor,
+        oraMaxTerm = oraMaxTerm,
+        baseSize = baseSize
+      )
+      
+      ggplotly(p)
+    })
   
   output$oraBarplot <- renderPlotly({
 
@@ -2682,78 +2411,29 @@ server <- function(input, output, session) {
     cellmap
   })
 
-  multiNetwork <- function(thresh=0) {
-    if (is.na(thresh) || is.null(thresh)) thresh <- 0
-    validate(need(nrow(reacValues$dataComp) > 1,"Not enough data to display."))
+  multiNetwork <- function(thresh = 0) {
+    if (is.na(thresh) || is.null(thresh))
+      thresh <- 0
+    validate(need(nrow(reacValues$dataComp) > 1, "Not enough data to display."))
     
     ridx <- input$groupComparisonsDT_rows_all
-    rnames <- rownames(reacValues$dataComp[ridx,])
-    validate(need(length(rnames) > 1,"Not enough data to display."))
-
+    rnames <- rownames(reacValues$dataComp[ridx, ])
+    validate(need(length(rnames) > 1, "Not enough data to display."))
+    
     nw.data <-
-      getBait2PreyNetwork(reacValues$dataComp[rnames,],
-                          enrichedMatrixSet(),
-                          reacValues$selection,
-                          myScatterColors())
-    nodes <- nw.data[[1]]
-    edges <- nw.data[[2]]
-
-    idxs <- match(nodes$label, V(ppi() )$name)
-    idxs <- idxs[!is.na(idxs)]
-    
-    if (length(idxs)>1) {
-      G <- induced_subgraph(ppi(), idxs)
-      G.df <- igraph::as_long_data_frame(G)
-      
-      names(G.df) <- c("from", "to", "value", "from_label", "to_label")
-      
-      from_id <- match(G.df$from_label, nodes$label)
-      to_id <- match(G.df$to_label, nodes$label)
-      
-      ppi.edges <-
-        data.frame(
-          from = from_id,
-          to = to_id,
-          color = rep(myScatterColors()[2], length(to_id)),
-          interaction = rep('PPI', length(to_id)),
-          value = G.df$value
-        )
-      edges <- rbind(edges, ppi.edges[ppi.edges$value >= thresh,])
-    }
-    
-    nodes <-
-      merge(nodes, cellmap(), by="label", all.x = T)
-    
-    reacValues$nwNodes <- nodes
-    reacValues$nwEdges <- edges
-    
-    visNetwork(nodes,
-               edges,
-               layout = "layout_nicely",
-               type = "full",
-               height = "1200px",
-               width = "2000px") %>%
-      visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "Subcell_localization",
-                 highlightNearest = TRUE,
-                 nodesIdSelection = TRUE) %>%
-      visNodes(font = list(size = 20, strokeWidth = 2)) %>%
-      visEdges(smooth=F) %>%
-      visInteraction(zoomView = input$enableNetworkZoom) %>%
-      visLegend(
-        main = "Legend",
-        useGroups = F,
-        addNodes = data.frame(
-          label = c("Comparison", "Protein"),
-          shape = c("diamond", "circle"),
-          color = c(myScatterColors()[1], myScatterColors()[2])
-        ),
-        addEdges = data.frame(
-          label = c("Comparison-Protein", "Protein-Protein"),
-          color = c(myScatterColors()[1], myScatterColors()[2])
-        ),
-        width = 0.3
+      getBait2PreyNetwork(
+        reacValues$dataComp[rnames, ],
+        enrichedMatrixSet(),
+        reacValues$selection,
+        myScatterColors()
       )
+    
+    plotMultiNetwork(nw.data,
+                     ppi(),
+                     cellmap(),
+                     myScatterColors(),
+                     thresh,
+                     input$enableNetworkZoom)
   }
 
   output$downloadSpecificityNetwork <- downloadHandler(
@@ -2776,64 +2456,34 @@ server <- function(input, output, session) {
   # 
   
   singleNetwork <- function(thresh) {
-    if (is.na(thresh) || is.null(thresh)) thresh <- 0
+    if (is.na(thresh) || is.null(thresh))
+      thresh <- 0
     
     req(reacValues$dataComp)
-    validate(need(nrow(reacValues$dataComp) > 1,"Not enough data to display."))
+    validate(need(nrow(reacValues$dataComp) > 1, "Not enough data to display."))
     
     ridx <- input$groupComparisonsDT_rows_all
-    rnames <- rownames(reacValues$dataComp[ridx,])
-    validate(need(length(rnames) > 1,"Not enough data to display."))
+    rnames <- rownames(reacValues$dataComp[ridx, ])
+    validate(need(length(rnames) > 1, "Not enough data to display."))
     
-    networkData <- toNetworkData(reacValues$dataComp[rnames,], ppi(), cellmap())
-    networkData$edges <- networkData$edges[networkData$edges$value >= thresh, ]
+    networkData <-
+      toNetworkData(reacValues$dataComp[rnames, ], ppi(), cellmap())
     
     msg <- ""
     if (length(rnames) > 1) {
       msg <- "\nCould not map selected proteins to the human PPI network."
     }
     
-    validate(need(!is.null(networkData), paste0("#### There are no proteins to display with your selection.", msg)))
+    validate(need(
+      !is.null(networkData),
+      paste0("#### There are no proteins to display with your selection.", msg)
+    ))
     
-    colLegend <-
-      colour_values(networkData$nodes$log2FC,
-                    n_summaries = 6,
-                    palette = 'viridis')
-    networkData$nodes$color <- colLegend$colours
-    
-    reacValues$nwNodes <- networkData$nodes
-    reacValues$nwEdges <- networkData$edges
-    
-    lnodes <-
-      data.frame(
-        id = 1:length(colLegend$summary_values),
-        color = colLegend$summary_colours,
-        label = colLegend$summary_values,
-        shape = "circle",
-        font = list(size = 16, color = "white")
-      )
-
-    visNetwork(networkData$nodes,
-               networkData$edges,
-               layout = "layout_nicely",
-               type = "full",
-               height = "1200px",
-               width = "2000px") %>%
-      visIgraphLayout() %>% visPhysics(stabilization = F) %>%
-      visOptions(selectedBy = "Subcell_localization",
-                 highlightNearest = TRUE,
-                 nodesIdSelection = TRUE) %>%
-      visNodes(font = list(size = 20, strokeWidth = 2)) %>%
-      visEdges(smooth=F, color=list(color = "grey", highlight = "red")) %>%
-      visInteraction(zoomView = input$enableNetworkZoom) %>%
-      visLegend(
-        useGroups = F,
-        addNodes = lnodes,
-        main = "log2FC",
-        width = 0.3,
-        ncol = 6,
-        stepX = 50
-      )
+    plotSingleNetwork(
+      networkData = networkData,
+      thresh = thresh,
+      enableNetworkZoom = input$enableNetworkZoom
+    )
   }
   
   
