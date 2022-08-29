@@ -620,11 +620,11 @@ plotDotplot <-
            maxColorGradient=NULL,
            minSizeGradient=1,
            maxSizeGradient=7,
-           clusteringMetric = "AvgIntensity",
+           clusteringMetric = "log2FC",
            dotplot_distance_metric = "canberra",
            dotplot_clustering_method = "complete",
            dotplot_cluster_columns=TRUE,
-           sigCutoffValue="p-value",
+           sigCutoffValue="adj.p-value",
            dotplot_ctrl_substraction=TRUE) {
     
     if (is.null(dotplotColors))
@@ -749,4 +749,356 @@ plotDotplot <-
       labels = c('> 0.05', '\u2264 0.05')
     )
   p
-}
+  }
+
+
+#' single-comparison visnetwork
+#' 
+#' @param networkData list of nodes and edges, output of toNetworkData.
+#' @param thresh PPi edge weight threshold.
+#' @param enableNetworkZoom boolean, whether to enable zoom or not.
+#' @return visnetwork object.
+#' @examples
+plotSingleNetwork <-
+  function(networkData,
+           thresh = 0,
+           enableNetworkZoom = FALSE) {
+    if (is.na(thresh) || is.null(thresh))
+      thresh <- 0
+    
+    if (is.null(networkData)) {
+      stop("#### There are no proteins to display with your selection.")
+    }
+    networkData$edges <-
+      networkData$edges[networkData$edges$value >= thresh,]
+    
+    colLegend <-
+      colour_values(networkData$nodes$log2FC,
+                    n_summaries = 6,
+                    palette = 'viridis')
+    networkData$nodes$color <- colLegend$colours
+    
+    reacValues$nwNodes <- networkData$nodes
+    reacValues$nwEdges <- networkData$edges
+    
+    lnodes <-
+      data.frame(
+        id = 1:length(colLegend$summary_values),
+        color = colLegend$summary_colours,
+        label = colLegend$summary_values,
+        shape = "circle",
+        font = list(size = 16, color = "white")
+      )
+    
+    visNetwork(
+      networkData$nodes,
+      networkData$edges,
+      layout = "layout_nicely",
+      type = "full",
+      height = "1200px",
+      width = "2000px"
+    ) %>%
+      visIgraphLayout() %>% visPhysics(stabilization = F) %>%
+      visOptions(
+        selectedBy = "Subcell_localization",
+        highlightNearest = TRUE,
+        nodesIdSelection = TRUE
+      ) %>%
+      visNodes(font = list(size = 20, strokeWidth = 2)) %>%
+      visEdges(smooth = F,
+               color = list(color = "grey", highlight = "red")) %>%
+      visInteraction(zoomView = enableNetworkZoom) %>%
+      visLegend(
+        useGroups = F,
+        addNodes = lnodes,
+        main = "log2FC",
+        width = 0.3,
+        ncol = 6,
+        stepX = 50
+      )
+  }
+
+
+#' multi-comparison visnetwork
+#' 
+#' @param nw.data list of nodes and edges, output of getBait2PreyNetwork.
+#' @param ppi igraph object, ppi network.
+#' @param cellmap data.frame, containing subcell. localization information from humancellmap.
+#' @param myScatterColors char vector of colors.
+#' @param thresh PPi edge weight threshold.
+#' @param enableNetworkZoom boolean, whether to enable zoom or not.
+#' @return visnetwork object.
+#' @examples
+plotMultiNetwork <-
+  function(nw.data,
+           ppi,
+           cellmap,
+           myScatterColors,
+           thresh = 0,
+           enableNetworkZoom = FALSE) {
+    if (is.na(thresh) || is.null(thresh))
+      thresh <- 0
+    
+    nodes <- nw.data[[1]]
+    edges <- nw.data[[2]]
+    
+    idxs <- match(nodes$label, V(ppi())$name)
+    idxs <- idxs[!is.na(idxs)]
+    
+    if (length(idxs) > 1) {
+      G <- induced_subgraph(ppi, idxs)
+      G.df <- igraph::as_long_data_frame(G)
+      
+      names(G.df) <-
+        c("from", "to", "value", "from_label", "to_label")
+      
+      from_id <- match(G.df$from_label, nodes$label)
+      to_id <- match(G.df$to_label, nodes$label)
+      
+      ppi.edges <-
+        data.frame(
+          from = from_id,
+          to = to_id,
+          color = rep(myScatterColors[2], length(to_id)),
+          interaction = rep('PPI', length(to_id)),
+          value = G.df$value
+        )
+      edges <- rbind(edges, ppi.edges[ppi.edges$value >= thresh, ])
+    }
+    
+    nodes <-
+      merge(nodes, cellmap, by = "label", all.x = T)
+    
+    reacValues$nwNodes <- nodes
+    reacValues$nwEdges <- edges
+    
+    visNetwork(
+      nodes,
+      edges,
+      layout = "layout_nicely",
+      type = "full",
+      height = "1200px",
+      width = "2000px"
+    ) %>%
+      visIgraphLayout() %>% visPhysics(stabilization = F) %>%
+      visOptions(
+        selectedBy = "Subcell_localization",
+        highlightNearest = TRUE,
+        nodesIdSelection = TRUE
+      ) %>%
+      visNodes(font = list(size = 20, strokeWidth = 2)) %>%
+      visEdges(smooth = F) %>%
+      visInteraction(zoomView = enableNetworkZoom) %>%
+      visLegend(
+        main = "Legend",
+        useGroups = F,
+        addNodes = data.frame(
+          label = c("Comparison", "Protein"),
+          shape = c("diamond", "circle"),
+          color = c(myScatterColors[1], myScatterColors[2])
+        ),
+        addEdges = data.frame(
+          label = c("Comparison-Protein", "Protein-Protein"),
+          color = c(myScatterColors[1], myScatterColors[2])
+        ),
+        width = 0.3
+      )
+  }
+
+
+#' generate bar plot from gprofiler's results
+#' 
+#' @param plotDf data.frame, output from gprofiler's gost `results`.
+#' @param orasource char, valid name of a gprofiler source (e.g "GO:CC").
+#' @param oracolor char.
+#' @param oraMaxTerm int, when 0 plots all sign. terms, otherwise max. number of terms to plot.
+#' @param baseSize int, base font size.
+#' @return plot object.
+#' @examples
+plotGprofilerBarplot <-
+  function(plotDf,
+           orasource,
+           oracolor = "skyblue",
+           oraMaxTerm = 0,
+           baseSize = 14) {
+    oraMaxTerm <- ifelse(oraMaxTerm == 0, 100000, oraMaxTerm)
+    
+    plotDf$minusLog10p_value <- -log10(plotDf$p_value)
+    plotDf <- plotDf[!duplicated(plotDf$term_name), ]
+    plotDf <- plotDf[order(plotDf$minusLog10p_value), ]
+    plotDf <- tail(plotDf, min(nrow(plotDf), oraMaxTerm))
+    plotDf$term_name <-
+      factor(plotDf$term_name, levels = plotDf$term_name)
+    
+    p <- ggplot(plotDf, aes(x = term_name, y = minusLog10p_value)) +
+      geom_bar(stat = "identity",
+               fill = oracolor,
+               width = 0.9)  + xlab("") +
+      ylab("-log10(p-value)") +
+      theme_cowplot(font_size = baseSize) + background_grid() +
+      ggtitle(orasource) +
+      coord_flip()
+    p
+  }
+
+#' generate data for heatmap
+#' 
+#' @param df data.frame with intensity values.
+#' @param geneNames vector, gene names corresponding to rows of df.
+#' @param expDesign data.frame, experimental design mapping samples to groups.
+#' @param heatmapGroups vector, plots only selected groups
+#' @return data.frame.
+#' @examples
+getHeatmaplyData <-
+  function(df,
+           geneNames,
+           expDesign,
+           heatmapGroups = NULL) {
+    if (!any(duplicated(geneNames))) {
+      rownames(df) <-
+        as.character(geneNames)
+    } else {
+      rownames(df) <-
+        make.names(geneNames , unique = T)
+    }
+    
+    if (!is.null(heatmapGroups) &
+        length(heatmapGroups) > 1) {
+      idxs <- c()
+      for (elem in heatmapGroups) {
+        relSamples <- expDesign$samples[expDesign$groups == elem]
+        idxs <-
+          c(idxs, grep(paste0(relSamples, collapse = "|"), colnames(df)))
+      }
+      df <- df[, idxs]
+    }
+    df
+  }
+
+#' Plot interactive heatmap (plotly)
+#' 
+#' @param dataHeatmap data.frame with intensity values.
+#' @param annot data.frame, experimental design.
+#' @param myGroupColors vector of colors.
+#' @param heatColors vector of colors.
+#' @param fontsize int describing the base plot font size.
+#' @param scaleHeatmap char, one of "none" or "Z-score".
+#' @param show_annot boolean to annotate samples in heatmap.
+#' @param show_col_labels boolean, see showticklabels in heatmaply().
+#' @param show_row_labels boolean, see showticklabels in heatmaply().
+#' @param clusterRows boolean.
+#' @param clusterCols boolean.
+#' @param plot_method char, see plot_method in heatmaply().
+#' @return plotly object.
+#' @examples
+plotHeatmaply <-
+  function(dataHeatmap,
+           annot,
+           myGroupColors,
+           heatColors,
+           fontsize,
+           scaleHeatmap = "Z-score",
+           show_annot=TRUE,
+           show_col_labels = TRUE,
+           show_row_labels = TRUE,
+           clusterRows = TRUE,
+           clusterCols = TRUE,
+           plot_method = "plotly") {
+    row.names(annot) <- annot$samples
+    annot <- annot[names(dataHeatmap), ]
+    annot$samples <- NULL
+    
+    cbarTitle <-
+      ifelse(scaleHeatmap != "none", "Z-score", "Intensity (log2)")
+    
+    p <- 0
+    
+    if (show_annot) {
+      p <- heatmaply(
+        dataHeatmap,
+        Rowv = clusterRows,
+        Colv = clusterCols,
+        scale = scaleHeatmap,
+        plot_method = plot_method,
+        fontsize_row = fontsize,
+        fontsize_col = fontsize,
+        showticklabels = c(show_col_labels, show_row_labels),
+        col_side_palette = myGroupColors,
+        col_side_colors = annot,
+        row_dend_left = TRUE,
+        column_text_angle = 90,
+        key.title = cbarTitle,
+        colors = heatColors
+      )
+    } else {
+      p <- heatmaply(
+        dataHeatmap,
+        Rowv = clusterRows,
+        Colv = clusterCols,
+        scale = scaleHeatmap,
+        plot_method = "plotly",
+        fontsize_row = fontsize,
+        fontsize_col = fontsize,
+        showticklabels = c(show_col_labels, show_row_labels),
+        row_dend_left = TRUE,
+        column_text_angle = 90,
+        key.title = cbarTitle,
+        colors = heatColors
+      )
+    }
+    p
+  }
+
+#' UpSet plot
+#' 
+#' @param matrixSet binary data.frame of significant proteins (rows) in comparisons (cols).
+#' @param samples boolean, displays number of elements in sets.
+#' @param scale int, see upset() function UpSetR library.
+#' @param upset_ratio numeric, see upset() function UpSetR library.
+#' @param upset_pointsize numeric, see upset() function UpSetR library.
+#' @param upset_sorted char, see upset() function UpSetR library.
+#' @param newMultiNames named list, with old and new names of comparisons
+#' @return UpSet plot.
+#' @examples
+plotUpsetPlot <-
+  function(matrixSet,
+           samples,
+           scale,
+           upset_ratio = 0.6,
+           upset_pointsize = 4,
+           upset_sorted = "Frequency",
+           newMultiNames = NULL) {
+    upset_sorted <- ifelse(upset_sorted == 'Degree', 'degree', 'freq')
+    
+    
+    if (is.null(samples))
+      stop("Please select at least two comparisons.")
+    if (length(colnames(matrixSet)) < 2)
+      stop("Need at least two comparisons to render UpSet plot. Only one provided.")
+    if (!is.null(samples)) {
+      if (length(samples) < 2)
+        stop("Please select at least two comparisons.")
+    }
+    if (!any(matrixSet[, samples] == 1))
+      stop("There are no significant proteins to display.")
+    
+    mb.ratio <- c(upset_ratio, 1 - upset_ratio)
+    
+    if (!is.null(newMultiNames) && all(newMultiNames$new != "") &&
+        length(newMultiNames$new) == length(samples)) {
+      for (idx in seq_along(newMultiNames$old)) {
+        names(matrixSet)[which(names(matrixSet) == newMultiNames$old[idx])] <-
+          newMultiNames$new[idx]
+        samples[idx] <- newMultiNames$new[idx]
+      }
+    }
+    
+    upset(
+      matrixSet,
+      sets = samples,
+      mb.ratio = mb.ratio,
+      order.by = upset_sorted,
+      text.scale = scale,
+      point.size = upset_pointsize
+    )
+  }
