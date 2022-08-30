@@ -134,6 +134,7 @@ tabPanel('Input',
             ),
             downloadButton("exampleFiles",
                            "Example input"),
+            inline(actionButton("showReportingStandards", "Reporting standards", icon = icon("info") )),
             br(), br(), br(),
             
             ######## PARAMETERS BEGIN
