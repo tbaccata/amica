@@ -307,7 +307,13 @@ observeEvent(input$runAnalysis, {
       pep.count.table$count = pep.count.table$count + 1
     }
     
+    isPilot <-
+      ifelse(any(duplicated(colData(
+        reacValues$proteinData
+      )$groups)), FALSE, TRUE)
     tool <- ifelse(input$limmaTrend, "DEqMS", "limma")
+    if (isPilot) tool <- "None"
+    reacValues$daTool <- tool
     
     out <- tryCatch({
       tmpOut <- groupComparisons(
