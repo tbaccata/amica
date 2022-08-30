@@ -368,15 +368,13 @@ server <- function(input, output, session) {
   output$boxPlot <- renderPlotly({
 
     withProgress(message = "Plotting boxplot of intensities", {
-      p <- plotBoxPlot(
+      ggplotly(plotBoxPlot(
         dataAssay(),
         input$assayNames,
         myGroupColors(),
         input$boxplot_base,
         input$boxplot_legend
-      )
-      p %>%
-        config(
+      )) %>% config(
           displaylogo = F,
           modeBarButtonsToRemove = removePlotlyBars,
           toImageButtonOptions = list(
@@ -409,7 +407,7 @@ server <- function(input, output, session) {
             format = input$density_format,
             width = input$density_width,
             height = input$density_height,
-            filename = paste0("density_plot", input$assayNames)
+            filename = paste0("density_plot_", input$assayNames)
           )
         )
     })
@@ -718,12 +716,12 @@ server <- function(input, output, session) {
         addGeneName = TRUE
       )
       
-      plotMostAbundantProteinsInSample(
+      ggplotly(plotMostAbundantProteinsInSample(
         dataAssay=tmp,
         sample=input$samples,
         color = myScatterColors()[1],
         abundant_base = input$abundant_base
-      )  %>% config(
+      ))  %>% config(
         displaylogo = F,
         modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
@@ -842,11 +840,11 @@ server <- function(input, output, session) {
     ))
 
     withProgress(message = "Plotting Coefficient of Variations ", {
-      plotCoeffVarPlot(dataAssay(),
+      ggplotly(plotCoeffVarPlot(dataAssay(),
                        myGroupColors(),
                        input$assayNames,
                        input$cv_base,
-                       input$cv_legend) %>% config(
+                       input$cv_legend)) %>% config(
         displaylogo = F,
         modeBarButtonsToRemove = removePlotlyBars,
         toImageButtonOptions = list(
@@ -1779,7 +1777,7 @@ server <- function(input, output, session) {
                    toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
-                                               filename = "volcano_plot")
+                                               filename = paste0("volcano_plot_", sample)
             )
     )
   })
@@ -1857,7 +1855,7 @@ server <- function(input, output, session) {
                    toImageButtonOptions = list(format = format,
                                                width = plot_width,
                                                height = plot_height,
-                                               filename = "ma_plot")
+                                               filename = paste0("ma_plot_", sample))
             )
     )
   })
@@ -1969,7 +1967,7 @@ server <- function(input, output, session) {
         format = input$profile_format,
         width = input$profile_width,
         height = input$profile_height,
-        filename = "profile_plot"
+        filename = paste0("profile_plot_", input$selectProfilePlotGene)
       )
     )
   })
