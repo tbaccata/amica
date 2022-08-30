@@ -377,8 +377,8 @@ plotMostAbundantProteinsInSample <-
       coord_flip() +
       theme_cowplot(font_size = abundant_base) +
       background_grid() +
-      theme(legend.title = element_blank()) + xlab("") + ylab(paste0("iBAQ intensity (%) in ", samples)) +
-      ggtitle(label = paste0(n, " most abundant proteins"))
+      theme(legend.title = element_blank()) + xlab("") + ylab(paste0("iBAQ intensities (%)")) +
+      ggtitle(label = paste0(n, " most abundant proteins in ", samples))
     p
   }
 
@@ -428,7 +428,7 @@ plotNumberIdentifiedProteins <-
         ),
         legend.title = element_blank(),
         legend.text = element_text(size = barplotId_legend)
-      ) + xlab("") + ylab("#of identified proteins based on LFQ intensities")
+      ) + xlab("") + ylab("#of identified proteins")
     
     p
   }
@@ -480,7 +480,7 @@ plotMissingValues <-
         ),
         legend.title = element_blank(),
         legend.text = element_text(size = barplotMv_legend)
-      ) + xlab("") + ylab("missing values (%) based on LFQ intensities")
+      ) + xlab("") + ylab("missing values (%)")
     
     p
   }
@@ -544,7 +544,7 @@ plotContaminants <-
         ),
         legend.title = element_blank(),
         legend.text = element_text(size = contaminants_legend)
-      ) + xlab("") + ylab("% Contaminant based on iBAQ Intensities") +
+      ) + xlab("") + ylab("iBAQ intensities (%)") +
       ggtitle(label = "Relative Amount of Contaminants")
     
     p
