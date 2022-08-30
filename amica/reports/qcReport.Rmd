@@ -3,7 +3,10 @@ title: "amica QC Report"
 date: '`r format(Sys.Date(), "%Y-%B-%d")`'
 output: html_document
 params:
+  amicaInput: NA
+  isPilot: NA
   analysisParams: NA
+  daTool: NA
   numberOfProteins: NA
   quantifiedProteins: NA
   numberOfComparisons: NA
@@ -29,8 +32,10 @@ params:
 ## 1 Analysis parameters 
 
 
-```{r, echo=FALSE}
-if (params$analysisParams != 'NA') {
+```{r, param-summary, echo=FALSE}
+if (params$amicaInput) {
+  paste("No analysis parameters accessible")
+} else {
   datatable(
       params$analysisParams,
       caption = "Summary of analysis parameters used",
@@ -47,8 +52,6 @@ if (params$analysisParams != 'NA') {
         ))
       )
     )
-} else {
-  paste("No analysis parameters accessible")
 }
 ```
 
@@ -58,7 +61,7 @@ Number of proteins in uploaded file: **`r params$numberOfProteins`**.
 
 Number of quantified proteins: **`r params$quantifiedProteins`**.
 
-Number of groups in experimental design: **`r params$quantifiedProteins`**.
+Number of groups in experimental design: **`r params$numberOfGroups`**.
 
 Number of pairwise group comparisons performed: **`r params$numberOfComparisons`**.
 
@@ -66,7 +69,7 @@ Number of pairwise group comparisons performed: **`r params$numberOfComparisons`
 ## 2 QC plots
 
 ### 2.1 Number of identified proteins (based on LFQ intensities prior to imputation)
-```{r, echo=FALSE}
+```{r, num-ids, echo=FALSE}
 params$numid
 ```
 
@@ -74,12 +77,12 @@ params$numid
 
 The percentage of contaminants is calculated with the iBAQ (Intensity based Absolute Quantification) values and shows the percentage of total signal from potential contaminants.
 
-```{r, echo=FALSE}
+```{r, contaminants, echo=FALSE}
 params$contaminants
 ```
 
 ### 2.3 Percentages of missing values (based on LFQ intensities prior to imputation)
-```{r, echo=FALSE}
+```{r, missing-vals, echo=FALSE}
 params$missingvals
 ```
 
@@ -111,43 +114,56 @@ params$impDensityPlot
 
 The Coefficient of Variation (CV) gets calculated by the standard deviation of replicates divided by their mean per protein, which gives an estimate on the reproducibility of the experiment.
 
-```{r, cv-boxplots-side, fig.show="hold", out.width="50%", echo=FALSE}
-params$lfqCvBox
-params$impCvBox
+```{r, cv-boxplots-side, fig.show="hold", results='asis', out.width="50%", echo=FALSE}
+if (params$isPilot) {
+  cat("\n\n**Cannot output CV-plots for pilots without replicates.**\n\n")
+} else {
+  print(params$lfqCvBox)
+  print(params$impCvBox)
+}
 ```
 
-### 2.8 Correlation plots
 
-The Pearson correlation plot visualizes how well samples (e.g replicates) correlate.
+```{r, corr-plots, echo=FALSE, results='asis'}
 
-```{r, echo=FALSE}
+idx <- 1
+if (!params$amicaInput &&
+    !params$isPilot) idx <- 2
+
+cat(paste0("\n\n### 2.8 Correlation plots\n\n"))
+
+cat(paste0("\n\nThe interactive pearson correlation plot [",idx, "] visualizes how well samples (e.g replicates) correlate.\n\n"))
+
 params$lfqCorrPlot
 params$impCorrPlot
 ```
 
-```{r, echo=FALSE}
-# df <- params$overlapDf
-# names(df) <- c(
-#       "Sample 1",
-#       "Sample 2",
-#       "# Sample 1",
-#       "# Sample 2",
-#       "# shared",
-#       "Overlap Coeff.",
-#       "Jaccard index"
-#     )
-#     datatable(
-#       df,
-#       extensions = 'Buttons',
-#       filter = "top",
-#       rownames = F,
-#       options = list(
-#         pageLength = 10,
-#         autoWidth = TRUE
-#         #dom = 'Bfrtip',
-#         #buttons = c('csv')
-#       )
-#     )
+
+## 3 References
+
+```{r, references, echo=FALSE, results='asis'}
+if (!params$amicaInput) {
+  
+  if (!params$isPilot) {
+    limmaText <- 'Ritchie, Matthew E., et al. "limma powers
+         differential expression analyses for RNA-sequencing and microarray
+         studies." Nucleic acids research 43.7 (2015): e47-e47.'
+    deqmsText <- 'Zhu, Yafeng, et al. "DEqMS: a method for accurate
+         variance estimation in differential protein expression analysis."
+         Molecular & Cellular Proteomics 19.6 (2020): 1047-1057.'
+    
+    if (params$daTool == "limma") {
+      cat(paste0("\n\n[1] ", limmaText, "\n\n"))
+    } else {
+      cat(paste0("\n\n[1] ", deqmsText, "\n\n"))
+    }
+  }
+}
+heatmaplyText <- 'Galili, Tal, et al. "heatmaply: an R
+         package for creating interactive cluster heatmaps for online
+         publishing." Bioinformatics 34.9 (2018): 1600-1602.'
+cat(paste0("\n\n[", idx, "] ",  heatmaplyText, "\n\n"))
+
 ```
 
 
