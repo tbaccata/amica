@@ -3,6 +3,7 @@ title: "amica Differential abundance Report"
 date: '`r format(Sys.Date(), "%Y-%B-%d")`'
 output: html_document
 params:
+  isPilot: NA
   fcCutoff: NA
   sigCutoffValue: NA # padj or p-value
   pvalCutoff: NA
@@ -17,23 +18,34 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-library(knitr)
+#knitr::opts_chunk$set(echo = FALSE)
+#library(knitr)
 library(DT)
 source("diffAbundancePlots.R", local = TRUE)
 ```
 
 ## 1 Analysis parameters 
 
-log2FC-threshold: **`r params$fcCutoff`**.
+```{r, echo=FALSE, results='asis'}
+cat(paste0("\n\nlog2FC-threshold: **", params$fcCutoff, "**\n\n"))
 
-Significance value: **`r params$sigCutoffValue`**.
+if (!params$isPilot) {
+  cat(paste0("\n\nSignificance value: **", params$sigCutoffValue, "**\n\n"))
+  
+  thresh <- ifelse(params$sigCutoffValue != 'none', params$pvalCutoff, 'none')
+  
+  cat(paste0("\n\nSignificance threshold: **", thresh, "**\n\n"))
+} else {
+  cat("\n\n**No (adj.) p-value columns available for pilot.**")
+}
 
-Significance threshold: **`r ifelse(params$sigCutoffValue != 'none', params$pvalCutoff, 'none')`**.
 
-Which proteins to show: **`r params$enrichmentChoice`**
+cat(paste0("\n\nWhich proteins to show: **", params$enrichmentChoice, "**\n\n"))
 
-## 2 Single group comparison(s) (MA - and volcano plots)
+```
+
+## 2 Single group comparison(s)
+
 
 
 ```{r single-comp, results='asis', echo=FALSE}
@@ -53,84 +65,75 @@ for (comp in params$comparisons) {
           
            #cat(paste0('\n\n### 2.`', idx, "`", " ", comp, "\n\n"))
           cat(paste0("\n\n### 2.",idx, " ", comp, "\n\n"))
-          vplot <- plotVolcanoPlot(pltData,
+          
+          if (params$isPilot) {
+            summaryPlot <- plotMAPlot(pltData,
+                      xText,
+                      params$myScatterColors
+                      )
+          } else {
+            summaryPlot <- plotVolcanoPlot(pltData,
                                    xText,
                                    ifelse(params$sigCutoffValue == "p-value", FALSE, TRUE),
                                    params$myScatterColors
                                    )
-          print(vplot)
+          
+          }
+          print(summaryPlot)
           
           nenriched <- nrow(pltData[pltData$logFC>0 & pltData$significant =="yes",])
           nreduced <- nrow(pltData[pltData$logFC<0 & pltData$significant =="yes",])
           
-          cat(paste0("\n\nNumber of enriched proteins: **", nenriched, "**\n\n"))
-          cat(paste0("\n\nNumber of reduced proteins : **", nreduced, "**\n\n"))
-          
+          if (params$enrichmentChoice != "reduced") {
+            cat(paste0("\n\nNumber of enriched proteins: **", nenriched, "**\n\n"))
+          }
+          if(params$enrichmentChoice != "enriched") {
+            cat(paste0("\n\nNumber of reduced proteins : **", nreduced, "**\n\n"))
+          }
           idx <- idx + 1
 }
 ```
 
 ## 3 Set comparisons of pairwise group comparisons
-Set comparison of differentially abundant proteins from selected comparisons under selected thresholds. The dots show which sets are getting compared. A dot not connected to another dot shows the number of proteins specific to that comparisons. The top barplot depicts the number of intersecting proteins, and the barplot on the side shows how many proteins are differentially abundant in the comparison. 
+UpSet plots [1]. Set comparison of differentially abundant proteins from selected comparisons under selected thresholds. The dots show which sets are getting compared. A dot not connected to another dot shows the number of proteins specific to that comparisons. The top barplot depicts the number of intersecting proteins, and the barplot on the side shows how many proteins are differentially abundant in the comparison. 
 
 ```{r multi-comp-enriched, echo=FALSE, results='asis'}
-
 if (length(params$comparisons) < 2) {
   cat("\n\nNot enough pairwise comparisons.\n\n")
 } else {
-  if (params$enrichmentChoice == "reduced") {
-  cat("\n\nSet comparison of enriched not shown.\n\n")
-} else {
-  cat(paste0("\n\n### UpSet plot of enriched proteins\n\n"))
-  print(params$enrichedUpSet)
-  cat(paste0("\n\nNumber of enriched proteins in all comparisons: **", params$nMultiEnriched, "**"))
+  if (params$enrichmentChoice != "reduced") {
+    cat(paste0("\n\n### UpSet plot of enriched proteins\n\n"))
+    print(params$enrichedUpSet)
+    cat(
+      paste0(
+        "\n\nNumber of enriched proteins in all comparisons: **",
+        params$nMultiEnriched,
+        "**\n\n"
+      )
+    )
+  }
 }
-}
-
 ```
 
 ```{r multi-comp-reduced, echo=FALSE, results='asis'}
 if (length(params$comparisons) < 2) {
   cat("\n\nNot enough pairwise comparisons.\n\n")
 } else {
-  if (params$enrichmentChoice == "reduced") {
-  print("Set comparison of reduced not shown.")
-} else {
-  cat(paste0("\n\n### UpSet plot of reduced proteins\n\n"))
-  print(params$reducedUpSet)
-  cat(paste0("\n\nNumber of reduced proteins in all comparisons:  **", params$nMultiReduced, "**"))
+  if (params$enrichmentChoice != "enriched") {
+    cat(paste0("\n\n### UpSet plot of reduced proteins\n\n"))
+    print(params$reducedUpSet)
+    cat(
+      paste0(
+        "\n\nNumber of reduced proteins in all comparisons:  **",
+        params$nMultiReduced,
+        "**\n\n"
+      )
+    )
+  }
 }
-}
-
 ```
 
-```{r dynamic-datatable, echo=FALSE}
-# out = NULL
-# knit_expanded <- NULL
-# for (idx in seq_along(params$summPlots)) {
-#   #out <- paste0(out, "### 2.", idx, " ", params$comparisons[idx], "\n\n" )
-#   knit_expanded <- paste0("print(params$summPlots[[idx]])\n\n")
-#   
-#   enrTable <- "datatable(params$enrichedTables[[idx]],rownames = F)\n\n"
-#   redTable <- "datatable(params$reducedTables[[idx]],rownames = F)\n\n"
-# 
-#   out <- paste0(out, "\n\n### 2.",idx, " comparison: ", 
-#                           params$comparisons[idx], 
-#                           "\n\n```{r results='asis', echo=FALSE}\n\n", knit_expanded, "```\n\n")
-  # 
-  # if (params$enrichmentChoice == "enriched") {
-  #   out <- paste0(out, "#### Top 10 enriched proteins\n\n```{r result='asis', echo=FALSE}\n\n", enrTable, "\n\n```")
-  # } else if(params$enrichmentChoice == "reduced") {
-  #   out <- paste0(out, "#### Top 10 reduced proteins\n\n```{r result='asis', echo=FALSE}\n\n", redTable, "\n\n```")
-  # } else {
-  #   out <- paste0(out, "#### Top 10 enriched proteins\n\n```{r result='asis', echo=FALSE}\n\n", enrTable, "\n\n```")
-  #   out <- paste0(out, "#### Top 10 reduced proteins\n\n```{r result='asis', echo=FALSE}\n\n", redTable, "\n\n```")
-  # }
-  
-#}
-#`r paste(knit(text = out), collapse = '\n')`
-```
-
-
+## 4 References
+[1] Lex, Alexander, et al. "UpSet: visualization of intersecting sets." IEEE transactions on visualization and computer graphics 20.12 (2014): 1983-1992.
 
 
