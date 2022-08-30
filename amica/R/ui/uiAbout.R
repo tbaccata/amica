@@ -5,10 +5,13 @@ tabPanel(
     <h3>News</h3>
          <hr>
          <ul>
+         <li>22.08.30 - New feature added - option to not impute missing values.</li>
+         <li>22.08.30 - New feature added - QC - and diff. abundance reports.</li>
+         <li>22.08.30 - Fixed error handling in upload and.</li>
+         <li>22.02.28 - New feature added - Dot plot in Diff. abundance tab.</li>
          <li>21.11.23 - amica posted on <a href="https://www.biorxiv.org/content/10.1101/2021.11.23.466958" 
          target="_blank">bioRxiv</a>.</li>
          <li>21.10.14 - github went public.</li>
-         <li>22.02.28 - New feature added - Dot plot in Diff. abundance tab.</li>
          </ul>
          </p>
          <p>
@@ -33,6 +36,9 @@ tabPanel(
          <li>(Heatmaply) <b>heatmaply: </b>Galili, Tal, et al. "heatmaply: an R 
          package for creating interactive cluster heatmaps for online 
          publishing." Bioinformatics 34.9 (2018): 1600-1602.</li>
+         <li>(UpSet plot) <b>UpSet: </b> Lex, Alexander, et al. "UpSet: 
+         visualization of intersecting sets." IEEE transactions on visualization 
+         and computer graphics 20.12 (2014): 1983-1992.</li>
          </ul>
          </p>
          <br>
