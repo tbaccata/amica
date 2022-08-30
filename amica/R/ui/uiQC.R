@@ -15,7 +15,7 @@ tabPanel(
     tabPanel(
       h3("PCA"),
       uiOutput("pcaSamplesInput"),
-      actionButton("submitPCA", "Plot PCA", icon = icon("cog")),
+      #actionButton("submitPCA", "Plot PCA", icon = icon("cog")),
       actionButton("pcaParams", "", icon = icon("wrench")),
       shinyjs::hidden(div(
         style = "display: grid; 
@@ -83,7 +83,7 @@ tabPanel(
                column(
                  width = 6,
                  h4("Boxplot"),
-                 inline(actionButton("submitBoxplot", "Plot boxplot", icon = icon("cog"))),
+                 #inline(actionButton("submitBoxplot", "Plot boxplot", icon = icon("cog"))),
                  inline(actionButton("boxplotHelp", icon = icon("info") , label = NULL)),
                  inline(uiOutput("boxplotHelpBox")),
                  ###
@@ -142,7 +142,7 @@ tabPanel(
                column(
                  width = 6,
                  h4("Density plot"),
-                 inline(actionButton("submitDensity", "Plot density plot", icon = icon("cog"))),
+                 #inline(actionButton("submitDensity", "Plot density plot", icon = icon("cog"))),
                  inline(actionButton("densityHelp", icon = icon("info") , label = NULL)),
                  inline(uiOutput("densityHelpBox")),
                  ###
@@ -204,7 +204,7 @@ tabPanel(
         column(width = 6,
                h4("Correlation"),
                uiOutput("corrSamplesInput"),
-               inline(actionButton("submitCor", "Plot Correlation", icon = icon("cog"))),
+               #inline(actionButton("submitCor", "Plot Correlation", icon = icon("cog"))),
                inline(actionButton("corHelp", icon = icon("info") , label = NULL)),
                inline(uiOutput("corHelpBox")),
                ###
@@ -248,7 +248,7 @@ tabPanel(
         ),
         column(width = 6,
                h4("Coefficient of variation"),
-               inline(actionButton("submitCVs", "Plot CVs", icon = icon("cog"))),
+               #inline(actionButton("submitCVs", "Plot CVs", icon = icon("cog"))),
                inline(actionButton("cvHelp", icon = icon("info") , label = NULL)),
                inline(uiOutput("cvHelpBox")),
                ###
@@ -316,7 +316,7 @@ tabPanel(
                column(
                  h4("Contaminants"),
                  width = 6,
-                 inline(actionButton("submitConts", "Plot Contamiants", icon = icon("cog"))),
+                 #inline(actionButton("submitConts", "Plot Contamiants", icon = icon("cog"))),
                  inline(actionButton("contaminantHelp", icon = icon("info") , label = NULL)),
                  inline(uiOutput("contaminantHelpBox")),
                  ###
@@ -442,7 +442,7 @@ tabPanel(
       fluidRow(
         column(
           width = 6,
-          inline(actionButton("submitNumProts", "Plot barplot", icon = icon("cog"))),
+          #inline(actionButton("submitNumProts", "Plot barplot", icon = icon("cog"))),
           inline(actionButton("idHelp", icon = icon("info") , label = NULL)),
           inline(uiOutput("idHelpBox")),
           ###
@@ -499,8 +499,7 @@ tabPanel(
         ),
         column(
           width = 6,
-          
-          inline(actionButton("submitNumMVs", "Plot barplot", icon = icon("cog"))),
+          #inline(actionButton("submitNumMVs", "Plot barplot", icon = icon("cog"))),
           inline(actionButton("mvHelp", icon = icon("info") , label = NULL)),
           inline(uiOutput("mvHelpBox")),
           ###
@@ -559,7 +558,7 @@ tabPanel(
     ),
     tabPanel(
     h3("Protein Overlap"),
-    inline(actionButton("submitOverlapHeatmap", "Plot overlap", icon = icon("cog"))),
+    #inline(actionButton("submitOverlapHeatmap", "Plot overlap", icon = icon("cog"))),
     inline(actionButton("overlapHeatmapHelp", icon = icon("info") , label = NULL)),
     inline(uiOutput("overlapHeatmapHelpBox")),
     ###
