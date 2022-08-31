@@ -856,12 +856,12 @@ tabPanel(
           ),
           checkboxInput("oraExcludeIea",
                         "Exclude electronic GO annotations?",
-                        value = FALSE),
+                        value = TRUE),
           helpText("This options discards all evidence codes marked as IEA
                    (Inferred from Electronic Annotation)"),
           checkboxInput("oraCustom",
                         "Use quantified proteins as custom background?",
-                        value = FALSE),
+                        value = TRUE),
           helpText(
             'A defined background gene set is required in order to determine
             over-represented functional terms. By default, all protein-coding
