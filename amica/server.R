@@ -966,24 +966,27 @@ server <- function(input, output, session) {
     reacValues$dotplotGroupsDf <- data.frame(comparison, group)
   })
   
-  output$submitDotplot <- renderUI({
-    req(reacValues$dotplotGroupsDf)
-    actionButton("submitDotplot", label = "Plot Dotplot")
-  })
+  # output$submitDotplot <- renderUI({
+  #   req(reacValues$dotplotGroupsDf)
+  #   actionButton("submitDotplot", label = "Plot Dotplot")
   
-  observeEvent(c(input$submitDotplot, reacValues$nsubmits),{
-    
+  observeEvent(
+    c(
+      reacValues$dataComp,
+      reacValues$dotplotGroupsDf,
+      input$groupComparisonsDT_rows_all
+    ),
+    {
+      
     req(reacValues$dotplotGroupsDf)
-    req(reacValues$dataComp)
+    #req(reacValues$dataComp)
     
     validate(need(!any(duplicated(reacValues$dotplotGroupsDf$group)), "Error! Please provide 
                   unique groups"  )  )
     
     #group2comps <- reacValues$dotplotGroupsDf
-    ridx <- isolate(input$groupComparisonsDT_rows_all)
+    ridx <- input$groupComparisonsDT_rows_all
     ridx <- rownames(reacValues$dataComp[ridx,])
-    
-    validate(need(length(ridx) > 1, "Cannot output Dotplot with less than two proteins." ) )
     
     aname <-
       ifelse(
@@ -1125,6 +1128,9 @@ server <- function(input, output, session) {
     ))
     req(reacValues$dataDotplot)
     req(reacValues$dotplotGroupsDf)
+
+    validate(need(length(input$groupComparisonsDT_rows_all) > 1,
+                  "Cannot output Dotplot with less than two proteins." ) )
     
     minColorGradient <- input$dotplot_color_gradient[1]
     maxColorGradient <- input$dotplot_color_gradient[2]
@@ -1257,7 +1263,7 @@ server <- function(input, output, session) {
             reacValues$enrichmentChoice,
             '_proteins_log2fcThresh_',
             reacValues$fcCutoff, 
-            'signcutoff_',
+            '_signcutoff_',
             reacValues$sigCutoffValue
           )
         ))
@@ -1483,10 +1489,12 @@ server <- function(input, output, session) {
                          plot a heatmap.") ))
     
     req(reacValues$dataComp)
-    ridx <- isolate(input$groupComparisonsDT_rows_all)
+    #ridx <- isolate(input$groupComparisonsDT_rows_all)
+    ridx <- input$groupComparisonsDT_rows_all
     ridx <- rownames(reacValues$dataComp[ridx,])
     
-    validate(need(nrow(reacValues$dataComp)>0, "No data to plot"))
+    validate(need(nrow(reacValues$dataComp)>1, "No data to plot"))
+    validate(need(length(ridx)>1, "No data to plot. Please remove filters in datatable."))
     
     heatmapSamplesInput <- isolate(input$heatmapSamplesInput)
     
@@ -1546,6 +1554,8 @@ server <- function(input, output, session) {
   
   output$compareHeatmap <- renderPlotly({
     input$submitHeatmap
+    validate(need(length(input$groupComparisonsDT_rows_all)>1, 
+                  "No data to plot. Please remove filters in datatable."))
     
     if (reacValues$show_heatmap == FALSE) {
       reacValues$show_heatmap = TRUE
@@ -1708,12 +1718,21 @@ server <- function(input, output, session) {
     event_data("plotly_selected", source = "subset")
   })
   
+  observeEvent(input$maVolcanoSubmit, {
+    if (reacValues$show_single == FALSE) {
+      reacValues$show_single = TRUE
+      toggle(id = 'hide_before_single_submit', anim = T)
+    }
+  })
   
   output$volcanoPlot <- renderPlotly({
     input$maVolcanoSubmit
     req(reacValues$dataComp)
     sample <- isolate(input$maVolcanoSampleSelect)
-    validate(need(length(grep(sample, names(reacValues$dataComp))) > 0,""))
+    validate(need(!is.null(sample) & sample!="" & length(sample)>0,
+                  "Please select a group comparison."))
+    validate(need(length(grep(sample, names(reacValues$dataComp))) > 0,
+                  "Please select a group comparison."))
     
     fontsize <- isolate(input$volcano_base)
     legend_fontsize <- isolate(input$volcano_legend)
@@ -1734,7 +1753,6 @@ server <- function(input, output, session) {
     }
     pcols <- c(c1,c2,"red")
     setChoice <- "union"
-    validate(need(!is.null(sample) & sample!="" & length(sample)>0, "Please select a group comparison."))
     
     pltData <- volcanoPlotData()
     if (!is.null(get_data())) {
@@ -1779,14 +1797,14 @@ server <- function(input, output, session) {
                                                height = plot_height,
                                                filename = paste0("volcano_plot_", sample)
             )
-    )
+    ))
   })
   
   observeEvent(c(input$maVolcanoSubmit, reacValues$nsubmits),{
-    if (reacValues$show_single == FALSE) {
-      reacValues$show_single = TRUE
-      toggle(id = 'hide_before_single_submit', anim = T)
-    }
+    # if (reacValues$show_single == FALSE) {
+    #   reacValues$show_single = TRUE
+    #   toggle(id = 'hide_before_single_submit', anim = T)
+    # }
     req(input$maVolcanoSampleSelect)
     sigCutoffValue <- isolate(input$sigCutoffValue)
     reacValues$sigCutoffValue <- sigCutoffValue
@@ -1810,6 +1828,11 @@ server <- function(input, output, session) {
     plot_height <- isolate(input$volcano_height)
     pointsize <- isolate(input$volcano_pointsize)
     format <- isolate(input$volcano_format)
+    
+    validate(need(!is.null(sample) & sample!="",
+                  "Please select a group comparison."))
+    validate(need(length(grep(sample, names(reacValues$dataComp))) > 0,
+                  "Please select a group comparison."))
     
     pltData <- volcanoPlotData()
     c1 <- isolate(input$volcanocol_1)
@@ -2031,26 +2054,40 @@ server <- function(input, output, session) {
     )
   })
   
+  # observeEvent(c(input$maVolcanoSubmit, input$submitMultiComp), {
+  #   shinyjs::hide("hide_ora_before_submit")
+  # })
+  
+  # observeEvent(input$showORA, {
+  #   shinyjs::show("hide_ora_before_submit")
+  #   #toggle(id = 'hide_ora_before_submit', anim = T)
+  # })
+  
   output$organismSources <- renderText({
     req(input$gprofilerOrganism)
     sources <- gprofilerOrganisms()[gprofilerOrganisms()$id == input$gprofilerOrganism, "sources"]
     paste0("Available sources: ", sources)
   })
   
-  observeEvent(c(input$submitORA, reacValues$nsubmits),{
+  observeEvent(c(
+    input$submitORA,
+    reacValues$dataComp
+    ),
+  {
+
     req(reacValues$dataComp)
     ridx <- isolate(input$groupComparisonsDT_rows_all)
     organism <- isolate(input$gprofilerOrganism)
     sources <- isolate(input$oraSources)
     customBg <- isolate(input$oraCustom)
     excludeIea <- isolate(input$oraExcludeIea)
-    
+
     validate(need(!is.null(organism), "Please select an organism."))
     validate(need(!is.null(sources), "Please select at least one source."))
     validate(need(nrow(reacValues$dataComp)>0, "No proteins to plot (output table must be empty)."))
     validate(need(length(ridx)>0, "No proteins to plot (output table must be empty)."))
     if ( nrow(reacValues$dataComp) < 2 ) return(NULL)
-    
+
     queryGenes <- gsub(";.*", "", reacValues$dataComp[ridx, geneName])
 
     withProgress(message = 'Computing ORA ', {
@@ -2059,8 +2096,8 @@ server <- function(input, output, session) {
       if (customBg) {
         customBgList <- gsub(";.*", "", reacValues$filtData[[geneName]])
       }
-      
-      reacValues$dataGprofiler <- 
+
+      reacValues$dataGprofiler <-
         gost(
           query = queryGenes,
           sources = sources,
@@ -2070,13 +2107,13 @@ server <- function(input, output, session) {
           exclude_iea = excludeIea,
           significant = input$significantORA
         )
-       
+
       incProgress(1/1.01, detail = paste("Finished!"))
     })
 
     reacValues$GostPlot <- reacValues$dataGprofiler
     reacValues$dataGprofiler <- reacValues$dataGprofiler$result
-    
+
     cols <- c(
       "source",
       "term_id",
@@ -2090,7 +2127,7 @@ server <- function(input, output, session) {
       cols <- cols[1:length(cols) - 1]
     }
     reacValues$dataGprofiler <- reacValues$dataGprofiler[, cols]
-    
+
     if (reacValues$show_ora == FALSE) {
       reacValues$show_ora = TRUE
       toggle(id = 'hide_ora_before_submit', anim = T)
@@ -2109,9 +2146,9 @@ server <- function(input, output, session) {
     gostplot(reacValues$GostPlot, capped = F, interactive = T)
     # %>% layout(yaxis = list(title = '-log10(p-adj)'))
   })
-  
+
   oraBarBase <-
-    eventReactive(c(input$submitORABar, reacValues$nsubmits), {
+    eventReactive(c(input$submitORABar, reacValues$dataGprofiler), {
       orasource <- isolate(input$orasource)
       plotDf <-
         reacValues$dataGprofiler[reacValues$dataGprofiler$source == orasource, ]
@@ -2151,10 +2188,19 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+
   output$download1 <- downloadHandler(
     filename = function() {
-      paste("data_gprofiler2_", Sys.Date(), ".tsv", sep="")
+      paste(
+        "data_gprofiler2_",
+        reacValues$enrichmentChoice,
+        '_proteins_log2fcThresh_',
+        reacValues$fcCutoff,
+        '_signcutoff_',
+        reacValues$sigCutoffValue,
+        ".tsv",
+        sep = ""
+      )
     },
     content = function(file) {
       write.table(reacValues$dataGprofiler, file, row.names = F, sep = "\t", quote = F)
@@ -2215,7 +2261,7 @@ server <- function(input, output, session) {
       )
     ) %>% formatSignif(columns = c('p_value'), digits = 3)
   })
-  
+
   # ------------------------------------------- visNetwork
   output$networkInput <- renderUI({
     req(reacValues$reacConditions)
