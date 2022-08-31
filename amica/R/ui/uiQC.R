@@ -9,7 +9,9 @@ tabPanel(
   uiOutput("assaysHelpBox"),
   helpText("ImputedIntensity are the intensities used for quantification"),
   verbatimTextOutput("quantSummary"),
-  downloadButton('qcReport', 'Generate QC Report', icon = icon("file")),
+  br(),br(),br(),
+  downloadButton('qcReport', h5('Generate QC Report'), icon = icon("file")),
+  br(),br(),br(),
   tabsetPanel(
     type = "tabs",
     tabPanel(

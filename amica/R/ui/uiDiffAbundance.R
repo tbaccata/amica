@@ -99,7 +99,12 @@ tabPanel(
         )
       )
     ),
-    downloadButton('diffAbundanceReport', 'Generate diff. abundance Report', icon = icon("file")),
+    br(),
+    br(),
+    br(),
+    downloadButton('diffAbundanceReport', 
+                   h5('Generate diff. abundance Report'),
+                   icon = icon("file")),
   ),
   h3("Summary"),
   p(
@@ -353,6 +358,9 @@ tabPanel(
           ),
           br(),
           br(),
+          h5("The overlap table is integrated in the downloadble data table below 
+             (please look for the significant columns)."),
+          br(),
           br()
         )
       )
@@ -510,7 +518,7 @@ tabPanel(
                    ),
             column(
               width = 4,
-              uiOutput("submitDotplot"),
+              ##uiOutput("submitDotplot"),
               div(style = "position:relative",
                   uiOutput('plot.ui'),
                   uiOutput("hover_info"))
@@ -835,6 +843,7 @@ tabPanel(
       ),
       
       h3("Over-Representation Analysis (ORA)"),
+      
       wellPanel(fluidRow(
         column(
           width = 6,
@@ -842,24 +851,28 @@ tabPanel(
           helpText("Only select this feature if your gene set isn't too large."),
           checkboxInput("significantORA", "Only show significant terms?", value = TRUE),
           helpText(
-            "Only deselect this box if you are certain. 
+            "Only deselect this box if you are certain.
                   The running time can increase dramatically if your gene list is too long."
           ),
-          checkboxInput("oraExcludeIea", 
-                        "Exclude electronic GO annotations?", 
+          checkboxInput("oraExcludeIea",
+                        "Exclude electronic GO annotations?",
                         value = FALSE),
-          helpText("This options discards all evidence codes marked as IEA 
+          helpText("This options discards all evidence codes marked as IEA
                    (Inferred from Electronic Annotation)"),
-          checkboxInput("oraCustom", 
-                        "Use quantified proteins as custom background?", 
+          checkboxInput("oraCustom",
+                        "Use quantified proteins as custom background?",
                         value = FALSE),
           helpText(
-            "A defined background gene set is required in order to determine 
-            over-represented functional terms. By default, all protein-coding 
-            genes are taken as background genes. Setting only quantified proteins 
-            as custom backgorund can be important in some cases, e.g when only a 
-            subset of proteins can be measured in an experiment. Examples include 
-            tissue-specific experiments (e.g liver-proteomics)."
+            'A defined background gene set is required in order to determine
+            over-represented functional terms. By default, all protein-coding
+            genes are taken as background genes. Setting only quantified proteins
+            as custom backgorund can be important in some cases, e.g when only a
+            subset of proteins can be measured in an experiment. Examples include
+            tissue-specific experiments (e.g liver-proteomics). A summary of 
+            potential biases is described in reference Timmons et al. (2015). 
+            Multiple sources of bias confound functional enrichment 
+            analysis of global-omics data. Genome biology, 16(1), 1-3.
+            '
           )
         ),
         column(width = 6,
@@ -874,7 +887,7 @@ tabPanel(
                  width = '250px'
                )),
                helpText("Please enter the scientific name by concatenating
-                              the first letter of the name and the family name. 
+                              the first letter of the name and the family name.
                               Example: human - 'hsapiens', mouse - 'mmusculus'."),
                verbatimTextOutput("organismSources", placeholder = F),
                checkboxGroupInput(
@@ -912,8 +925,8 @@ tabPanel(
       shinyjs::hidden(
         div(
           id = 'hide_ora_before_submit',
-          
           tabsetPanel(
+            id = "ora_result_tabs",
             type = "tabs",
             tabPanel(
               h3("Manhattan plot"),
@@ -946,12 +959,12 @@ tabPanel(
               inline(actionButton("oraBarParams", "", icon = icon("wrench"))),
               shinyjs::hidden(
                 div(
-                  style = "display: grid; 
+                  style = "display: grid;
           grid-template-columns: 30% repeat(2, 30%); ## same as repeat(4, 20%)
           grid-gap: 30px;",
-                  
+
                   id = 'toggle_oraBar_params',
-                  
+
                   numericInput(
                     "oraBar_width",
                     "Width in pixel.",
@@ -982,7 +995,7 @@ tabPanel(
                     choices = c("svg", "png"),
                     selected = "svg"
                   ),
-                  
+
                   sliderInput(
                     "oraBar_maxTerms",
                     "Max. number of terms to plot",
@@ -1003,7 +1016,7 @@ tabPanel(
           #downloadLink("download1","Download table"),
           div(style = 'overflow-x: scroll; max-width: 100%',
               DTOutput("gprofilerDT"))
-        )
+       )
       )
     )
   ),
