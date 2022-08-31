@@ -629,7 +629,9 @@ plotDotplot <-
     
     if (is.null(dotplotColors))
       dotplotColors <- viridis(20, option = "viridis")
-    
+
+  dataDotplot <- dataDotplot[!is.na(dataDotplot[[clusteringMetric]]),]
+      
   mat <- dataDotplot %>%
     dplyr::select(Gene, Group, all_of(clusteringMetric)) %>%  # drop unused columns to faciliate widening
     pivot_wider(names_from = Group, values_from = all_of(clusteringMetric)) %>%
