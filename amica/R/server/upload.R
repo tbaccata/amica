@@ -1,9 +1,6 @@
 ### UPLOAD
 observeEvent(input$submitAnalysis, {
   reacValues$inputParameterSummary <- NULL
-  reacValues$combinedData = NULL
-  reacValues$dataCompAmica = NULL
-  reacValues$amicaInput = FALSE
   allFilesUploaded <- TRUE
   
   ### EXAMPLE

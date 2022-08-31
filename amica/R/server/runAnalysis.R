@@ -29,6 +29,7 @@ output$intensitySelection <- renderUI({
                "Intensity")
     }
   }
+  intensities <- intensities[! intensities %in% "ImputedIntensity"]
   
   selectizeInput(
     "quantIntensity",
@@ -45,6 +46,9 @@ observeEvent(input$runAnalysis, {
     showNotification(paste0("No data uploaded."), type = "error")
     return(NULL)
   }
+  reacValues$combinedData = NULL
+  reacValues$dataCompAmica = NULL
+  reacValues$amicaInput = FALSE
   
   if (reacValues$amicaInput == FALSE) {
     ###FILTDATA BEGIN
