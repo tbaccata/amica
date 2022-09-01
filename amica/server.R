@@ -2900,6 +2900,7 @@ server <- function(input, output, session) {
           reacValues$proteinData
         )$groups)), FALSE, TRUE)
       
+      lfqAvail <- TRUE
       if (
         "Intensity" %in% assayNames(reacValues$proteinData) ||
         "LFQIntensity" %in% assayNames(reacValues$proteinData)
@@ -2963,7 +2964,9 @@ server <- function(input, output, session) {
           reacValues$groupFactors
         )
         
-      }
+      } else {
+        lfqAvail <- FALSE
+        }
 
       incProgress(3/10)
       impData <- getAssayData(reacValues$proteinData,
@@ -3028,16 +3031,20 @@ server <- function(input, output, session) {
       )
       incProgress(9/10)
       
-      
+      ibaqAvail <- ifelse(
+        abundancePrefix %in% assayNames(reacValues$proteinData),
+        TRUE,
+        FALSE
+      )
       
       params <- list(isPilot=isPilot,
                      numberOfProteins=nsummary,
                      quantifiedProteins=nquant,
                      numberOfComparisons=ncomps,
                      numberOfGroups=ngroups,
-                     numid=numIdPlotly(),
-                     contaminants=contaminantsPlotly(),
-                     missingvals=pctMvsPlotly(),
+                     numid=numIdPlotly(),#ifelse(lfqAvail, numIdPlotly(), NA),
+                     contaminants=ifelse(ibaqAvail, contaminantsPlotly(), NA),
+                     missingvals=ifelse(ibaqAvail, pctMvsPlotly(), NA),
                      overlapDf=reacValues$overlapDf,
                      lfqPCA=lfqPCA,
                      impPCA=impPCA,
