@@ -4,6 +4,7 @@ reacValues <-
     expDesign=NULL,
     uploadSuccess=NULL,
     analysisSuccess=NULL,
+    dbTool=NULL,
     daTool=NULL,
     inputParameterSummary=NULL,
     filtData = NULL,
