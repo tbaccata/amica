@@ -175,8 +175,8 @@ server <- function(input, output, session) {
       "\nNumber of group comparisons: \n",
       ncomps,
       "\n\n\nYou can now inspect\n",
-      "\t1) QC\n",
-      "\t2) Quantitative results\n",
+      "\t1) QC (generate QC report)\n",
+      "\t2) Quantitative results (generate Diff. Abundance report)\n",
       "\t3) Protein-protein interaction networks (only applicable for H.sapiens at the moment)\n",
       "\t4) or upload another amica file to compare experiments!"
     )
@@ -2054,14 +2054,15 @@ server <- function(input, output, session) {
     )
   })
   
-  # observeEvent(c(input$maVolcanoSubmit, input$submitMultiComp), {
-  #   shinyjs::hide("hide_ora_before_submit")
-  # })
-  
-  # observeEvent(input$showORA, {
-  #   shinyjs::show("hide_ora_before_submit")
-  #   #toggle(id = 'hide_ora_before_submit', anim = T)
-  # })
+  observeEvent(c(input$maVolcanoSubmit, input$submitMultiComp), {
+    if (reacValues$show_ora == TRUE) {
+      reacValues$show_ora = FALSE
+      toggle(id = 'hide_ora_before_submit', anim = T)
+    }
+    reacValues$dataGprofiler <- NULL
+    reacValues$GostPlot <- NULL
+    
+  })
   
   output$organismSources <- renderText({
     req(input$gprofilerOrganism)
@@ -2069,11 +2070,7 @@ server <- function(input, output, session) {
     paste0("Available sources: ", sources)
   })
   
-  observeEvent(c(
-    input$submitORA,
-    reacValues$dataComp
-    ),
-  {
+  observeEvent(input$submitORA, {
 
     req(reacValues$dataComp)
     ridx <- isolate(input$groupComparisonsDT_rows_all)
@@ -2135,7 +2132,7 @@ server <- function(input, output, session) {
   })
   
   output$gostplot <- renderPlotly({
-    
+    req(reacValues$GostPlot)
     validate(
       need(nrow(reacValues$GostPlot$result) >= 1, 
            paste("No results to show\n",
@@ -2149,14 +2146,17 @@ server <- function(input, output, session) {
 
   oraBarBase <-
     eventReactive(c(input$submitORABar, reacValues$dataGprofiler), {
+      req(reacValues$dataGprofiler)
       orasource <- isolate(input$orasource)
       plotDf <-
         reacValues$dataGprofiler[reacValues$dataGprofiler$source == orasource, ]
+      print(plotDf)
       validate(need(
-        !is.null(reacValues$dataGprofiler) || nrow(plotDf) > 0,
+        !is.null(reacValues$dataGprofiler) && nrow(plotDf) > 0,
         paste(
           "No results to show for this source\n",
-          "Please make sure that the organism"
+          "Please make sure that the organism",
+          "is correct or deselect Only show significant terms"
         )
       ))
       
@@ -3042,10 +3042,8 @@ server <- function(input, output, session) {
                      quantifiedProteins=nquant,
                      numberOfComparisons=ncomps,
                      numberOfGroups=ngroups,
-                     numid=numIdPlotly(),#ifelse(lfqAvail, numIdPlotly(), NA),
-                     contaminants=ifelse(ibaqAvail, contaminantsPlotly(), NA),
-                     missingvals=ifelse(ibaqAvail, pctMvsPlotly(), NA),
-                     overlapDf=reacValues$overlapDf,
+                     lfqAvail=lfqAvail,
+                     ibaqAvail=ibaqAvail,
                      lfqPCA=lfqPCA,
                      impPCA=impPCA,
                      lfqBoxplot=lfqBoxplot,
@@ -3065,8 +3063,15 @@ server <- function(input, output, session) {
         params[['daTool']] <- reacValues$daTool
       }
       params[['amicaInput']] <- amicaInput
-        
       
+      if (lfqAvail) {
+        params[['numid']] <- numIdPlotly()
+        params[['missingvals']] <- pctMvsPlotly()
+      }
+      if (ibaqAvail) {
+        params[['contaminants']] <- contaminantsPlotly()
+      }
+
       # Knit the document, passing in the `params` list, and eval it in a
       # child of the global environment (this isolates the code in the document
       # from the code in this app).
