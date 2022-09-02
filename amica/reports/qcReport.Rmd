@@ -11,11 +11,11 @@ params:
   quantifiedProteins: NA
   numberOfComparisons: NA
   numberOfGroups: NA
+  lfqAvail: NA
+  ibaqAvail: NA
   numid: NA
   contaminants: NA
   missingvals: NA
-  #overlap: NA
-  overlapDf: NA
   lfqPCA: NA
   impPCA: NA
   lfqBoxplot: NA
@@ -68,22 +68,47 @@ Number of pairwise group comparisons performed: **`r params$numberOfComparisons`
 
 ## 2 QC plots
 
-### 2.1 Number of identified proteins (based on LFQ intensities prior to imputation)
-```{r, num-ids, echo=FALSE}
-params$numid
+**LFQIntensity** or **Intensity** are intensities that still contain missing 
+values and potential contaminants. These intensities are used to calculate the 
+fraction of missing data or the number of identified protein groups in a sample.
+If the data was quantified with MaxQuant or FragPipe these intensities are 
+already normalized.
+
+**ImputedIntensity** are normalized and imputed intensities that are also used to 
+calculate differential abundance. If the re-normalization option was selected 
+in the input tab the LFQIntensities were normalized after removing potential 
+contaminants, reverse hits, proteins only identified by site and protein groups 
+that had too few valid values per group.
+
+### 2.1 Number of identified proteins (based on LFQ intensities prior to filtering and imputation)
+```{r, num-ids, echo=FALSE, error=TRUE}
+if (!params$lfqAvail) {
+  print("No LFQIntensities available for this plot.")
+} else {
+  params$numid
+
+}
 ```
 
 ### 2.2 Percentages of contamination (based on iBAQ intensities)
 
 The percentage of contaminants is calculated with the iBAQ (Intensity based Absolute Quantification) values and shows the percentage of total signal from potential contaminants.
 
-```{r, contaminants, echo=FALSE}
-params$contaminants
+```{r, contaminants, echo=FALSE, error=TRUE}
+if (!params$ibaqAvail) {
+  print("No iBAQ intensities available for this plot.")
+} else {
+  params$contaminants
+}
 ```
 
-### 2.3 Percentages of missing values (based on LFQ intensities prior to imputation)
-```{r, missing-vals, echo=FALSE}
-params$missingvals
+### 2.3 Percentages of missing values (based on LFQ intensities prior to filtering and imputation)
+```{r, missing-vals, echo=FALSE, error=TRUE}
+if (!params$lfqAvail) {
+  print("No LFQIntensities available for this plot.")
+} else {
+  params$missingvals
+}
 ```
 
 ### 2.4 PCA
