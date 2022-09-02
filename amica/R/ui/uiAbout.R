@@ -7,7 +7,7 @@ tabPanel(
          <ul>
          <li>22.08.30 - New feature added - option to not impute missing values.</li>
          <li>22.08.30 - New feature added - QC - and diff. abundance reports.</li>
-         <li>22.08.30 - Fixed error handling in upload and.</li>
+         <li>22.08.30 - Fixed error handling in upload.</li>
          <li>22.02.28 - New feature added - Dot plot in Diff. abundance tab.</li>
          <li>21.11.23 - amica posted on <a href="https://www.biorxiv.org/content/10.1101/2021.11.23.466958" 
          target="_blank">bioRxiv</a>.</li>
