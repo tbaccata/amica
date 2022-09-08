@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     libxslt-dev
 
 # basic shiny functionality
-RUN R -e "install.packages(c('shiny', 'rmarkdown', 'shinyjs', 'shinymanager', 'shinyBS', 'DT', 'shinycssloaders', 'bslib', 'profvis', 'colourpicker'), repos='https://cloud.r-project.org/')"
+RUN R -e "install.packages(c('shiny', 'rmarkdown', 'shinyjs', 'shinymanager', 'shinyBS', 'DT', 'shinycssloaders', 'bslib', 'profvis', 'colourpicker', 'shinyalert'), repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages(c('reshape2', 'igraph', 'visNetwork', 'UpSetR', 'dplyr', 'pheatmap', 'DT', 'data.table', 'RColorBrewer', 'Rmisc', 'eulerr'), repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages(c('heatmaply', 'ggfortify', 'colourvalues', 'pryr'),  repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages(c('tidyr', 'Cairo', 'cowplot'),  repos='https://cloud.r-project.org/')"
