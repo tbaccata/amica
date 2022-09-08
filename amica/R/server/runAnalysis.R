@@ -57,7 +57,7 @@ observeEvent(input$runAnalysis, {
     quantIntensity <- "LFQIntensity"
     
     if (!is.null(reacValues$dbTool)) {
-      if (is.null(input$quantIntensity) |
+      if (is.null(input$quantIntensity) ||
           length(input$quantIntensity) < 2) {
         if (reacValues$dbTool == "fragpipe") {
           quantIntensity <-
@@ -66,6 +66,10 @@ observeEvent(input$runAnalysis, {
               "RazorIntensity",
               "Intensity"
             )
+          if (!quantIntensity %in% assayNames(reacValues$proteinData)) {
+            quantIntensity <- assayNames(reacValues$proteinData)[1]
+          }
+          
         }
       } else {
         quantIntensity <- input$quantIntensity
@@ -294,6 +298,26 @@ observeEvent(input$runAnalysis, {
     reacValues$filtData <-
       rowData(reacValues$proteinData)[isQuantRnames(reacValues$proteinData),]
     
+    if (is.null(reacValues$filtData)) {
+      shinyalert(
+        title = "No data left to analyze after set input parameters:",
+        text = paste(reacValues$inputParameterSummary, sep = '\n\n',
+                     paste0('#of quantified proteins: ', 
+                            length(isQuantRnames(reacValues$proteinData)) )),
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "error",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#669966",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    }
     
     normDf <- NULL
     tmp <- NULL
