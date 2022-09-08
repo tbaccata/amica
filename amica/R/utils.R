@@ -763,6 +763,7 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   
   samples <- make.names(design$samples)
   
+  
   unique_idx <- grep(paste0(samples, ".Unique.Intensity", collapse = "|"), colnames(protData))
   tot_idx <- grep(paste0(samples, ".Total.Intensity", collapse = "|"), colnames(protData))
   razor_idx <- grep(paste0(samples, ".Razor.Intensity", collapse = "|"), names(protData))
