@@ -1,5 +1,5 @@
 require(shiny)
-library(shinyjs)
+require(shinyjs)
 require(shinyBS)
 require(shinyalert)
 require(ggplot2)
@@ -10,7 +10,7 @@ require(DT)
 require(tools)
 require(DEqMS)
 require(gprofiler2)
-library(bslib)
+require(bslib)
 require(reshape2)
 require(igraph)
 require(visNetwork)
@@ -99,7 +99,7 @@ footer = function(x) {
          </p>
          <p>All code and online documentation can be found on 
          <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
-         <p>amica version 2022.09.01
+         <p>amica version 2022.09.08
          <img src='maxperutzlabs.jpg' width='100px'>
          </p>
          ")
