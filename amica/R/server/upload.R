@@ -306,9 +306,9 @@ observeEvent(input$submitAnalysis, {
         "Protein.ID",
         "Protein.Probability")
     
-    if (all(mqNames %in% header &&
+    if (all(mqNames %in% header) &&
             length(grep("^Intensity|^iBAQ.|^LFQ.intensity", header)) > 0
-            )) {
+            ) {
       tryCatch({
         reacValues$proteinData <-
           readInMQproteinGroupsSumm(input$maxquantFile$datapath,
