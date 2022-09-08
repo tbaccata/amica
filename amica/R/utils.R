@@ -761,38 +761,41 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   names(protData)[idx] <- gsub(sampleSpCountPostfix, "", names(protData)[idx])
   names(protData)[idx] <- paste0("razorUniqueCount.", names(protData)[idx])
   
-  unique_idx <- grep(paste0(design$samples, ".Unique.Intensity", collapse = "|"), colnames(protData))
-  tot_idx <- grep(paste0(design$samples, ".Total.Intensity", collapse = "|"), colnames(protData))
-  razor_idx <- grep(paste0(design$samples, ".Razor.Intensity", collapse = "|"), names(protData))
-  ints_idx <- grep(paste0(design$samples, ".Intensity", collapse = "|"), names(protData))
-  lfq_idx <- grep(paste0(design$samples, ".MaxLFQ.Intensity", collapse = "|"), names(protData))
-  lfq_unique_idx <- grep(paste0(design$samples, ".MaxLFQ.Unique.Intensity", collapse = "|"), names(protData))
-  lfq_unique_tot_idx <- grep(paste0(design$samples, ".MaxLFQ.Total.Intensity", collapse = "|"), names(protData))
+  samples <- make.names(design$samples)
   
-  if (length(tot_idx ) < 1 ) {
-    stop(paste0("Error: There are no .Total.Intensity columns ", 
-                " in the uploaded input data."))
-  }
-  if (length(unique_idx ) < 1 ) {
-    stop(paste0("Error: There are no .Unique.Intensity columns ", 
-                " in the uploaded input data."))
-  }
+  unique_idx <- grep(paste0(samples, ".Unique.Intensity", collapse = "|"), colnames(protData))
+  tot_idx <- grep(paste0(samples, ".Total.Intensity", collapse = "|"), colnames(protData))
+  razor_idx <- grep(paste0(samples, ".Razor.Intensity", collapse = "|"), names(protData))
+  ints_idx <- grep(paste0(samples, ".Intensity", collapse = "|"), names(protData))
+  lfq_idx <- grep(paste0(samples, ".MaxLFQ.Intensity", collapse = "|"), names(protData))
+  lfq_unique_idx <- grep(paste0(samples, ".MaxLFQ.Unique.Intensity", collapse = "|"), names(protData))
+  lfq_unique_tot_idx <- grep(paste0(samples, ".MaxLFQ.Total.Intensity", collapse = "|"), names(protData))
   
-  tots <- protData[,tot_idx]
-  names(tots) <- gsub(".Total.Intensity", "", names(tots))
-  tots[tots==0] <- NA
-  tots <- log2(tots)
-  
-  uniqs <- protData[,unique_idx]
-  names(uniqs) <- gsub(".Unique.Intensity", "", names(uniqs))
-  uniqs[uniqs==0] <- NA
-  uniqs <- log2(uniqs)
-  
+  uniqs <- NULL
+  tots <- NULL
   razor <- NULL
   ints <- NULL
   lfqInts <- NULL
   lfqUniqueInts <- NULL
   lfqTotalInts <- NULL
+  
+  assayList <- list()
+  
+  if (length(tot_idx) > 0) {
+    tots <- protData[,tot_idx]
+    names(tots) <- gsub(".Total.Intensity", "", names(tots))
+    tots[tots==0] <- NA
+    tots <- log2(tots)
+    assayList[['TotalIntensity']] <- tots
+  }
+  
+  if (length(unique_idx) > 0) {
+    uniqs <- protData[,unique_idx]
+    names(uniqs) <- gsub(".Unique.Intensity", "", names(uniqs))
+    uniqs[uniqs==0] <- NA
+    uniqs <- log2(uniqs)
+    assayList[['UniqueIntensity']] <- uniqs
+  }
   
   if (length(razor_idx) > 0) {
     razor <- protData[,razor_idx]
@@ -841,11 +844,6 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
       lfq_unique_tot_idx
     )
   dropIdx <- c(dropIdx, grep("Spectral.Count", names(protData)) )
-  
-  assayList <- list(
-    TotalIntensity = tots,
-    UniqueIntensity = uniqs
-  )
 
   if (!is.null(razor)) {
     assayList[["RazorIntensity"]] <- razor
@@ -861,6 +859,11 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
   }
   if (!is.null(lfqTotalInts)) {
     assayList[["LFQTotalIntensity"]] <- lfqTotalInts
+  }
+  
+  if (length(assayList) < 1) {
+    stop(paste0("Error: ", 
+                "There are intensities in the uploaded FragPipe file."))
   }
   
   se <- ProteomicsData(
