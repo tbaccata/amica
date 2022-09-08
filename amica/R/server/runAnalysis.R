@@ -66,6 +66,7 @@ observeEvent(input$runAnalysis, {
               "RazorIntensity",
               "Intensity"
             )
+          
           if (!quantIntensity %in% assayNames(reacValues$proteinData)) {
             quantIntensity <- assayNames(reacValues$proteinData)[1]
           }
