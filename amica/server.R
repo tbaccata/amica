@@ -2132,13 +2132,21 @@ server <- function(input, output, session) {
   })
   
   output$gostplot <- renderPlotly({
-    req(reacValues$GostPlot)
     validate(
       need(nrow(reacValues$GostPlot$result) >= 1, 
            paste("No results to show\n",
            "Please make sure that the organism",
            "is correct or deselect Only show significant terms"))
     )
+    validate(need(
+      !is.null(reacValues$dataGprofiler),
+      paste(
+        "No results to show for this source\n",
+        "Please make sure that the organism",
+        "is correct or deselect Only show significant terms"
+      )
+    ))
+    req(reacValues$GostPlot)
     # req(reacValues$GostPlot )
     gostplot(reacValues$GostPlot, capped = F, interactive = T)
     # %>% layout(yaxis = list(title = '-log10(p-adj)'))
@@ -2150,7 +2158,6 @@ server <- function(input, output, session) {
       orasource <- isolate(input$orasource)
       plotDf <-
         reacValues$dataGprofiler[reacValues$dataGprofiler$source == orasource, ]
-      print(plotDf)
       validate(need(
         !is.null(reacValues$dataGprofiler) && nrow(plotDf) > 0,
         paste(
@@ -2176,7 +2183,15 @@ server <- function(input, output, session) {
     })
   
   output$oraBarplot <- renderPlotly({
-
+    validate(need(
+      !is.null(reacValues$dataGprofiler) && 
+        nrow(reacValues$dataGprofiler[reacValues$dataGprofiler$source == input$orasource, ]) > 0,
+      paste(
+        "No results to show for this source\n",
+        "Please make sure that the organism",
+        "is correct or deselect Only show significant terms"
+      )
+    ))
     oraBarBase() %>% config(
       displaylogo = F,
       modeBarButtonsToRemove = removePlotlyBars,
