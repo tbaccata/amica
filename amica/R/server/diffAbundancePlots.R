@@ -694,12 +694,15 @@ plotDotplot <-
     preFiltered$relativeAbundance <- x/max(x, na.rm = T)
   }
   
-  if (is.null(minColorGradient)){
-    minColorGradient < min(preFiltered$log2FC, na.rm = T)
-  }
-  if (is.null(maxColorGradient)){
-    maxColorGradient < max(preFiltered$log2FC, na.rm = T)
-  }
+  minColorGradient <-
+    ifelse(is.null(minColorGradient),
+           min(preFiltered$log2FC, na.rm = T),
+           minColorGradient)
+  
+  maxColorGradient <-
+    ifelse(is.null(maxColorGradient),
+           max(preFiltered$log2FC, na.rm = T),
+           maxColorGradient)
   
   p <- preFiltered %>%
     ggplot(aes(
