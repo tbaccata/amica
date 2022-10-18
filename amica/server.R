@@ -1291,25 +1291,27 @@ server <- function(input, output, session) {
   
   observeEvent(c(input$submitMultiComp, reacValues$nsubmits),{
     req(enrichedMatrixSet())
-    
     req(input$upset1Sample)
     
-
-    if (reacValues$show_multi == FALSE) {
-      reacValues$show_multi = TRUE
-      toggle(id = 'hide_before_multi_submit', anim = T)
-    }
-
-    reacValues$dataComp <-
-      getComparisonsData2(reacValues$dataLimma,
-                          enrichedMatrixSet(),
-                          'union',
-                          input$upset1Sample)
     
-    reacValues$sigCutoffValue <- input$sigCutoffValue
-    reacValues$selection <- input$upset1Sample
-    reacValues$fcCutoff <- input$fcCutoff
-    reacValues$enrichmentChoice <- input$enrichmentChoice
+    if (length(input$upset1Sample) > 1) {
+      
+      reacValues$dataComp <-
+        getComparisonsData2(reacValues$dataLimma,
+                            enrichedMatrixSet(),
+                            'union',
+                            input$upset1Sample)
+      
+      reacValues$sigCutoffValue <- input$sigCutoffValue
+      reacValues$selection <- input$upset1Sample
+      reacValues$fcCutoff <- input$fcCutoff
+      reacValues$enrichmentChoice <- input$enrichmentChoice
+      
+      if (reacValues$show_multi == FALSE) {
+        reacValues$show_multi = TRUE
+        toggle(id = 'hide_before_multi_submit', anim = T)
+      }
+    }
   })
   
   output$upset1Sample <- renderUI({
