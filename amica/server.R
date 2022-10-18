@@ -1186,7 +1186,7 @@ server <- function(input, output, session) {
   output$downloadDotPlotData <- downloadHandler(
     filename = function(){paste("dotplot_data",'.tsv',sep='')},
     content = function(file){
-      write.table(reacValues$dataDotplot[-which(names(reacValues$dataDotplot) == "significant")], 
+      write.table(reacValues$dataDotplot, 
                   file, row.names = F, sep = '\t', quote = F)
     })
 
@@ -1305,6 +1305,11 @@ server <- function(input, output, session) {
                           enrichedMatrixSet(),
                           'union',
                           input$upset1Sample)
+    
+    reacValues$sigCutoffValue <- input$sigCutoffValue
+    reacValues$selection <- input$upset1Sample
+    reacValues$fcCutoff <- input$fcCutoff
+    reacValues$enrichmentChoice <- input$enrichmentChoice
   })
   
   output$upset1Sample <- renderUI({
@@ -1412,14 +1417,6 @@ server <- function(input, output, session) {
     matrixSet <- isolate(enrichedMatrixSet() )
     samples <- isolate(input$upset1Sample)
     scale <- isolate(input$upset_scale)
-    fcThresh <- isolate(input$fcCutoff)
-    enrichmentChoice <- isolate(input$enrichmentChoice)
-    sigCutoffValue <- isolate(input$sigCutoffValue)
-    
-    reacValues$sigCutoffValue <- sigCutoffValue
-    reacValues$selection <- samples
-    reacValues$fcCutoff <- fcThresh
-    reacValues$enrichmentChoice <- enrichmentChoice
 
     upset_ratio <- isolate(input$upset_ratio)
     upset_pointsize <- isolate(input$upset_pointsize)
@@ -2192,16 +2189,18 @@ server <- function(input, output, session) {
         "is correct or deselect Only show significant terms"
       )
     ))
-    oraBarBase() %>% config(
-      displaylogo = F,
-      modeBarButtonsToRemove = removePlotlyBars,
-      toImageButtonOptions = list(
-        format = input$oraBar_format,
-        width = input$oraBar_width,
-        height = input$oraBar_height,
-        filename = "ora_barplot"
+    withProgress(message = "Plotting ORA bar plot ", {
+      oraBarBase() %>% config(
+        displaylogo = F,
+        modeBarButtonsToRemove = removePlotlyBars,
+        toImageButtonOptions = list(
+          format = input$oraBar_format,
+          width = input$oraBar_width,
+          height = input$oraBar_height,
+          filename = "ora_barplot"
+        )
       )
-    )
+    })
   })
 
   output$download1 <- downloadHandler(
