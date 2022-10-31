@@ -573,6 +573,32 @@ output$oraHelpBox <- renderUI({
 
 observeEvent(input$showReportingStandards, {
   out <- '
+  <h3>What to report</h3>
+  <p>Please report all analysis parameters in the "Input tab" used for data 
+analysis, that are available for download after data upload and which are 
+also depicted in the QC report:</p>
+
+<ul>
+	<li>Filtering proteins on MS/MS counts and min. razor peptides</li>
+	<li>Filtering proteins on min. valid values per group</li>
+	<li>Normalization settings</li>
+	<li>Imputation settings</li>
+</ul>
+
+
+
+<p>Please also make sure to save the selected global parameters used for 
+quantification in the "Differential abundance tab", which are also 
+available in the Differential Abundance report:</p>
+
+<ul>
+	<li>Fold change threshold</li>
+	<li>Significance cutoff (adj. p-value, p-value or none)</li>
+	<li>(adj.) p-value threshold</li>
+	<li>How to apply fold change threshold (absolute, show only 
+	enriched, or show only reduced)</li>
+</ul>
+
   <h3>Used libraries and ressources</h3>
          <p>Please cite following publications (if you have used them):</p>
          <hr>
