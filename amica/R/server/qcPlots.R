@@ -635,6 +635,8 @@ plotOverlaply <-
     overlap_matrix <-
       acast(df, sample1 ~ sample2, value.var = "overlap")
     
+    overlap_matrix <- overlap_matrix[row.names(annot),]
+
     if (annotSamples) {
       p <- heatmaply_cor(
         overlap_matrix,
@@ -643,6 +645,9 @@ plotOverlaply <-
         limits = limits,
         row_side_palette = myGroupColors,
         row_side_colors = annot,
+        fontsize_row=12,
+        fontsize_col=12,
+        column_text_angle = -270,
         plot_method = "plotly",
         key.title = title,
         colors = heatColors
@@ -653,6 +658,9 @@ plotOverlaply <-
         xlab = "",
         ylab = "",
         limits = limits,
+        fontsize_row=12,
+        fontsize_col=12,
+        column_text_angle = -270,
         plot_method = "plotly",
         key.title = title,
         colors = heatColors
