@@ -278,6 +278,9 @@ plotCorrPlotly <-
           gsub("Intensity", " intensities", assayName),
           ")</b>"
         ),
+        fontsize_row=14,
+        fontsize_col=14,
+        column_text_angle = -90,
         colors = heatColors,
         row_side_palette = myGroupColors,
         row_side_colors = annot,
@@ -289,6 +292,9 @@ plotCorrPlotly <-
         round(corDf, 3),
         xlab = "",
         ylab = "",
+        fontsize_row=14,
+        fontsize_col=14,
+        column_text_angle = -90,
         colors = heatColors,
         limits = limits,
         main = paste0(
