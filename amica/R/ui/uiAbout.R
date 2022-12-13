@@ -5,6 +5,8 @@ tabPanel(
     <h3>News</h3>
          <hr>
          <ul>
+	 <li>22.12.09 - amica published in <a href="https://doi.org/10.1186/s12864-022-09058-7"
+	 target="_blank">BMC Genomics</a>.</li>
          <li>22.08.30 - New feature added - option to not impute missing values.</li>
          <li>22.08.30 - New feature added - QC - and diff. abundance reports.</li>
          <li>22.08.30 - Fixed error handling in upload.</li>
