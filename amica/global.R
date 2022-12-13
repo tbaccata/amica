@@ -92,10 +92,10 @@ footer = function(x) {
     style="footer{position: absolute; bottom:5%; left: 33%; padding:5px;}",
     HTML("
     <h5>How to cite us</h5>
-         <p>Please cite Didusch, S., Madern, M., Hartl, M., & Baccarini, M. (2021). 
+         <p>Please cite Didusch, S., Madern, M., Hartl, M., & Baccarini, M. BMC Genomics 23, 817 (2022). 
          amica: an interactive and user-friendly web-platform for the analysis of proteomics data.
-         DOI: <a href='https://www.biorxiv.org/content/10.1101/2021.11.23.466958' 
-         target='_blank'>https://doi.org/10.1101/2021.11.23.466958</a>.\n
+         DOI: <a href='https://doi.org/10.1186/s12864-022-09058-7' 
+         target='_blank'>https://doi.org/10.1186/s12864-022-09058-7</a>.\n
          </p>
          <p>All code and online documentation can be found on 
          <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
