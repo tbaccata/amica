@@ -55,22 +55,22 @@ observeEvent(input$runAnalysis, {
     reacValues$inputParameterSummary <- NULL
     
     quantIntensity <- "LFQIntensity"
-    
     if (!is.null(reacValues$dbTool)) {
-      if (is.null(input$quantIntensity) ||
-          length(input$quantIntensity) < 2) {
+      if (is.null(input$quantIntensity)) {
         if (reacValues$dbTool == "fragpipe") {
           quantIntensity <-
             ifelse(
               "RazorIntensity" %in% assayNames(reacValues$proteinData),
               "RazorIntensity",
-              "Intensity"
+              "LFQIntensity"
             )
           
           if (!quantIntensity %in% assayNames(reacValues$proteinData)) {
             quantIntensity <- assayNames(reacValues$proteinData)[1]
           }
           
+        } else if (reacValues$dbTool == "maxquant") {
+          quantIntensity <- 'LFQIntensity'
         }
       } else {
         quantIntensity <- input$quantIntensity
@@ -86,8 +86,9 @@ observeEvent(input$runAnalysis, {
         reacValues$inputParameterSummary,
         "DB search tool:\tunknown\n"
       )
+      quantIntensity <- 'LFQIntensity'
     }
-    
+
     reacValues$inputParameterSummary <-
       paste0(
         reacValues$inputParameterSummary,
@@ -97,11 +98,12 @@ observeEvent(input$runAnalysis, {
       )
     ### filter on values
     impDf <- assay(reacValues$proteinData, quantIntensity)
+
+    baseName <- ifelse(input$source=='maxquant', 'LFQIntensity', 'Intensity' )
     reacValues$proteinData <-
       setAssay(x = reacValues$proteinData,
                assay = impDf,
-               assayName = "LFQIntensity")
-    
+               assayName = baseName)
     
     rnames <- filterOnMinValuesRnames(
       y = reacValues$proteinData,
