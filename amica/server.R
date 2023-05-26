@@ -595,6 +595,14 @@ server <- function(input, output, session) {
   
   output$overlapHeatmapPlotly <- renderPlotly({
     
+    validate(
+      need(
+        "LFQIntensity" %in% assayNames(reacValues$proteinData) ||
+          "Intensity" %in% assayNames(reacValues$proteinData),
+        "No data to plot (no columns starting with 'LFQIntensity_' or 'Intensity_' available)."
+      )
+    )
+    
     aname <-
       ifelse(
         "LFQIntensity" %in% assayNames(reacValues$proteinData),
@@ -1245,7 +1253,6 @@ server <- function(input, output, session) {
     tmp <- tmp[, c(1,(idx+1):ncol(tmp), 2:idx)]
     
     hasPadj <- ifelse(length(grep(padjPrefix, names(reacValues$dataComp)))>0, TRUE, FALSE )
-      
     dt <- datatable(
       tmp,
       filter = "top",
@@ -1724,6 +1731,18 @@ server <- function(input, output, session) {
     }
   })
   
+  observe({
+    updateSelectizeInput(session,
+                         server = T,
+                         'selectVolcanoPlotGenes',
+                         choices = c("",reacValues$filtData[[geneName]]),
+    )
+  })
+  
+  hightlightedVolcanoGenes <- eventReactive(input$maVolcanoHighlightSubmit,{
+    input$selectVolcanoPlotGenes
+  })
+  
   output$volcanoPlot <- renderPlotly({
     input$maVolcanoSubmit
     req(reacValues$dataComp)
@@ -1770,6 +1789,15 @@ server <- function(input, output, session) {
       )
     ))
     
+    # this is strange logic, isTruthy() or is.null() et al. do not work here
+    # and result in an empty plot 
+    # so we have to wrap the existence check around a tryCatch()
+    # https://stackoverflow.com/questions/68473529/r-shiny-test-existence-of-reactive-value-which-is-optional-after-req
+    chk <- tryCatch({ is.null(hightlightedVolcanoGenes())}, error = function(e) NULL)
+    if (!is.null(chk) ) {
+      if (!'show_id' %in% names(pltData)) pltData$show_id <- FALSE
+      pltData[pltData$Gene.names %in% hightlightedVolcanoGenes(), "show_id"] <- TRUE
+    }
     xText <- unlist(strsplit(sample, "__vs__"))
     xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
     
@@ -1857,6 +1885,15 @@ server <- function(input, output, session) {
     if (!is.null(get_data())) {
       pltData[pltData$key %in% get_data()$key, "show_id"] <- TRUE
     }
+    # this is strange logic, isTruthy() or is.null() et al. do not work here
+    # and result in an empty plot 
+    # so we have to wrap the existence check around a tryCatch()
+    # https://stackoverflow.com/questions/68473529/r-shiny-test-existence-of-reactive-value-which-is-optional-after-req
+    chk <- tryCatch({ is.null(hightlightedVolcanoGenes())}, error = function(e) NULL)
+    if (!is.null(chk) ) {
+      if (!'show_id' %in% names(pltData)) pltData$show_id <- FALSE
+      pltData[pltData$Gene.names %in% hightlightedVolcanoGenes(), "show_id"] <- TRUE
+    }
     
     xText <- unlist(strsplit(sample, "__vs__"))
     xText <- paste0("log2FC(", xText[1], "/", xText[2], ")")
@@ -1882,7 +1919,6 @@ server <- function(input, output, session) {
     )
   })
   
-
   observe({
     updateSelectizeInput(session,
                          server = T,
