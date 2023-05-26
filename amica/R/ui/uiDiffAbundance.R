@@ -126,6 +126,15 @@ tabPanel(
           inline(actionButton("volcanoHelp", icon = icon("info") , label = NULL)),
           inline(uiOutput("VolcanoHelpBox")),
           inline(actionButton("volcanoParams", "", icon = icon("wrench"))),
+          br(),
+          inline(selectizeInput(
+            inputId = "selectVolcanoPlotGenes",
+            label = (""),
+            choices = NULL,
+            multiple = T,
+            options = list(placeholder =
+                             "Highlight proteins ..."))),
+          inline(actionButton("maVolcanoHighlightSubmit", label = "Highlight")),
           ###
           shinyjs::hidden(
             div(
