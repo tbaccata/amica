@@ -245,6 +245,9 @@ plotCorrPlotly <-
            annotSamples = T,
            groupFactors = NULL,
            groupInputs = NULL) {
+    
+    validate(need(length(expDesign$samples) > 2, 'Need more than 2 samples ...' ))
+    
     if (is.null(groupInputs))
       groupInputs <- unique(expDesign$groups)
     
@@ -259,6 +262,7 @@ plotCorrPlotly <-
     df <- df[, expDesign$samples[expDesign$groups %in% groupInputs]]
     
     annot <- expDesign
+    annot <- annot[, c('samples', 'groups')]
     row.names(annot) <- annot$samples
     annot <- annot[names(df),]
     annot$samples <- NULL
@@ -577,6 +581,8 @@ plotOverlaply <-
            metric = "jaccard_index",
            groupFactors = NULL) {
 
+    validate(need(length(expDesign$samples) > 2, 'Need more than 2 samples ...' ))
+    
     if (!is.null(groupFactors) &&
         all(groupFactors %in% unique(expDesign$groups))) {
       expDesign <- expDesign[expDesign$groups %in% groupFactors,]
@@ -588,6 +594,7 @@ plotOverlaply <-
       dataAssay[, expDesign$samples[expDesign$groups %in% groupInputs]]
     
     annot <- expDesign
+    annot <- annot[, c('samples', 'groups')]
     row.names(annot) <- annot$samples
     annot$samples <- NULL
     
