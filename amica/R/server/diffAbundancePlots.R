@@ -73,7 +73,7 @@ plotMAPlot <- function(pltData,
   p <- p + geom_text(
     data = subset(pltData, show_id),
     aes(logFC, AveExpr, label = Gene.names),
-    position = position_jitter(width = 0.25, height = 0.25)
+    position = position_jitter(width = 0.25, height = 0.25), color='black'
   ) + xlab(xText)
   
   return(p)
@@ -296,7 +296,8 @@ plotVolcanoPlot <-
     p <- p + geom_text(
       data = subset(pltData, show_id),
       aes(logFC, nlog10_pval, label = Gene.names),
-      position = position_jitter(width = 0.25, height = 0.25)
+      position = position_jitter(width = 0.25, height = 0.25),
+      color='black'
       #,position = position_jitter(seed = 1)#position_nudge(y = -0.1)
     ) + xlab(xText)
     
@@ -1009,6 +1010,7 @@ plotHeatmaply <-
            clusterRows = TRUE,
            clusterCols = TRUE,
            plot_method = "plotly") {
+    annot <- annot[, c('samples', 'groups')]
     row.names(annot) <- annot$samples
     annot <- annot[names(dataHeatmap), ]
     annot$samples <- NULL
