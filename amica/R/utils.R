@@ -483,7 +483,7 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
     tmpFrom[idx] <- fromId
     tmpTo[idx] <- toId
   }
-  
+
   if (!is.na(tmpFrom)) {
     df$edges$from <- tmpFrom
     df$edges$to <- tmpTo
@@ -970,6 +970,170 @@ readInCustomSumm <- function(mqFile, specs, design, logtransform=TRUE) {
                        #rowData = protData[, -dropIdx],
                        colData = design)
   
+  return(se)
+}
+
+
+readInDIANNProteinGroupsSumm <- function(mqFile, design) {
+  protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
+  
+  if (!("Protein.Group" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "Protein.Group", " is not a column name of the uploaded input data."))
+  }
+  if (!("Genes" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "Genes", " is not a column name of the uploaded input data."))
+  }
+  
+  row.names(protData) <- protData$Protein.Group
+  protData[[contaminantCol]] <- ""
+  
+  names(protData)[which(names(protData)=="Protein.Group")] <- "Majority.protein.IDs"
+  names(protData)[which(names(protData)=='Genes')] <- "Gene.names"
+  
+  protData$Gene.names <- ifelse(
+    protData$Gene.names == "",
+    protData$Majority.protein.IDs,
+    protData$Gene.names
+  )
+  
+  samples <- make.names(design$samples)
+  sampleColumns <- names(protData)[names(protData) %in% samples]
+  
+  if (length(sampleColumns) != length(samples)) {
+    stop(paste0("Error: Not all samples in experimental design could be matched in PG report."))
+  }
+  
+  assayList <- list()
+  
+  intensities <- protData[, sampleColumns]
+  intensities[intensities==0] <- NA
+  intensities <- log2(intensities)
+  assayList[['LFQIntensity']] <- intensities
+  
+  dropIdx <- which(names(protData) %in% sampleColumns)
+  
+  se <- ProteomicsData(
+    assays = assayList,
+    rowData = protData[,-dropIdx],
+    colData = design
+  )
+  return(se)
+}
+
+readInSpectronautProteinGroupsSumm <- function(mqFile, design) {
+  protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
+  
+  protData[[contaminantCol]] <- ""
+  
+  if (!("PG.ProteinAccessions" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "PG.ProteinAccessions", " is not a column name of the uploaded input data."))
+  }
+  if (!("PG.Genes" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "PG.Genes", " is not a column name of the uploaded input data."))
+  }
+  
+  names(protData)[which(names(protData)=="PG.ProteinAccessions")] <- "Majority.protein.IDs"
+  row.names(protData) <- protData$Majority.protein.IDs
+  names(protData)[which(names(protData)=='PG.Genes')] <- "Gene.names"
+  
+  if ('PG.RunEvidenceCount' %in% names(protData)) {
+    names(protData)[which(names(protData)=='PG.RunEvidenceCount')] <- "razorUniqueCount"
+  }
+  
+  samples <- make.names(design$samples)
+  
+  if (length(grep('PG.NrOfPrecursorsIdentified',names(protData))) > 0 ) {
+    idxs <- grep('PG.NrOfPrecursorsIdentified',names(protData))
+    
+    if (length(idxs) != length(samples)) {
+      stop(paste0("Error: Not all samples in experimental design could be matched in PG report."))
+    }
+    
+    names(protData)[idxs] <- paste0('razorUniqueCount.', samples)
+  }
+  
+  protData$Gene.names <- ifelse(
+    protData$Gene.names == "",
+    protData$Majority.protein.IDs,
+    protData$Gene.names
+  )
+  
+  sampleColumns <- grep('PG.Quantity', names(protData) )
+  if (length(sampleColumns) != length(samples)) {
+    stop(paste0("Error: Not all samples in experimental design could be matched in PG report."))
+  }
+  
+  assayList <- list()
+  intensities <- protData[, sampleColumns]
+  names(intensities) <- samples
+  intensities[intensities==0] <- NA
+  intensities <- log2(intensities)
+  assayList[['LFQIntensity']] <- intensities
+  
+  dropIdx <- sampleColumns
+  
+  if (length(assayList) < 1) {
+    stop(paste0("Error: ", 
+                "There are intensities in the uploaded Spectronaut file."))
+  }
+  
+  se <- ProteomicsData(
+    assays = assayList,
+    rowData = protData[,-dropIdx],
+    colData = design
+  )
+  return(se)
+}
+
+readInFPTMTSumm <- function(mqFile, design) {
+  protData <- read.delim(mqFile, sep = "\t", header = T, stringsAsFactors = F)
+  
+  if (!("ProteinID" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "Protein.Group", " is not a column name of the uploaded input data."))
+  }
+  if (!("Index" %in% names(protData))) {
+    stop(paste0("Error: ", 
+                "Index", " is not a column name of the uploaded input data."))
+  }
+  
+  row.names(protData) <- protData$ProteinID
+  protData[[contaminantCol]] <- ""
+  
+  names(protData)[which(names(protData)=="ProteinID")] <- "Majority.protein.IDs"
+  names(protData)[which(names(protData)=='Index')] <- "Gene.names"
+  names(protData)[which(names(protData)=="NumberPSM")] <- "spectraCount"
+  
+  protData$Gene.names <- ifelse(
+    protData$Gene.names == "",
+    protData$Majority.protein.IDs,
+    protData$Gene.names
+  )
+  
+  samples <- make.names(design$samples)
+  sampleColumns <- names(protData)[names(protData) %in% samples]
+  
+  if (length(sampleColumns) != length(samples)) {
+    stop(paste0("Error: Not all samples in experimental design could be matched in abundance report."))
+  }
+  
+  assayList <- list()
+  
+  intensities <- protData[, sampleColumns]
+  intensities[intensities==0] <- NA
+  assayList[['Intensity']] <- intensities
+  
+  dropIdx <- which(names(protData) %in% sampleColumns)
+  
+  se <- ProteomicsData(
+    assays = assayList,
+    rowData = protData[,-dropIdx],
+    colData = design
+  )
   return(se)
 }
 
