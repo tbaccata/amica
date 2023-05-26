@@ -1,3 +1,49 @@
+formatError <- function() {
+  shinyalert(
+    title = "Unrecognized input format.",
+    text = paste0(
+      "Unrecognized input format\n",
+      "\tallowed input files:\n",
+      "\tLFQ MaxQuant: proteinGroups.txt\n",
+      "\tLFQ FragPipe: combined_protein.tsv",
+      "\tDIA DIA-NN: protein group matrix\n",
+      "\tDIA Spectronaut: protein group report\n",
+      "\tTMT FragPipe: [abundance/ratio]_protein_[normalization].tsv\n",
+    ),
+    size = "s", 
+    closeOnEsc = TRUE,
+    closeOnClickOutside = TRUE,
+    html = FALSE,
+    type = "error",
+    showConfirmButton = TRUE,
+    showCancelButton = FALSE,
+    confirmButtonText = "OK",
+    confirmButtonCol = "#669966",
+    timer = 0,
+    imageUrl = "",
+    animation = TRUE
+  )
+}
+
+fileUploadFail <- function(cond) {
+  shinyalert(
+    title = "Upload of file failed.",
+    text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
+    size = "s", 
+    closeOnEsc = TRUE,
+    closeOnClickOutside = TRUE,
+    html = FALSE,
+    type = "error",
+    showConfirmButton = TRUE,
+    showCancelButton = FALSE,
+    confirmButtonText = "OK",
+    confirmButtonCol = "#669966",
+    timer = 0,
+    imageUrl = "",
+    animation = TRUE
+  )
+}
+
 ### UPLOAD
 observeEvent(input$submitAnalysis, {
   reacValues$inputParameterSummary <- NULL
@@ -168,24 +214,7 @@ observeEvent(input$submitAnalysis, {
         
       },
       error = function(cond) {
-        #message('amica upload failed. ', cond)
-
-        shinyalert(
-          title = "amica upload failed.",
-          text = gsub("Error in .*):|.*Error: ", "Error: ",  cond),
-          size = "s", 
-          closeOnEsc = TRUE,
-          closeOnClickOutside = TRUE,
-          html = FALSE,
-          type = "error",
-          showConfirmButton = TRUE,
-          showCancelButton = FALSE,
-          confirmButtonText = "OK",
-          confirmButtonCol = "#669966",
-          timer = 0,
-          imageUrl = "",
-          animation = TRUE
-        )
+        fileUploadFail(cond)
       },
       warning = function(cond) {
         message(paste(cond))
@@ -260,22 +289,7 @@ observeEvent(input$submitAnalysis, {
       message('Custom upload failed. ', cond)
       allFilesUploaded <- FALSE
       
-      shinyalert(
-        title = "Upload of custom file failed.",
-        text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
-        size = "s", 
-        closeOnEsc = TRUE,
-        closeOnClickOutside = TRUE,
-        html = FALSE,
-        type = "error",
-        showConfirmButton = TRUE,
-        showCancelButton = FALSE,
-        confirmButtonText = "OK",
-        confirmButtonCol = "#669966",
-        timer = 0,
-        imageUrl = "",
-        animation = TRUE
-      )
+      fileUploadFail(cond)
       
       },
     warning = function(cond) {
@@ -318,22 +332,7 @@ observeEvent(input$submitAnalysis, {
         allFilesUploaded <- FALSE
         message('MaxQuant upload failed. ', cond)
         
-        shinyalert(
-          title = "Upload of MaxQuant file failed.",
-          text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
-          size = "s", 
-          closeOnEsc = TRUE,
-          closeOnClickOutside = TRUE,
-          html = FALSE,
-          type = "error",
-          showConfirmButton = TRUE,
-          showCancelButton = FALSE,
-          confirmButtonText = "OK",
-          confirmButtonCol = "#669966",
-          timer = 0,
-          imageUrl = "",
-          animation = TRUE
-        )
+        fileUploadFail(cond)
         return("")
       },
       warning = function(cond) {
@@ -355,29 +354,7 @@ observeEvent(input$submitAnalysis, {
         allFilesUploaded <- FALSE
         message('FragPipe upload failed. ', cond)
         
-        shinyalert(
-          title = "Upload of FragPipe file failed.",
-          text =  gsub("Error in .*):|.*Error: ", "Error: ",  cond),
-          size = "s", 
-          closeOnEsc = TRUE,
-          closeOnClickOutside = TRUE,
-          html = FALSE,
-          type = "error",
-          showConfirmButton = TRUE,
-          showCancelButton = FALSE,
-          confirmButtonText = "OK",
-          confirmButtonCol = "#669966",
-          timer = 0,
-          imageUrl = "",
-          animation = TRUE
-        )
-        
-        # showNotification(
-        #   paste(cond),
-        #   duration = 100,
-        #   closeButton = T,
-        #   type = "error"
-        # )
+        fileUploadFail(cond)
       },
       warning = function(cond) {
         message(paste(cond))
@@ -385,44 +362,88 @@ observeEvent(input$submitAnalysis, {
         showNotification(paste("Reading in FragPipe ..."), type = "message")
       }
       )
-      #
       reacValues$dbTool <- "fragpipe"
     } else {
-      allFilesUploaded <- FALSE
+      formatError()
+    }
+  }
+  
+  if (input$source == 'dia') {
+    header <-
+      unlist(strsplit(readLines(input$diaFile$datapath, n = 1), "\t"))
+    header <- make.names(header)
+    
+    diannNames <-
+      c("Protein.Group", 
+        "Genes", 
+        "First.Protein.Description")
+    snNames <- c('PG.ProteinAccessions', 'PG.Genes')
+    if (all(diannNames %in% header)) {
       
-      shinyalert(
-        title = "Unrecognized input format.",
-        text = paste0(
-          "Unrecognized input format\n",
-          "\tallowed input files:\n",
-          "\tMaxQuant: proteinGroups.txt\n",
-          "\tFragPipe: combined_protein.tsv"
-        ),
-        size = "s", 
-        closeOnEsc = TRUE,
-        closeOnClickOutside = TRUE,
-        html = FALSE,
-        type = "error",
-        showConfirmButton = TRUE,
-        showCancelButton = FALSE,
-        confirmButtonText = "OK",
-        confirmButtonCol = "#669966",
-        timer = 0,
-        imageUrl = "",
-        animation = TRUE
+      ###
+      tryCatch({
+        reacValues$proteinData <-
+          readInDIANNProteinGroupsSumm(input$diaFile$datapath,
+                                       reacValues$expDesign)
+      },
+      error = function(cond) {
+        allFilesUploaded <- FALSE
+        message('DIA-NN upload failed. ', cond)
+        
+        fileUploadFail(cond)
+      },
+      warning = function(cond) {
+        message(paste(cond))
+      }, finally = {
+        showNotification(paste("Reading in DIA-NN ..."), type = "message")
+      }
+      )
+      ###
+      reacValues$dbTool <- "DIA-NN"
+    } else if(all(snNames %in% header)) {
+      
+      tryCatch({
+        reacValues$proteinData <-
+          readInSpectronautProteinGroupsSumm(input$diaFile$datapath,
+                                             reacValues$expDesign)
+      },
+      error = function(cond) {
+        allFilesUploaded <- FALSE
+        message('DIA-NN upload failed. ', cond)
+        fileUploadFail(cond)
+      },
+      warning = function(cond) {
+        message(paste(cond))
+      }, finally = {
+        showNotification(paste("Reading in Spectronaut ..."), type = "message")
+      }
       )
       
-      # showNotification(
-      #   paste0(
-      #     "Unrecognized input format\n",
-      #     "\tallowed input files:\n",
-      #     "\tMaxQuant: proteinGroups.txt\n",
-      #     "\tFragPipe: combined_protein.tsv"
-      #   ),
-      #   type = "error"
-      # )
+    }  else {
+      allFilesUploaded <- FALSE
+      formatError()
     }
-    
+  }
+  
+  if (input$source == 'tmtFP') {
+    tryCatch({
+      reacValues$proteinData <-
+        readInFPTMTSumm(input$tmtFPFile$datapath,
+                                        reacValues$expDesign)
+    },
+    error = function(cond) {
+      allFilesUploaded <- FALSE
+      message('Upload failed. ', cond)
+      fileUploadFail(cond)
+    },
+    warning = function(cond) {
+      message(paste(cond))
+    }, finally = {
+      showNotification(paste("Reading in FragPipe's TMT report ..."), type = "message")
+    }
+    )
+    #
+    reacValues$dbTool <- "fragpipeTMT"
   }
   
   # contrasts
