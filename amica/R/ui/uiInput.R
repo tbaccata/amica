@@ -24,14 +24,19 @@ tabPanel('Input',
                label = "Select the file input.",
                choices = c(
                  "Upload amica format" = "amica",
-                 "Upload output from MaxQuant or FragPipe" = "maxquant",
+                 "Upload LFQ" = "maxquant",
+                 "Upload DIA" = "dia",
+                 "Upload TMT" = "tmtFP",
                  "Upload custom format" = "custom",
                  "Load in example" = "example"
                )
              ),
              helpText(
-               "If 'amica' is selected previous output gets loaded in. When 'MaxQuant or FragPipe', 
-                     or 'custom' are selected differential abundance get's computed with limma or DEqMS, 
+               "If 'amica' is selected previous output gets loaded in. When 'LFQ' is selected,
+               MaxQuant or FragPipe output can be processed. 'DIA' allows for the upload
+               of DIA-NN and Spectronaut output. Finally, if 'custom' is selected any tabular format
+               can be uploaded, provived a 'specification' file is uploaded.
+               Differential abundance get's computed with limma or DEqMS, 
                      for this you have to upload an additional 'contrast matrix' to your experimental 'design'."
              ),
              br(),
@@ -55,6 +60,28 @@ tabPanel('Input',
                fileInput(
                  "maxquantFile",
                  "Upload 'proteinGroups.txt' file from MaxQuant or 'combined_protein.tsv' from FragPipe.",
+                 width = "60%"
+               )
+             ),
+             conditionalPanel(
+               # The condition should be that the user selects
+               # "file" from the radio buttons
+               condition = "input.source == 'dia'",
+               h4("1) DIA-NN or Spectronaut input"),
+               fileInput(
+                 "diaFile",
+                 "Upload PG matrix from DIA-NN or PG report from Spectronaut.",
+                 width = "60%"
+               )
+             ),
+             conditionalPanel(
+               # The condition should be that the user selects
+               # "file" from the radio buttons
+               condition = "input.source == 'tmtFP'",
+               h4("1) FragPipe's TMT"),
+               fileInput(
+                 "tmtFPFile",
+                 "Upload '[abundance/ratio]_protein_[normalization].tsv' file from FragPipe.",
                  width = "60%"
                )
              ),
@@ -94,7 +121,7 @@ tabPanel('Input',
              ),
              
              conditionalPanel(
-               condition = "input.source == 'custom' || input.source == 'maxquant'",
+               condition = "input.source != 'example' && input.source != 'amica'",
                inline(h4("3) Contrast matrix")),
                inline(actionButton("showContrasts", "", icon = icon("info") )),
                fileInput(
@@ -334,7 +361,7 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
                                   "Set3"
                                 ),
                                 multiple = F,
-                                selected = "Set2"
+                                selected = "Paired"
                               ),
                               radioButtons(
                                 "revScatter",
