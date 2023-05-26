@@ -9,7 +9,7 @@ output$brewerOptionsQual <- renderUI({
     "brewerOptionsQual",
     "Choose a color palette for qualitative data:",
     row.names(brewer.pal.info),
-    selected = "Set2"
+    selected = "Paired"
   )
 })
 
@@ -45,7 +45,7 @@ myColors <- reactive({
 })
 
 mySelectionColors <- reactive({
-  color <- ifelse(is.null(input$brewerOptionsQual), "Set2", input$brewerOptionsQual)
+  color <- ifelse(is.null(input$brewerOptionsQual), "Paired", input$brewerOptionsQual)
   reverse <- ifelse(input$revQual=="yes", TRUE, FALSE)
   #nc <- length(unique(reacValues$proteinData$groups))
   
@@ -107,7 +107,7 @@ output$groupFactorsSummary <- renderText({
 })
 
 output$volcanoMAColors <- renderUI({
-  pal <- brewer.pal(3, "Set2")
+  pal <- brewer.pal(3, "Paired")
   
   lapply(seq_along(1:2), function(i) {
     colourInput(paste("volcanocol", i, sep="_"), paste0("Color ", i, ":"), pal[i])
@@ -145,7 +145,7 @@ myGroupColors <- reactive({
 })
 
 myScatterColors <- reactive({
-  color <- ifelse(is.null(input$brewerOptionsScatter), "Set2", input$brewerOptionsScatter)
+  color <- ifelse(is.null(input$brewerOptionsScatter), "Paired", input$brewerOptionsScatter)
   reverse <- ifelse(input$revScatter=="yes", TRUE, FALSE)
   
   pal <- brewer.pal(5, color)
