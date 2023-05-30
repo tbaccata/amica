@@ -17,6 +17,7 @@ showModal(modalDialog(
        <li>TMT FragPipe support.</li>
        </ul>
        <li>Highlight proteins in volcano - and MA plots.</li>
+       <li>Updated IntAct version (2022-07-13)</li>
        <li>Changed default plot colors.</li>
        </ul>
        </p>
@@ -410,7 +411,7 @@ output$exampleHelpBox <- renderUI({
 output$NetworkHelpBox <- renderUI({
   if (input$networkHelp %% 2) {
     HTML(
-      "<p>PPI (protein-protein interaction) Network from IntAct (2021-10).
+      "<p>PPI (protein-protein interaction) Network from IntAct (2022-07-13).
       All interactions are derived from literature curation or direct user
       submissions. Edge weights can be further filtered, more information can
       be found <a href='https://www.ebi.ac.uk/intact/' target='_blank'>here</a>.

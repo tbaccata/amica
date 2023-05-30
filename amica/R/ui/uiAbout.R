@@ -9,6 +9,7 @@ tabPanel(
          <li>23.05.30 - Additional file upload option for DIA (Spectronaut and DIA-NN).</li>
          <li>23.05.30 - Additional file upload option for TMT (FragPipe).</li>
          <li>23.05.30 - New feature added - option to highlight proteins in volcano - and MA plots.</li>
+         <li>23.05.30 - Updated IntAct version (2022-07-13).</li>
          <li>23.05.30 - Changed default plot colors.</li>
 	 <li>22.12.09 - amica published in <a href="https://doi.org/10.1186/s12864-022-09058-7"
 	 target="_blank">BMC Genomics</a>.</li>
