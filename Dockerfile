@@ -6,7 +6,6 @@ LABEL maintainer "Sebastian Didusch <sebastian.didusch@univie.ac.at>"
 RUN apt-get update && apt-get install -y \
     sudo \
     pandoc \
-    pandoc-citeproc \
     libcairo2-dev \
     libxt-dev \
     libssl-dev \
