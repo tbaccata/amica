@@ -1,15 +1,30 @@
-# showModal(modalDialog(
-#   title = "Welcome to amica",
-#   HTML("<p>
-#        This is a public server with limited capacity. Its purpose is to demonstrate 
-#        amica's functionality for easy and quick access. 
-#        You can install amica locally, instructions on how to 
-#        do that are on <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.
-#        </p>"),
-#   easyClose = TRUE,
-#   footer = NULL
-#   )
-# )
+showModal(modalDialog(
+  title = "Welcome to amica",
+  HTML("<p>
+       This is a public server with limited capacity. Its purpose is to demonstrate
+       amica's functionality for easy and quick access.
+       You can install amica locally, instructions on how to
+       do that are on <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.
+       </p>
+       <hr>
+       <p>
+       <b>New version 3.0.0</b> with new features:
+       <ul>
+       <li>Additional file parsing options added:</li>
+       <ul>
+       <li>DIA Spectronaut support.</li>
+       <li>DIA DIA-NN support.</li>
+       <li>TMT FragPipe support.</li>
+       </ul>
+       <li>Highlight proteins in volcano - and MA plots.</li>
+       <li>Changed default plot colors.</li>
+       </ul>
+       </p>
+       "),
+  easyClose = TRUE,
+  footer = NULL
+  )
+)
 
 observeEvent(input$showFileInput, {
   showModal(modalDialog(
