@@ -24,7 +24,10 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 
 ### Input
 
-- MaxQuant's **proteinGroups.txt**, FragPipe's **combined_protein.tsv** or any tab-separated file
+- DDA: MaxQuant's **proteinGroups.txt**, FragPipe's **combined_protein.tsv**
+- DIA: Spectronaut's **PG report**, DIA-NN's **PG matrix**
+- TMT: FragPipe's **[abundance/ratio]_protein_[normalization].tsv**
+- or any custom, tab-separated file.
 - Processed data can be downloaded in a developed **amica format** which can also be used as input
 - Experimental design mapping samples to conditions
 - Contrast matrix file for group comparisons in case of MaxQuant, FragPipe or custom upload
@@ -57,6 +60,7 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 - Correlation plots (Pearson correlation)
 - Bar plots (identified proteins, % contaminants, most abundant proteins) per sample
 - Scatter plots
+- Automated QC report
 
 
 ### Differential abundance analysis
@@ -72,6 +76,7 @@ amica is an interactive and user-friendly web-based platform that accepts proteo
 - Profile plot
 - Protein-protein interaction (PPI) network
 - Over-Representation Analysis (ORA)
+- Automated Diff. abundance report
 
 
 ### Compare multiple amica files
