@@ -57,7 +57,7 @@ observeEvent(input$runAnalysis, {
     quantIntensity <- "LFQIntensity"
     if (!is.null(reacValues$dbTool)) {
       if (is.null(input$quantIntensity)) {
-        if (reacValues$dbTool == "fragpipe") {
+        if (reacValues$dbTool == "fragpipe" || reacValues$dbTool=='fragpipeTMT') {
           quantIntensity <-
             ifelse(
               "RazorIntensity" %in% assayNames(reacValues$proteinData),
