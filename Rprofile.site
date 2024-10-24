@@ -1,4 +1,10 @@
+defaultAmicaShinyPort <- 3838
+amicaPort <- strtoi(Sys.getenv("AMICA_SHINY_PORT", defaultAmicaShinyPort))
+
+defaultAmicaShinyHostIp <- "0.0.0.0"
+amicaHost <- Sys.getenv("AMICA_SHINY_HOST", defaultAmicaShinyHostIp)
+
 local({
-   options(shiny.port = 3838, shiny.host = "0.0.0.0")
+   options(shiny.port = amicaPort, shiny.host = amicaHost)
 })
 

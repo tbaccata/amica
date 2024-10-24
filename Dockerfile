@@ -1,6 +1,14 @@
-FROM rocker/r-base
+ARG AMICA_SHINY_IDLE_TIMEOUT_SECONDS=3600
+ARG AMICA_SHINY_PORT_DOCKER_INTERNAL=3838
+ARG AMICA_SHINY_HOST_DOCKER_INTERNAL="0.0.0.0"
 
-LABEL maintainer "Sebastian Didusch <sebastian.didusch@univie.ac.at>"
+ARG AMICA_VERSION_OVERRIDE="3.0.1"
+
+############################################################################
+FROM rocker/r-base AS build_deps
+
+LABEL maintainer="Sebastian Didusch <sebastian.didusch@univie.ac.at>"
+LABEL maintainer="Juraj Ahel <juraj.ahel@vbcf.ac.at>"
 
 # system libraries of general use
 RUN apt-get update && apt-get install -y \
@@ -23,6 +31,8 @@ RUN R -e "install.packages(c('tidyr', 'Cairo', 'cowplot'),  repos='https://cloud
 # install dependencies from bioconductor
 RUN R -e "install.packages('BiocManager'); library('BiocManager'); BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn'))"
 
+############################################################################
+FROM build_deps AS final
 
 # copy the app to the image
 RUN mkdir /root/amica
@@ -30,7 +40,18 @@ COPY amica /root/amica
 
 COPY Rprofile.site /usr/lib/R/etc/
 
-EXPOSE 3838
+ARG AMICA_SHINY_PORT_DOCKER_INTERNAL
+ENV AMICA_SHINY_PORT=${AMICA_SHINY_PORT_DOCKER_INTERNAL}
+EXPOSE ${AMICA_SHINY_PORT_DOCKER_INTERNAL}
+
+ARG AMICA_SHINY_HOST_DOCKER_INTERNAL
+ENV AMICA_SHINY_HOST=${AMICA_SHINY_HOST_DOCKER_INTERNAL}
+
+ARG AMICA_SHINY_IDLE_TIMEOUT_SECONDS
+ENV AMICA_SHINY_IDLE_TIMEOUT_SECONDS=${AMICA_SHINY_IDLE_TIMEOUT_SECONDS}
+
+ARG AMICA_VERSION_OVERRIDE
+ENV AMICA_VERSION_OVERRIDE=${AMICA_VERSION_OVERRIDE}
 
 CMD ["R", "-e", "shiny::runApp('/root/amica')"]
 

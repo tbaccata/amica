@@ -1,6 +1,6 @@
 showModal(modalDialog(
   title = "Welcome to amica",
-  HTML("<p>
+  HTML(paste0("<p>
        This is a public server with limited capacity. Its purpose is to demonstrate
        amica's functionality for easy and quick access.
        You can install amica locally, instructions on how to
@@ -8,7 +8,9 @@ showModal(modalDialog(
        </p>
        <hr>
        <p>
-       <b>New version 3.0.0</b> with new features:
+       <b>New version ",
+       amicaGlobalVars$amicaVersion,
+       "</b> with new features:
        <ul>
        <li>Additional file parsing options added:</li>
        <ul>
@@ -21,7 +23,7 @@ showModal(modalDialog(
        <li>Changed default plot colors.</li>
        </ul>
        </p>
-       "),
+       ")),
   easyClose = TRUE,
   footer = NULL
   )
