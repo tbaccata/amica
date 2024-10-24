@@ -512,18 +512,18 @@ readInAmicaSumm <- function(inFilePath, design) {
     stop(paste0("Error: ", 
                 geneName, " is not a column name of the uploaded input data."))
   }
-  if (length(grep("ImputedIntensity", names(protData)) ) < 1 ) {
-    stop(paste0("Error: There are no ImputedIntensity columns ", 
-                " in the uploaded input data."))
-  }
-  if (length(grep("__vs__", names(protData)) ) < 1 ) {
-    stop(paste0("Error: There are no '__vs__' - infix columns ", 
-                " in the uploaded input data."))
-  }
-  if (length(grep("logFC", names(protData)) ) < 1 ) {
-    stop(paste0("Error: There are no 'logFC' - columns ", 
-                " in the uploaded input data."))
-  }
+  # if (length(grep("ImputedIntensity", names(protData)) ) < 1 ) {
+  #   stop(paste0("Error: There are no ImputedIntensity columns ", 
+  #               " in the uploaded input data."))
+  # }
+  # if (length(grep("__vs__", names(protData)) ) < 1 ) {
+  #   stop(paste0("Error: There are no '__vs__' - infix columns ", 
+  #               " in the uploaded input data."))
+  # }
+  # if (length(grep("logFC", names(protData)) ) < 1 ) {
+  #   stop(paste0("Error: There are no 'logFC' - columns ", 
+  #               " in the uploaded input data."))
+  # }
   
   rownames(protData) <- protData[[proteinId]]
   
