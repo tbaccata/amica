@@ -138,7 +138,7 @@ server <- function(input, output, session) {
   
   output$uploadSuccessMsg <- renderUI({
     req(reacValues$uploadSuccess)
-    if (!is.null(reacValues$analysisSuccess)) return(NULL)
+    if (is.null(reacValues$analysisSuccess)) return(NULL)
     
     HTML(
       "<h4>Successfully uploaded data!</h4>
