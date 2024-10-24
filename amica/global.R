@@ -69,6 +69,8 @@ local$timeoutSeconds <- strtoi(Sys.getenv("AMICA_SHINY_IDLE_TIMEOUT_SECONDS", lo
 local$defaultAmicaVersion <- "3.0.1"
 amicaGlobalVars$amicaVersion <- Sys.getenv("AMICA_VERSION_OVERRIDE", local$defaultAmicaVersion)
 
+local$defaultAmicaSourceHyperlink <- "https://www.github.com/tbaccata/amica"
+amicaGlobalVars$amicaSourceHyperlink <- Sys.getenv("AMICA_SOURCE_HYPERLINK", local$defaultAmicaSourceHyperlink)
 
 
 inactivity <- sprintf("function idleTimer() {
@@ -107,14 +109,22 @@ footer = function(x) {
          target='_blank'>https://doi.org/10.1186/s12864-022-09058-7</a>.\n
          </p>
          <p>All code and online documentation can be found on 
-         <a href='https://www.github.com/tbaccata/amica' target='_blank'>github</a>.</p>
+         <a href='",
+         amicaGlobalVars$amicaSourceHyperlink,
+         "' target='_blank'>github</a>.</p>
          <p>amica version ",
          amicaGlobalVars$amicaVersion,
          "
          <img src='maxperutzlabs.jpg' width='100px'>
          <!-- <img src='proteomics_vbcf.png' height='50px'> -->
          <img src='vbc-logo-rgb.png' width='100px'>
+         <br>
+         <p>You can easily use amica locally if you need to use it a lot on all common operating systems (Windows/Mac/Linux), instructions on 
+         <a href='",
+         amicaGlobalVars$amicaSourceHyperlink,
+         "' target='_blank'>github</a>.</p>
          </p>
          "))
   )
 }
+
