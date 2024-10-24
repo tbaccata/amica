@@ -7,7 +7,7 @@ ARG AMICA_SHINY_HOST_DOCKER_INTERNAL="0.0.0.0"
 ARG AMICA_VERSION_OVERRIDE="3.0.1"
 
 ############################################################################
-FROM rocker/r-base AS build_deps
+FROM rocker/r-base:4.4.1 AS build_deps
 
 LABEL maintainer="Sebastian Didusch <sebastian.didusch@univie.ac.at>"
 LABEL maintainer="Juraj Ahel <juraj.ahel@vbcf.ac.at>"
@@ -24,17 +24,23 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libxslt-dev
 
-# basic shiny functionality
-RUN R -e "install.packages(c('shiny', 'rmarkdown', 'shinyjs', 'shinymanager', 'shinyBS', 'DT', 'shinycssloaders', 'bslib', 'profvis', 'colourpicker', 'shinyalert'), repos='https://cloud.r-project.org/')"
-RUN R -e "install.packages(c('reshape2', 'igraph', 'visNetwork', 'UpSetR', 'dplyr', 'pheatmap', 'DT', 'data.table', 'RColorBrewer', 'Rmisc', 'eulerr'), repos='https://cloud.r-project.org/')"
-RUN R -e "install.packages(c('heatmaply', 'ggfortify', 'colourvalues', 'pryr'),  repos='https://cloud.r-project.org/')"
-RUN R -e "install.packages(c('tidyr', 'Cairo', 'cowplot'),  repos='https://cloud.r-project.org/')"
+WORKDIR /src
+COPY install_dependencies.R .
+RUN Rscript install_dependencies.R
 
-# install dependencies from bioconductor
-RUN R -e "install.packages('BiocManager'); library('BiocManager'); BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn'))"
+# # basic shiny functionality
+# RUN R -e "install.packages(c('shiny', 'rmarkdown', 'shinyjs', 'shinymanager', 'shinyBS', 'DT', 'shinycssloaders', 'bslib', 'profvis', 'colourpicker', 'shinyalert'), repos='https://cloud.r-project.org/')"
+# RUN R -e "install.packages(c('reshape2', 'igraph', 'visNetwork', 'UpSetR', 'dplyr', 'pheatmap', 'DT', 'data.table', 'RColorBrewer', 'Rmisc', 'eulerr'), repos='https://cloud.r-project.org/')"
+# RUN R -e "install.packages(c('heatmaply', 'ggfortify', 'colourvalues', 'pryr'),  repos='https://cloud.r-project.org/')"
+# RUN R -e "install.packages(c('tidyr', 'Cairo', 'cowplot'),  repos='https://cloud.r-project.org/')"
+
+# # install dependencies from bioconductor
+# RUN R -e "install.packages('BiocManager'); library('BiocManager'); BiocManager::install(c('limma', 'DEqMS', 'gprofiler2', 'vsn'))"
 
 ############################################################################
 FROM build_deps AS final
+
+WORKDIR /
 
 # copy the app to the image
 RUN mkdir /root/amica
