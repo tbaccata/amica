@@ -5,21 +5,21 @@ tabPanel(
     <h3>News</h3>
          <hr>
          <ul>
-         <li>23.05.30 - New version (3.0.0).</li>
-         <li>23.05.30 - Additional file upload option for DIA (Spectronaut and DIA-NN).</li>
-         <li>23.05.30 - Additional file upload option for TMT (FragPipe).</li>
-         <li>23.05.30 - New feature added - option to highlight proteins in volcano - and MA plots.</li>
-         <li>23.05.30 - Updated IntAct version (2022-07-13).</li>
-         <li>23.05.30 - Changed default plot colors.</li>
+         <li>2023-05-30 - New version (3.0.0).</li>
+         <li>2023-05-30 - Additional file upload option for DIA (Spectronaut and DIA-NN).</li>
+         <li>2023-05-30 - Additional file upload option for TMT (FragPipe).</li>
+         <li>2023-05-30 - New feature added - option to highlight proteins in volcano - and MA plots.</li>
+         <li>2023-05-30 - Updated IntAct version (2022-07-13).</li>
+         <li>2023-05-30 - Changed default plot colors.</li>
 	 <li>22.12.09 - amica published in <a href="https://doi.org/10.1186/s12864-022-09058-7"
 	 target="_blank">BMC Genomics</a>.</li>
-         <li>22.08.30 - New feature added - option to not impute missing values.</li>
-         <li>22.08.30 - New feature added - QC - and diff. abundance reports.</li>
-         <li>22.08.30 - Fixed error handling in upload.</li>
-         <li>22.02.28 - New feature added - Dot plot in Diff. abundance tab.</li>
-         <li>21.11.23 - amica posted on <a href="https://www.biorxiv.org/content/10.1101/2021.11.23.466958" 
+         <li>2022-08-30 - New feature added - option to not impute missing values.</li>
+         <li>2022-08-30 - New feature added - QC - and diff. abundance reports.</li>
+         <li>2022-08-30 - Fixed error handling in upload.</li>
+         <li>2022-02-28 - New feature added - Dot plot in Diff. abundance tab.</li>
+         <li>2021-11-23 - amica posted on <a href="https://www.biorxiv.org/content/10.1101/2021.11.23.466958" 
          target="_blank">bioRxiv</a>.</li>
-         <li>21.10.14 - github went public.</li>
+         <li>2021-10-14 - github went public.</li>
          </ul>
          </p>
          <p>
