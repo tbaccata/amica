@@ -48,6 +48,10 @@ COPY amica /root/amica
 
 COPY Rprofile.site /usr/lib/R/etc/
 
+RUN chmod -R g+rwx /root
+
+### env setup only below, no more file changes
+
 ARG AMICA_SHINY_PORT_DOCKER_INTERNAL
 ENV AMICA_SHINY_PORT=${AMICA_SHINY_PORT_DOCKER_INTERNAL}
 EXPOSE ${AMICA_SHINY_PORT_DOCKER_INTERNAL}
