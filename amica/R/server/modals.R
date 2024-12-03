@@ -1,35 +1,18 @@
-# showModal(modalDialog(
-#   title = "Welcome to amica",
-#   HTML(paste0("<p>
-#        This is a public server with limited capacity. Its purpose is to demonstrate
-#        amica's functionality for easy and quick access.
-#        You can install amica locally, instructions on how to
-#        do that are on <a href='",
-#         amicaGlobalVars$amicaSourceHyperlink,
-#         "' target='_blank'>github</a>.
-#        </p>
-#        <hr>
-#        <p>
-#        <b>New version ",
-#        amicaGlobalVars$amicaVersion,
-#        "</b> with new features:
-#        <ul>
-#        <li>Additional file parsing options added:</li>
-#        <ul>
-#        <li>DIA Spectronaut support.</li>
-#        <li>DIA DIA-NN support.</li>
-#        <li>TMT FragPipe support.</li>
-#        </ul>
-#        <li>Highlight proteins in volcano - and MA plots.</li>
-#        <li>Updated IntAct version (2022-07-13)</li>
-#        <li>Changed default plot colors.</li>
-#        </ul>
-#        </p>
-#        ")),
-#   easyClose = TRUE,
-#   footer = NULL
-#   )
-# )
+# splash screen that will optionally be shown when the user opens the shiny app
+if (amicaGlobalVars$splashScreenEnabled == TRUE) {
+  
+  htmlContent <- amicaUtil$replacePlaceholders(
+    paste(readLines(amicaGlobalVars$splashScreenHtmlContentSource)), 
+    amicaGlobalVars$placeholder_replacement_map
+    )
+  
+  showModal(modalDialog(
+  title = amicaGlobalVars$splashScreenTitle,
+  HTML(htmlContent),
+  easyClose = TRUE,
+  footer = NULL
+  ))
+}
 
 observeEvent(input$showFileInput, {
   showModal(modalDialog(
