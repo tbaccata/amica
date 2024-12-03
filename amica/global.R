@@ -62,7 +62,7 @@ amicaGlobalVars <- new.env()
 local <- new.env()
 
 # splash screen
-local$defaultSplashScreenEnabled <- FALSE
+local$defaultSplashScreenEnabled <- TRUE
 amicaGlobalVars$splashScreenEnabled <- as.logical(Sys.getenv("AMICA_SPLASHSCREEN_ENABLED", local$defaultSplashScreenEnabled))
 local$defaultSplashScreenTitle <- "Welcome to amica"
 amicaGlobalVars$splashScreenTitle <- as.character(Sys.getenv("AMICA_SPLASHSCREEN_TITLE", local$defaultSplashScreenTitle))
@@ -71,9 +71,9 @@ amicaGlobalVars$splashScreenHtmlContentSource <- as.character(Sys.getenv("AMICA_
 
 # default footer / info
 # if using images in the footer and the source is a file, it needs to be added to the www folder under amica
-local$defaultOverrideFooter <- FALSE
+local$defaultOverrideFooter <- TRUE
 amicaGlobalVars$overrideFooter <- as.logical(Sys.getenv("AMICA_FOOTER_CUSTOMIZE", local$defaultOverrideFooter))
-local$defaultFooterHtmlContentSource <- "default/footer.html"
+local$defaultFooterHtmlContentSource <- "mpl/mplFooter.html"
 if (amicaGlobalVars$overrideFooter == TRUE){
   amicaGlobalVars$footerHtmlContentSource <- as.character(Sys.getenv("AMICA_FOOTER_CONTENT_SOURCE", local$defaultFooterHtmlContentSource))
 } else {
@@ -87,10 +87,10 @@ local$defaultTimeoutSeconds <- 60*15
 local$timeoutSeconds <- strtoi(Sys.getenv("AMICA_SHINY_IDLE_TIMEOUT_SECONDS", local$defaultTimeoutSeconds))
 
 local$defaultAmicaVersion <- "3.0.1"
-amicaGlobalVars$amicaVersion <- Sys.getenv("AMICA_VERSION_OVERRIDE", local$defaultAmicaVersion)
+amicaGlobalVars$amicaVersion <- as.character(Sys.getenv("AMICA_VERSION_OVERRIDE", local$defaultAmicaVersion))
 
 local$defaultAmicaSourceHyperlink <- "https://www.github.com/tbaccata/amica"
-amicaGlobalVars$amicaSourceHyperlink <- Sys.getenv("AMICA_SOURCE_HYPERLINK", local$defaultAmicaSourceHyperlink)
+amicaGlobalVars$amicaSourceHyperlink <- as.charater(Sys.getenv("AMICA_SOURCE_HYPERLINK", local$defaultAmicaSourceHyperlink))
 
 # will be used to replace every text matching {{placeholder_x}} (incl braces) with the assigned value
 amicaGlobalVars$placeholder_replacement_map <- list(
