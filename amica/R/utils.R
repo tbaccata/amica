@@ -1,3 +1,25 @@
+######################################################
+
+amicaUtil <- new.env()
+
+# used for replacing placeholders in a string, e.g. "This is a {{pch_value}}" with  map = list(pch_value = "cat")
+# gives "This is a cat"
+amicaUtil$replacePlaceholders = function(x, replacement_map) {
+  result <- Reduce(
+    function(txt, key) {
+      gsub(
+        paste0("{{", key, "}}"), 
+        replacement_map[[key]], 
+        txt,
+        fixed = TRUE)
+    },
+    names(replacement_map),
+    init = x)
+  return (result)
+}
+
+######################################################
+
 filterOnValidValues <-
   function(data,
            mappings,
