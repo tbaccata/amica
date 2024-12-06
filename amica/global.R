@@ -90,7 +90,7 @@ local$defaultAmicaVersion <- "3.0.1"
 amicaGlobalVars$amicaVersion <- as.character(Sys.getenv("AMICA_VERSION_OVERRIDE", local$defaultAmicaVersion))
 
 local$defaultAmicaSourceHyperlink <- "https://www.github.com/tbaccata/amica"
-amicaGlobalVars$amicaSourceHyperlink <- as.charater(Sys.getenv("AMICA_SOURCE_HYPERLINK", local$defaultAmicaSourceHyperlink))
+amicaGlobalVars$amicaSourceHyperlink <- as.character(Sys.getenv("AMICA_SOURCE_HYPERLINK", local$defaultAmicaSourceHyperlink))
 
 # will be used to replace every text matching {{placeholder_x}} (incl braces) with the assigned value
 amicaGlobalVars$placeholder_replacement_map <- list(
