@@ -13,7 +13,10 @@ tabPanel('Input',
                condition = "output.uploadSuccess",
                HTML(
                  '<h3 style="color: #339999;"> Successfully uploaded data.<br>
-                 Refresh this page to upload another data set.</h3> <p></p>'
+                 Refresh this page to upload another data set.</h3>
+                 <h4>Use the tabs on top of the page to see the generated interactive plots (QC, Diff abundance).</h4>
+                 <h4>Summary of imported data shown on the right.</h4>
+                  <p></p>'
                )
             ),
              conditionalPanel(
@@ -45,9 +48,9 @@ tabPanel('Input',
                # The condition should be that the user selects
                # "file" from the radio buttons
                condition = "input.source == 'amica'",
-               inline(h4("1) amica file")),
+               inline(h4("1) protein groups table (amica format)")),
                inline(actionButton("showAmicaInput", "", icon = icon("info") )),
-               fileInput("amicaFile", "Upload amica_proteinGroups.txt.", width = "60%"),
+               fileInput("amicaFile", "e.g. amica_protein_table.tsv", width = "60%"),
                helpText(
                  "Have you run amica before? Input the amica output from a previous session."
                )
@@ -82,6 +85,7 @@ tabPanel('Input',
                fileInput(
                  "tmtFPFile",
                  "Upload '[abundance/ratio]_protein_[normalization].tsv' file from FragPipe.",
+                 multiple = F,
                  width = "60%"
                )
              ),
@@ -109,8 +113,9 @@ tabPanel('Input',
                
                fileInput(
                  "groupSpecification",
-                 "Experimental design",
-                 c('text/csv',
+                 "e.g. amica_design.tsv",
+                 c('text/tsv',
+                  'text/csv',
                    'text/comma-separated-values,text/plain'),
                  multiple = F,
                  width = "60%"
@@ -275,137 +280,154 @@ tabPanel('Input',
            ,
            mainPanel(
              #h1("amica"),
-             HTML('<center><img src="ga_amica.png" width="50%"></center>'),
-             #img(src = 'ga_amica.svg',  align = "center"),
-             br(),
-             br(),
-             br(),
-             p(
-               "
-amica is an interactive and user-friendly web-based platform that accepts proteomic 
-               input files from different sources and provides automatically 
-               generated quality control, set comparisons, differential expression,
-               biological network and over-representation analysis on the basis 
-               of minimal user input."
-             ),
-             p(
-               "Upload the required input files (explained on the sidebar) and the full functionality will be revealed."
-             ),
-             br(),
-             br(),
-             uiOutput("uploadSuccessMsg"),
-             br(), br(), br(),
-             uiOutput("download_amica"),
-             br(),br(),br(),
-             verbatimTextOutput("summaryText", placeholder = F),
-             uiOutput("analysisSuccessMsg"),
-             DTOutput("inputParamDT"),
-             #verbatimTextOutput("inputParameterSummary", placeholder = F),
-             shinyjs::hidden(div(
-               id = 'hide_before_input',
-               bsCollapse(
-                 id = "colorCollapse",
-                 open = "Panel beneath",
+
+            conditionalPanel(
+               condition = "!output.uploadSuccess",
                  
-                 bsCollapsePanel(
-                   style = "info",
-                   "Click to choose colors and ordering of groups in plots",
-                   p(
-                     "All visualizations are interactive and created with plotly.
-                                                             When you hover over a plot with your mouse a toolbar is visable in the top right corner.
-                                                             For some plots (volcano -, MA - and fold change plots) you can select data points with the select box or lasso functions which annotates the data points.
-                                                             Plots can be downloaded in svg format when clicking on the camera icon."
-                   ),
-                   tabsetPanel(
-                     type = "tabs",
-                     tabPanel(h4("Available color palettes"),
-                              plotOutput("brewercols", height = "800px")),
-                     tabPanel(h4("Qualitative (groups)"),
-                              HTML("
-                                         <p>
-                                         Each experimental group can be assigned 
-                                         a color that stays consistent for various 
-                                         QC plots (PCA, boxplots, barplots, etc.) 
-                                         and heatmaps.
-                                         </p>"),
-                              uiOutput("brewerOptionsQual"),
-                              radioButtons(
-                                "revQual",
-                                "Reverse colors?",
-                                choices = c("yes", "no"),
-                                selected = "no"
-                              ),
-                              uiOutput('myColorPanel')
-                     ),
-                     tabPanel(h4("Qualitative (scatter)"),
-                              HTML("
-                                         <p>
-                                         These colors will be used for scatter -,
-                                         volcano -, MA - and fold change plots, 
-                                         as well as for PPI networks.
-                                         </p>"),
-                              selectInput(
-                                "brewerOptionsScatter",
-                                "Scatter plot colors",
-                                choices = c(
-                                  "RdYlBu",
-                                  "RdYlGn",
-                                  "Spectral",
-                                  "Accent",
-                                  "Dark2",
-                                  "Paired",
-                                  "Pastel1",
-                                  "Pastel2",
-                                  "Set1",
-                                  "Set2",
-                                  "Set3"
-                                ),
-                                multiple = F,
-                                selected = "Paired"
-                              ),
-                              radioButtons(
-                                "revScatter",
-                                "Reverse colors?",
-                                choices = c("yes", "no"),
-                                selected = "no"
-                              ),
-                              plotlyOutput("irisScatter", height = 800),
-                              helpText("This famous (Fisher's or Anderson's) iris data set gives
-                                             the measurements in centimeters of the variables sepal 
-                                             length and width and petal length and width, respectively, 
-                                             for 50 flowers from each of 3 species of iris. 
-                                             The species are Iris setosa, versicolor, and virginica.")
-                     ),
-                     tabPanel(
-                       h4("Diverging"),
-                       uiOutput("brewerOptionsDiv"),
-                       radioButtons(
-                         "revDiv",
-                         "Reverse colors?",
-                         choices = c("yes", "no"),
-                         selected = "yes"
-                       ),
-                       plotlyOutput("mtcarsHeatmap", height = 800),
-                       helpText(
-                         "The Motor Trend Car Road Tests was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
-                       )
-                     ),
-                     tabPanel(
-                       h4("Order of groups in plots"),
-                       uiOutput("groupFactors"),
-                       helpText("If you only select a subset of groups 
-                                      the unselected groups will not be plotted."),
-                       inline(actionButton("submitGroupFactors", "Submit factors")),
-                       inline(actionButton("resetGroupFactors", "Reset factors")),
-                       verbatimTextOutput("groupFactorsSummary")
-                     )
-                   )
-                 )
-               )
-             )),
-             br(), br(), br(),
-             h3(textOutput("designTitle")),
-             DTOutput("expDesignDT"),
+                HTML('<center><img src="ga_amica.png" width="50%"></center>'),
+                #img(src = 'ga_amica.svg',  align = "center"),
+                br(),
+                br(),
+                br(),
+                p(
+                  "
+                  amica is an interactive and user-friendly web-based platform that accepts proteomic 
+                  input files from different sources and provides automatically 
+                  generated quality control, set comparisons, differential expression,
+                  biological network and over-representation analysis on the basis 
+                  of minimal user input."
+                ),
+                p(
+                  "Upload the required input files (explained on the sidebar) and the full functionality will be revealed."
+                ),
+                br(),
+                br()
+              ),
+
+              conditionalPanel(
+                condition ="output.uploadSuccess",
+
+                uiOutput("uploadSuccessMsg"),
+                br(), br(),
+                uiOutput("download_amica"),
+                br(), br(), br(),
+                verbatimTextOutput("summaryText", placeholder = F),
+
+                conditionalPanel(
+                  condition = "!output.analysisSuccess",
+                  uiOutput("analysisSuccessMsg")
+                ),
+
+                DTOutput("inputParamDT"),
+                #verbatimTextOutput("inputParameterSummary", placeholder = F),
+                shinyjs::hidden(div(
+                  id = 'hide_before_input',
+                  bsCollapse(
+                    id = "colorCollapse",
+                    open = "Panel beneath",
+                    
+                    bsCollapsePanel(
+                      style = "info",
+                      "Click to choose colors and ordering of groups in plots",
+                      p(
+                        "All visualizations are interactive and created with plotly.
+                                                                When you hover over a plot with your mouse a toolbar is visable in the top right corner.
+                                                                For some plots (volcano -, MA - and fold change plots) you can select data points with the select box or lasso functions which annotates the data points.
+                                                                Plots can be downloaded in svg format when clicking on the camera icon."
+                      ),
+                      tabsetPanel(
+                        type = "tabs",
+                        tabPanel(h4("Available color palettes"),
+                                  plotOutput("brewercols", height = "800px")),
+                        tabPanel(h4("Qualitative (groups)"),
+                                  HTML("
+                                            <p>
+                                            Each experimental group can be assigned 
+                                            a color that stays consistent for various 
+                                            QC plots (PCA, boxplots, barplots, etc.) 
+                                            and heatmaps.
+                                            </p>"),
+                                  uiOutput("brewerOptionsQual"),
+                                  radioButtons(
+                                    "revQual",
+                                    "Reverse colors?",
+                                    choices = c("yes", "no"),
+                                    selected = "no"
+                                  ),
+                                  uiOutput('myColorPanel')
+                        ),
+                        tabPanel(h4("Qualitative (scatter)"),
+                                  HTML("
+                                            <p>
+                                            These colors will be used for scatter -,
+                                            volcano -, MA - and fold change plots, 
+                                            as well as for PPI networks.
+                                            </p>"),
+                                  selectInput(
+                                    "brewerOptionsScatter",
+                                    "Scatter plot colors",
+                                    choices = c(
+                                      "RdYlBu",
+                                      "RdYlGn",
+                                      "Spectral",
+                                      "Accent",
+                                      "Dark2",
+                                      "Paired",
+                                      "Pastel1",
+                                      "Pastel2",
+                                      "Set1",
+                                      "Set2",
+                                      "Set3"
+                                    ),
+                                    multiple = F,
+                                    selected = "Paired"
+                                  ),
+                                  radioButtons(
+                                    "revScatter",
+                                    "Reverse colors?",
+                                    choices = c("yes", "no"),
+                                    selected = "no"
+                                  ),
+                                  plotlyOutput("irisScatter", height = 800),
+                                  helpText("This famous (Fisher's or Anderson's) iris data set gives
+                                                the measurements in centimeters of the variables sepal 
+                                                length and width and petal length and width, respectively, 
+                                                for 50 flowers from each of 3 species of iris. 
+                                                The species are Iris setosa, versicolor, and virginica.")
+                        ),
+                        tabPanel(
+                          h4("Diverging"),
+                          uiOutput("brewerOptionsDiv"),
+                          radioButtons(
+                            "revDiv",
+                            "Reverse colors?",
+                            choices = c("yes", "no"),
+                            selected = "yes"
+                          ),
+                          plotlyOutput("mtcarsHeatmap", height = 800),
+                          helpText(
+                            "The Motor Trend Car Road Tests was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)."
+                          )
+                        ),
+                        tabPanel(
+                          h4("Order of groups in plots"),
+                          uiOutput("groupFactors"),
+                          helpText("If you only select a subset of groups 
+                                          the unselected groups will not be plotted."),
+                          inline(actionButton("submitGroupFactors", "Submit factors")),
+                          inline(actionButton("resetGroupFactors", "Reset factors")),
+                          verbatimTextOutput("groupFactorsSummary")
+                        )
+                      )
+                    )
+                  )
+                )),
+                br(), br(), br(),
+                h3(textOutput("designTitle")),
+                DTOutput("expDesignDT")
+              ),
+
+             
              footer()#p("This is footer"))
            )
          )
