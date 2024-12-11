@@ -506,7 +506,7 @@ toNetworkData <- function(df.genes, ppi, cellmap) {
     tmpTo[idx] <- toId
   }
 
-  if (!is.na(tmpFrom)) {
+  if (length(tmpFrom) > 0) {
     df$edges$from <- tmpFrom
     df$edges$to <- tmpTo
   }
@@ -577,6 +577,8 @@ readInAmicaSumm <- function(inFilePath, design) {
     intIdxs <- c(intIdxs, filtIdxs)
     tmpDf <- protData[,filtIdxs]
     names(tmpDf) <- gsub(gpref, "", names(tmpDf) )
+    # make sure order of design is order of assay
+    tmpDf <- tmpDf[, make.names(design$samples) ]
     assayList[[i]] <- tmpDf
   }
   names(assayList) <- prefixes
@@ -695,6 +697,8 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
   
   raws <- protData[,raw_idx]
   names(raws) <- gsub("Intensity.", "", names(raws))
+  # sample order of design
+  raws <- raws[, make.names(design$samples)]
   raws[raws==0] <- NA
   raws <- log2(raws)
   
@@ -707,6 +711,8 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
     names(ibaqs) <- gsub("iBAQ.", "", names(ibaqs))
     ibaqs[ibaqs==0] <- NA
     ibaqs <- log2(ibaqs)
+    # sample order of design
+    ibaqs <- ibaqs[, make.names(design$samples)]
     
     assayList[[assayIdx]] <- ibaqs
     names(assayList) <- c("RawIntensity", "iBAQ")
@@ -718,6 +724,8 @@ readInMQproteinGroupsSumm <- function(mqFile, design) {
     names(lfqs) <- gsub("LFQ.intensity.", "", names(lfqs))
     lfqs[lfqs == 0] <- NA
     lfqs <- log2(lfqs)
+    # sample order of design
+    lfqs <- lfqs[, make.names(design$samples)]
     
     assayList[[assayIdx]] <- lfqs
     names(assayList)[assayIdx] <- "LFQIntensity"
@@ -777,14 +785,12 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     protData$Gene.names
   )
   
-  query <- paste0(design$samples, sampleSpCountPostfix, collapse = "|")
+  samples <- make.names(design$samples)
+  query <- paste0(samples, sampleSpCountPostfix, collapse = "|")
   idx <-  grep(query, names(protData))
 
   names(protData)[idx] <- gsub(sampleSpCountPostfix, "", names(protData)[idx])
   names(protData)[idx] <- paste0("razorUniqueCount.", names(protData)[idx])
-  
-  samples <- make.names(design$samples)
-  
   
   unique_idx <- grep(paste0(samples, ".Unique.Intensity", collapse = "|"), colnames(protData))
   tot_idx <- grep(paste0(samples, ".Total.Intensity", collapse = "|"), colnames(protData))
@@ -809,6 +815,9 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     names(tots) <- gsub(".Total.Intensity", "", names(tots))
     tots[tots==0] <- NA
     tots <- log2(tots)
+    
+    # sample order of design
+    tots <- tots[, make.names(design$samples)]
     assayList[['TotalIntensity']] <- tots
   }
   
@@ -817,6 +826,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     names(uniqs) <- gsub(".Unique.Intensity", "", names(uniqs))
     uniqs[uniqs==0] <- NA
     uniqs <- log2(uniqs)
+    # sample order of design
+    uniqs <- uniqs[, make.names(design$samples)]
     assayList[['UniqueIntensity']] <- uniqs
   }
   
@@ -824,6 +835,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     razor <- protData[,razor_idx]
     names(razor) <- gsub(".Razor.Intensity", "", names(razor))
     razor[razor==0] <- NA
+    # sample order of design
+    razor <- razor[, make.names(design$samples)]
     razor <- log2(razor)
   }
   
@@ -832,6 +845,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     names(ints) <- gsub(".Intensity", "", names(ints))
     ints[ints==0] <- NA
     ints <- log2(ints)
+    # sample order of design
+    ints <- ints[, make.names(design$samples)]
   }
   
   # MaxLFQ intensities
@@ -840,6 +855,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     names(lfqInts) <- gsub(".MaxLFQ.Intensity", "", names(lfqInts))
     lfqInts[lfqInts==0] <- NA
     lfqInts <- log2(lfqInts)
+    # sample order of design
+    lfqInts <- lfqInts[, make.names(design$samples)]
   }
   
   if (length(lfq_unique_idx) > 0) {
@@ -847,6 +864,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     names(lfqUniqueInts) <- gsub(".MaxLFQ.Unique.Intensity", "", names(lfqUniqueInts))
     lfqUniqueInts[lfqUniqueInts==0] <- NA
     lfqUniqueInts <- log2(lfqUniqueInts)
+    # sample order of design
+    lfqUniqueInts <- lfqUniqueInts[, make.names(design$samples)]
   }
   
   if (length(lfq_unique_tot_idx) > 0) {
@@ -854,6 +873,8 @@ readInFragPipeProteinGroupsSumm <- function(mqFile, design) {
     names(lfqTotalInts) <- gsub(".MaxLFQ.Total.Intensity", "", names(lfqTotalInts))
     lfqTotalInts[lfqTotalInts==0] <- NA
     lfqTotalInts <- log2(lfqTotalInts)
+    # sample order of design
+    lfqTotalInts <- lfqUniqueInts[, make.names(design$samples)]
   }
   
   dropIdx <-
@@ -959,11 +980,14 @@ readInCustomSumm <- function(mqFile, specs, design, logtransform=TRUE) {
     protData$Majority.protein.IDs,
     protData$Gene.names
   )
+  samples <- make.names(design$samples)
   
   int_idx <- grep(intensityPrefix, names(protData))
   razor <- protData[,int_idx]
   names(razor) <- gsub(intensityPrefix, "", names(razor))
   razor[razor==0] <- NA
+  razor <- razor[, samples]
+  
   if (logtransform) {
     razor <- log2(razor)
   }
@@ -977,6 +1001,7 @@ readInCustomSumm <- function(mqFile, specs, design, logtransform=TRUE) {
     tots <- protData[,tot_idx]
     names(tots) <- gsub(abundancePrefix, "", names(tots))
     tots[tots==0] <- NA
+    tots <- tots[, samples]
     if (logtransform) {
       tots <- log2(tots)
     }
@@ -1029,7 +1054,7 @@ readInDIANNProteinGroupsSumm <- function(mqFile, design) {
   
   assayList <- list()
   
-  intensities <- protData[, sampleColumns]
+  intensities <- protData[, samples]
   intensities[intensities==0] <- NA
   intensities <- log2(intensities)
   assayList[['LFQIntensity']] <- intensities
@@ -1145,7 +1170,7 @@ readInFPTMTSumm <- function(mqFile, design) {
   
   assayList <- list()
   
-  intensities <- protData[, sampleColumns]
+  intensities <- protData[, samples]
   intensities[intensities==0] <- NA
   assayList[['Intensity']] <- intensities
   
