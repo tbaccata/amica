@@ -2336,7 +2336,9 @@ server <- function(input, output, session) {
   })
 
   ppi <- reactive({
-    simplify(read_graph('data/intact_weighted.edgelist', format="ncol", directed=F))
+    dat <- read.table('data/intact_weighted.edgelist', header = F, sep = '\t')
+    names(dat) <- c('node1', 'node2', 'weight')
+    simplify(graph_from_data_frame(dat, directed = F))
   })
   
   cellmap <- reactive({
