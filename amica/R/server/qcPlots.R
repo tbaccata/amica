@@ -422,6 +422,13 @@ plotNumberIdentifiedProteins <-
         all(groupFactors %in% unique(df$group))) {
       df <- df[df$group %in% groupFactors,]
       df$group <- factor(df$group, levels = groupFactors)
+      # fix sample ordering
+      sampleLevels <- c()
+      for (group in groupFactors) {
+        sampleLevels <- c(sampleLevels, 
+                          expDesign$samples[expDesign$groups==group])
+      }
+      df$Sample <- factor(df$Sample, levels = sampleLevels)
     }
     
     p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
@@ -474,8 +481,15 @@ plotMissingValues <-
         all(groupFactors %in% unique(df$group))) {
       df <- df[df$group %in% groupFactors, ]
       df$group <- factor(df$group, levels = groupFactors)
+      
+      # fix sample ordering
+      sampleLevels <- c()
+      for (group in groupFactors) {
+        sampleLevels <- c(sampleLevels, 
+                          expDesign$samples[expDesign$groups==group])
+      }
+      df$Sample <- factor(df$Sample, levels = sampleLevels)
     }
-    
     p <- ggplot(df, aes(x = Sample, y = Number, fill = group)) +
       geom_bar(stat = "identity") +
       scale_fill_manual(values = myGroupColors) +
@@ -537,6 +551,13 @@ plotContaminants <-
         contsInts[contsInts$group %in% groupFactors, ]
       contsInts$group <-
         factor(contsInts$group, levels = groupFactors)
+      # fix sample ordering
+      sampleLevels <- c()
+      for (group in groupFactors) {
+        sampleLevels <- c(sampleLevels, 
+                          expDesign$samples[expDesign$groups==group])
+      }
+      contsInts$Sample <- factor(contsInts$Sample, levels = sampleLevels)
     }
     
     p <-

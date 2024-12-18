@@ -278,8 +278,14 @@ server <- function(input, output, session) {
       object <- object[object$group %in% reacValues$groupFactors,]
       object$group <-
         factor(object$group, levels = reacValues$groupFactors)
+      # fix sample ordering
+      sampleLevels <- c()
+      for (group in reacValues$groupFactors) {
+        sampleLevels <- c(sampleLevels, 
+                          reacValues$expDesign$samples[reacValues$expDesign$groups==group])
+      }
+      object$colname <- factor(object$colname, levels = sampleLevels)
     }
-    
     object
   })
   
