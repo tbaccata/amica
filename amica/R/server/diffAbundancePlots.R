@@ -632,6 +632,18 @@ plotDotplot <-
       dotplotColors <- viridis(20, option = "viridis")
 
   dataDotplot <- dataDotplot[!is.na(dataDotplot[[clusteringMetric]]),]
+  
+  # add protein id to duplicated gene names from isoforms
+  tmp <- dataDotplot[, c('ProteinID', 'Gene')]
+  tmp <- tmp[!duplicated(tmp),]
+  duplicatedGeneNames <- tmp$Gene[duplicated(tmp$Gene)]
+  
+  if (length(duplicatedGeneNames) > 0 ) {
+    dataDotplot$Gene[dataDotplot$Gene %in% duplicatedGeneNames] <-
+      paste0(dataDotplot$Gene[dataDotplot$Gene %in% duplicatedGeneNames], ';',
+             dataDotplot$ProteinID[dataDotplot$Gene %in% duplicatedGeneNames]
+      )
+  }
       
   mat <- dataDotplot %>%
     dplyr::select(Gene, Group, all_of(clusteringMetric)) %>%  # drop unused columns to faciliate widening
