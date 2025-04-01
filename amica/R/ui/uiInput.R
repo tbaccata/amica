@@ -114,8 +114,8 @@ tabPanel('Input',
                fileInput(
                  "groupSpecification",
                  "e.g. amica_design.tsv",
-                 c('text/tsv',
-                  'text/csv',
+                 c('.tsv', 'text/plain', 'text/tsv',
+                  #'text/csv',
                    'text/comma-separated-values,text/plain'),
                  multiple = F,
                  width = "60%"
