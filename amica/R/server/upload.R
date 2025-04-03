@@ -140,9 +140,10 @@ observeEvent(input$submitAnalysis, {
       if (class(tmpData$samples) == 'integer' ||
           class(tmpData$samples) == 'numeric') {
         tmpData$samples <- as.character(tmpData$samples)
-      } else {
-        tmpData$samples <- make.names(tmpData$samples)
-      }
+      } 
+      # else {
+      #  tmpData$samples <- make.names(tmpData$samples)
+      # }
       
       for (group in unique(tmpData$groups)) {
         if (make.names(group) != group) {
@@ -379,7 +380,7 @@ observeEvent(input$submitAnalysis, {
         "First.Protein.Description")
     snNames <- c('PG.ProteinAccessions', 'PG.Genes')
     if (all(diannNames %in% header)) {
-      
+      reacValues$expDesign$samples <- make.names(reacValues$expDesign$samples )
       ###
       tryCatch({
         reacValues$proteinData <-
@@ -500,6 +501,29 @@ observeEvent(input$submitAnalysis, {
             ),
             type = "warning",
             duration = 100
+          ))
+        }
+      }
+      ### ensure either pilot or replicated experiment, but not mixed
+      for (idx in 1:nrow(contrastsData) ) {
+        group1 <- contrastsData[idx, 1]
+        group2 <- contrastsData[idx, 2]
+        
+        nGroup1 <- length(reacValues$expDesign$samples[reacValues$expDesign$groups==group1])
+        nGroup2 <- length(reacValues$expDesign$samples[reacValues$expDesign$groups==group2])
+        
+        if ( (nGroup1==1 && nGroup2 > 1) ||
+             (nGroup2==1 && nGroup1 > 1) ) {
+          shiny:::reactiveStop(showNotification(
+            paste0(
+              "The group comparison ",
+              group1, ' vs. ', group2, 
+              " is not valid because one of the groups doesn't have replicates.\n",
+              "Either provide a pilot experiment without replicates, or provide ",
+              "replicates for all groups."
+            ),
+            type = "warning",
+            duration = 1000
           ))
         }
       }
